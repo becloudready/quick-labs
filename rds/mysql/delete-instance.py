@@ -4,7 +4,7 @@ import boto3
 # db = sys.argv[1]
 rds = boto3.client('rds')
 
-for i in range(18,26):
+for i in range(1,2):
     db = 'database-{}'.format(i)
     try:
         response = rds.delete_db_instance(
