@@ -1,4 +1,4 @@
-# AWS Python Samples
+# Automate AWS with Python
 
 
 ### RDS-MySQL
