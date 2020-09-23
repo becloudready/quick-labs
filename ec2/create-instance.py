@@ -1,6 +1,7 @@
 import boto3
 import botocore
 import paramiko
+import time
 
 ec2 = boto3.resource('ec2', region_name='us-east-1')
 instance = ec2.create_instances(
@@ -16,22 +17,26 @@ instance = ec2.create_instances(
 print (instance[0].id)
 instance[0].wait_until_running()           
 instance[0].reload()
-print(instance[0].public_dns_name)
-print(instance[0].public_ip_address)
+print (instance[0].public_ip_address)
+time.sleep(10)
 
-key = paramiko.RSAKey.from_private_key_file('C:/Users/Sonu_2/Downloads/Ansible.pem')
 client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-client.connect(hostname=instance[0].public_ip_address, username="ec2-user", pkey=key)
-
+client.load_system_host_keys()
+client.connect(hostname=instance[0].public_ip_address, username="ec2-user", key_filename='C:/Users/Sonu_2/Downloads/Ansible.pem')
 stdin, stdout, stderr = client.exec_command('sudo yum update -y')
-stdout=stdout.readlines()
-for line in stdout:
-    output=output+line
-if output!="":
-    print (output)
-else:
-    print ("There was no output for this command")
+print (stdout.readlines())
+time.sleep(3)
+stdin, stdout, stderr = client.exec_command('sudo yum install git -y')
+print (stdout.readlines())
+time.sleep(3)
+stdin, stdout, stderr = client.exec_command('git clone https://github.com/becloudready/aws-python.git')
+print (stdout.readlines())
+time.sleep(3)
+stdin, stdout, stderr = client.exec_command('bash shell.sh')
+print (stdout.readlines())
+time.sleep(3)
+#client.close()
 
-client.close()
+print ("Finished")
