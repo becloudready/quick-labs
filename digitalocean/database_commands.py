@@ -82,4 +82,4 @@ if __name__ == "__main__":
 
     # create_DBs("training", 5)
     # list_DBs()  
-    delete_all_DBs()
+    # delete_all_DBs()
