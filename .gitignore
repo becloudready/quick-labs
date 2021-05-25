@@ -1,0 +1,5 @@
+venv/
+digitalocean/YT_intro.py
+digitalocean/api_token.py
+__pycache__/
+ConnectionDetails.txt
