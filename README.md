@@ -1,4 +1,4 @@
-# Automate AWS with Python
+# Handy scripts to quickly spin up instances in various public Cloud
 
 
 ### RDS-MySQL
