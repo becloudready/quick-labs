@@ -1,3 +1,13 @@
+## doctl Command cheatsheet
+
+```
+doctl compute droplet create bcr-1 --size s-1vcpu-1gb    --image centos-7-x64 --region nyc1 --ssh-keys <key-id>
+doctl compute droplet list --tag-name bcr --format Name,PublicIPv4
+
+doctl compute droplet delete --tag-name becloudready
+
+```
+
 ## doctl command to create 10 VMs quickly
 
 ```
