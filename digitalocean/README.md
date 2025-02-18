@@ -13,3 +13,8 @@ doctl compute droplet delete --tag-name becloudready
 ```
 for i in {1..10}; do doctl compute droplet create ansible-controller-$i --size s-1vcpu-1gb   --image centos-7-x64 --region nyc1 --ssh-keys <key> --tag-name becloudready; done
 ```
+## doctl command to launch k8s clusters
+
+```
+./doctl kubernetes cluster create quick-labs-09 --region nyc2 --version 1.32.1-do.0 --maintenance-window saturday=02:00 --node-pool "name=quick-labs-09;size=s-2vcpu-4gb;count=3"
+```
