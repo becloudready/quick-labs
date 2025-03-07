@@ -34,10 +34,10 @@ kubectl version --client         # For Kubernetes Labs
 ## **📦 Available Labs**  
 | Lab Name  | Description |
 |-----------|------------|
-| `linux-basics` | Learn shell scripting and sysadmin tasks |
-| `db-fundamentals` | Hands-on with MySQL & PostgreSQL |
-| `k8s-getting-started` | Deploy a Kubernetes cluster for practice |
-| `ai-agent-lab` | Set up an AI-powered chatbot & automation |
+| `linux` | Learn shell scripting and sysadmin tasks |
+| `db` | Hands-on with MySQL & PostgreSQL |
+| `k8s` | Deploy a Kubernetes cluster for practice |
+| `ai-agent` | Set up an AI-powered chatbot & automation |
 
 ---
 
