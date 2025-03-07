@@ -51,6 +51,6 @@ Fork the repo and submit a **Pull Request**.
 
 ---
 
-## ** License**  
+## **License**  
 Licensed under **Apache License**.  
 
