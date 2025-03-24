@@ -1,0 +1,59 @@
+name: Create DigitalOcean Kubernetes Cluster
+
+on:
+  workflow_dispatch:
+    inputs:
+      cluster_name:
+        description: 'Cluster Name'
+        required: true
+        default: 'my-do-cluster'
+      region:
+        description: 'Region'
+        required: false
+        default: 'nyc1'
+      node_size:
+        description: 'Node Size'
+        required: false
+        default: 's-2vcpu-4gb'
+      node_count:
+        description: 'Node Count'
+        required: false
+        default: '2'
+
+jobs:
+  create-cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install doctl (DigitalOcean CLI)
+        run: |
+          curl -sSL https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
+          chmod +x doctl
+          sudo mv doctl /usr/local/bin/
+
+      - name: Authenticate with DigitalOcean
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        run: |
+          doctl auth init -t $DIGITALOCEAN_ACCESS_TOKEN
+
+      - name: Create Kubernetes Cluster
+        env:
+          CLUSTER_NAME: ${{ github.event.inputs.cluster_name }}
+          REGION: ${{ github.event.inputs.region }}
+          NODE_SIZE: ${{ github.event.inputs.node_size }}
+          NODE_COUNT: ${{ github.event.inputs.node_count }}
+        run: |
+          doctl kubernetes cluster create $CLUSTER_NAME \
+            --region $REGION \
+            --size $NODE_SIZE \
+            --count $NODE_COUNT \
+            --wait
+
+      - name: Get Cluster Kubeconfig
+        env:
+          CLUSTER_NAME: ${{ github.event.inputs.cluster_name }}
+        run: |
+          doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
