@@ -1,28 +1,24 @@
-name: 'DigitalOcean Kubernetes Cluster'
-description: 'Spin up a Kubernetes cluster on DigitalOcean'
-
-on:
-  workflow_dispatch:
+name: 'Setup DigitalOcean Kubernetes Cluster'
+description: 'GitHub Action to create a Kubernetes cluster on DigitalOcean'
 
 inputs:
-  do_token:
+  digitalocean_token:
     description: 'DigitalOcean API Token'
     required: true
   cluster_name:
-    description: 'Name of the cluster'
+    description: 'Name of the Kubernetes cluster'
     required: true
-    default: 'github-action-cluster'
   region:
-    description: 'Region to deploy the cluster in'
-    required: true
-    default: 'nyc3'
+    description: 'Region to create the cluster in (default: nyc1)'
+    required: false
+    default: 'nyc1'
   node_size:
-    description: 'Droplet size for nodes'
-    required: true
+    description: 'Droplet size for worker nodes (default: s-2vcpu-4gb)'
+    required: false
     default: 's-2vcpu-4gb'
   node_count:
-    description: 'Number of nodes'
-    required: true
+    description: 'Number of worker nodes (default: 2)'
+    required: false
     default: '2'
 
 runs:
@@ -35,26 +31,18 @@ runs:
         sudo mv doctl /usr/local/bin/
       shell: bash
 
-    - name: Authenticate doctl
-      run: |
-        doctl auth init --access-token ${{ inputs.do_token }}
+    - name: Authenticate with DigitalOcean
+      run: doctl auth init --access-token "${{ inputs.digitalocean_token }}"
       shell: bash
 
-    - name: Create Kubernetes Cluster
+    - name: Create Kubernetes cluster
       run: |
-        doctl kubernetes cluster create ${{ inputs.cluster_name }} \
-          --region ${{ inputs.region }} \
-          --size ${{ inputs.node_size }} \
-          --count ${{ inputs.node_count }}
+        doctl kubernetes cluster create "${{ inputs.cluster_name }}" \
+          --region "${{ inputs.region }}" \
+          --size "${{ inputs.node_size }}" \
+          --count "${{ inputs.node_count }}"
       shell: bash
 
-    - name: Get Kubeconfig
-      run: |
-        doctl kubernetes cluster kubeconfig save ${{ inputs.cluster_name }}
-      shell: bash
 
-    - name: Output Cluster Info
-      run: |
-        doctl kubernetes cluster get ${{ inputs.cluster_name }}
-      shell: bash
+
 
