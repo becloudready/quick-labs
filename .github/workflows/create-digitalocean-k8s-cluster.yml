@@ -1,6 +1,9 @@
 name: 'Setup DigitalOcean Kubernetes Cluster'
 description: 'GitHub Action to create a Kubernetes cluster on DigitalOcean'
 
+on:
+  workflow_dispatch:
+
 inputs:
   digitalocean_token:
     description: 'DigitalOcean API Token'
