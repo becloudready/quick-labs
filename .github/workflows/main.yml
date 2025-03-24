@@ -1,0 +1,45 @@
+name: 'Setup DigitalOcean Kubernetes Cluster'
+description: 'GitHub Action to create a Kubernetes cluster on DigitalOcean'
+author: 'Chandan'
+
+inputs:
+  digitalocean_token:
+    description: 'DigitalOcean API Token'
+    required: true
+  cluster_name:
+    description: 'Name of the Kubernetes cluster'
+    required: true
+  region:
+    description: 'Region to create the cluster in (default: nyc1)'
+    required: false
+    default: 'nyc1'
+  node_size:
+    description: 'Droplet size for worker nodes (default: s-2vcpu-4gb)'
+    required: false
+    default: 's-2vcpu-4gb'
+  node_count:
+    description: 'Number of worker nodes (default: 2)'
+    required: false
+    default: '2'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install doctl
+      run: |
+        curl -sL https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
+        chmod +x doctl
+        sudo mv doctl /usr/local/bin/
+      shell: bash
+
+    - name: Authenticate with DigitalOcean
+      run: echo "${{ inputs.digitalocean_token }}" | doctl auth init --access-token
+      shell: bash
+
+    - name: Create Kubernetes cluster
+      run: |
+        doctl kubernetes cluster create "${{ inputs.cluster_name }}" \
+          --region "${{ inputs.region }}" \
+          --size "${{ inputs.node_size }}" \
+          --count "${{ inputs.node_count }}"
+      shell: bash
