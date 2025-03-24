@@ -27,9 +27,10 @@ jobs:
     steps:
       - name: Install doctl
         run: |
-          curl -sL https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
-          chmod +x doctl
-          sudo mv doctl /usr/local/bin/
+          cd ~
+          wget https://github.com/digitalocean/doctl/releases/download/v1.123.0/doctl-1.123.0-linux-amd64.tar.gz
+          tar xf ~/doctl-1.123.0-linux-amd64.tar.gz
+          sudo mv ~/doctl /usr/local/bin
         shell: bash
 
       - name: Authenticate with DigitalOcean
