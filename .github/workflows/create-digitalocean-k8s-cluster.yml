@@ -1,12 +1,7 @@
 name: Setup DigitalOcean Kubernetes Cluster
-description: GitHub Action to create a Kubernetes cluster on DigitalOcean
 
 on:
   workflow_dispatch:
-
-jobs:
-  create-cluster:
-    runs-on: ubuntu-latest
     inputs:
       digitalocean_token:
         description: 'DigitalOcean API Token'
@@ -26,7 +21,9 @@ jobs:
         description: 'Number of worker nodes (default: 2)'
         required: false
         default: '2'
-    
+jobs:
+  create-cluster:
+    runs-on: ubuntu-latest   
     steps:
       - name: Install doctl
         run: |
