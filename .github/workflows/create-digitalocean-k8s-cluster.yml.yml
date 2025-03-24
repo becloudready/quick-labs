@@ -1,59 +1,60 @@
-name: Create DigitalOcean Kubernetes Cluster
+name: 'DigitalOcean Kubernetes Cluster'
+description: 'Spin up a Kubernetes cluster on DigitalOcean'
 
 on:
   workflow_dispatch:
-    inputs:
-      cluster_name:
-        description: 'Cluster Name'
-        required: true
-        default: 'my-do-cluster'
-      region:
-        description: 'Region'
-        required: false
-        default: 'nyc1'
-      node_size:
-        description: 'Node Size'
-        required: false
-        default: 's-2vcpu-4gb'
-      node_count:
-        description: 'Node Count'
-        required: false
-        default: '2'
 
-jobs:
-  create-cluster:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+inputs:
+  do_token:
+    description: 'DigitalOcean API Token'
+    required: true
+  cluster_name:
+    description: 'Name of the cluster'
+    required: true
+    default: 'github-action-cluster'
+  region:
+    description: 'Region to deploy the cluster in'
+    required: true
+    default: 'nyc3'
+  node_size:
+    description: 'Droplet size for nodes'
+    required: true
+    default: 's-2vcpu-4gb'
+  node_count:
+    description: 'Number of nodes'
+    required: true
+    default: '2'
 
-      - name: Install doctl (DigitalOcean CLI)
-        run: |
-          curl -sSL https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
-          chmod +x doctl
-          sudo mv doctl /usr/local/bin/
+runs:
+  using: 'composite'
+  steps:
+    - name: Install doctl
+      run: |
+        curl -sL https://github.com/digitalocean/doctl/releases/latest/download/doctl-$(uname -s)-$(uname -m) -o doctl
+        chmod +x doctl
+        sudo mv doctl /usr/local/bin/
+      shell: bash
 
-      - name: Authenticate with DigitalOcean
-        env:
-          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-        run: |
-          doctl auth init -t $DIGITALOCEAN_ACCESS_TOKEN
+    - name: Authenticate doctl
+      run: |
+        doctl auth init --access-token ${{ inputs.do_token }}
+      shell: bash
 
-      - name: Create Kubernetes Cluster
-        env:
-          CLUSTER_NAME: ${{ github.event.inputs.cluster_name }}
-          REGION: ${{ github.event.inputs.region }}
-          NODE_SIZE: ${{ github.event.inputs.node_size }}
-          NODE_COUNT: ${{ github.event.inputs.node_count }}
-        run: |
-          doctl kubernetes cluster create $CLUSTER_NAME \
-            --region $REGION \
-            --size $NODE_SIZE \
-            --count $NODE_COUNT \
-            --wait
+    - name: Create Kubernetes Cluster
+      run: |
+        doctl kubernetes cluster create ${{ inputs.cluster_name }} \
+          --region ${{ inputs.region }} \
+          --size ${{ inputs.node_size }} \
+          --count ${{ inputs.node_count }}
+      shell: bash
 
-      - name: Get Cluster Kubeconfig
-        env:
-          CLUSTER_NAME: ${{ github.event.inputs.cluster_name }}
-        run: |
-          doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
+    - name: Get Kubeconfig
+      run: |
+        doctl kubernetes cluster kubeconfig save ${{ inputs.cluster_name }}
+      shell: bash
+
+    - name: Output Cluster Info
+      run: |
+        doctl kubernetes cluster get ${{ inputs.cluster_name }}
+      shell: bash
+
