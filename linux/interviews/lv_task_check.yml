@@ -1,0 +1,108 @@
+---
+- name: Advanced Linux Admin Practical Assessment
+  hosts: candidate_vm
+  become: yes
+  gather_facts: yes
+
+  vars:
+    # Pre-requisite: Ensure /dev/sdb and /dev/sdc are available as unused block devices for LVM tasks.
+    # Adjust device names as per your test VM setup.
+    lvm_pv_device1: /dev/xvdbb
+    lvm_pv_device2: /dev/xvdbc
+    lvm_vg_name: "datavg"
+    lvm_lv_name: "applv"
+    lvm_lv_mount_point: "/mnt/appdata"
+    lvm_lv_initial_size: "512M"
+    lvm_lv_extended_size_abs: "768M" # Absolute size after extension
+
+  tasks:
+    - name: Check if physical volume (PV) devices exist
+      stat:
+        path: "{{ item }}"
+      register: pv_status
+      loop:
+        - "{{ lvm_pv_device1 }}"
+        - "{{ lvm_pv_device2 }}"
+
+    - name: Fail if any physical volume device doesn't exist
+      fail:
+        msg: "Physical volume device {{ item }} does not exist!"
+      when: item.stat.exists == false
+      loop: "{{ pv_status.results }}"
+
+    - name: Check if volume group (VG) exists
+      command: vgs --noheadings -o vg_name
+      register: vg_status
+      changed_when: false
+
+    - name: Fail if the specified volume group does not exist
+      fail:
+        msg: "Volume Group {{ lvm_vg_name }} does not exist!"
+      when: "'{{ lvm_vg_name }}' not in vg_status.stdout"
+
+    - name: Check if logical volume (LV) exists
+      command: lvs --noheadings -o lv_name
+      register: lv_status
+      changed_when: false
+
+    - name: Fail if the specified logical volume does not exist
+      fail:
+        msg: "Logical Volume {{ lvm_lv_name }} does not exist!"
+      when: "'{{ lvm_lv_name }}' not in lv_status.stdout"
+
+    - name: Check if the logical volume consists of the specified PVs
+      command: pvs --noheadings -o pv_name,vg_name
+      register: pv_check
+      changed_when: false
+
+    - name: Fail if the PVs are not part of the volume group
+      fail:
+        msg: "The physical volumes {{ lvm_pv_device1 }} and {{ lvm_pv_device2 }} are not part of the volume group {{ lvm_vg_name }}."
+      when: "'{{ lvm_pv_device1 }}' not in pv_check.stdout or '{{ lvm_pv_device2 }}' not in pv_check.stdout"
+
+    - name: Check if logical volume is mounted at the specified mount point
+      stat:
+        path: "{{ lvm_lv_mount_point }}"
+      register: lv_mount_status
+
+    - name: Fail if the logical volume is not mounted at the expected mount point
+      fail:
+        msg: "The logical volume {{ lvm_lv_name }} is not mounted at {{ lvm_lv_mount_point }}!"
+      when: lv_mount_status.stat.exists == false
+
+    - name: Extract historical logical volume size from LVM archives
+      shell: |
+        grep "extend" /etc/lvm/archive/datavg_*.vg | cut -d' ' -f8
+      register: historical_lv_sizes
+      changed_when: false
+
+    - name: Extract original logical volume size from LVM archives (create size)
+      shell: |
+        grep "create" /etc/lvm/archive/* | cut -d' ' -f8
+      register: original_lv_size
+      changed_when: false
+
+    - name: Display historical logical volume sizes
+      debug:
+        msg: "Historical LV sizes: {{ historical_lv_sizes.stdout_lines }}"
+
+    - name: Generate JSON report
+      copy:
+        content: |
+          {
+            "pv_device_1_exists": "{{ pv_status.results[0].stat.exists }}",
+            "pv_device_2_exists": "{{ pv_status.results[1].stat.exists }}",
+            "vg_exists": "{{ lvm_vg_name in vg_status.stdout }}",
+            "lv_exists": "{{ lvm_lv_name in lv_status.stdout }}",
+            "pv_devices_in_vg": "{{ lvm_pv_device1 in pv_check.stdout and lvm_pv_device2 in pv_check.stdout }}",
+            "lv_mount_point_exists": "{{ lv_mount_status.stat.exists }}",
+            "historical_lv_sizes": "{{ historical_lv_sizes.stdout_lines }}",
+            "original_lv_size": "{{ original_lv_size.stdout }}"
+          }
+        dest: "/tmp/lvm_assignment_report.json"
+
+    - name: Fetch JSON report to local machine
+      fetch:
+        src: "/tmp/lvm_assignment_report.json"
+        dest: "./lvm_assignment_report.json"
+        flat: yes
