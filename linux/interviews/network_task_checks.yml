@@ -1,0 +1,196 @@
+---
+- name: Validate Intermediate Networking Tasks
+  hosts: candidate_vm # Ensure this matches your inventory
+  become: yes # For reading some files, checking firewall, etc.
+  gather_facts: yes # Needed for ansible_facts.services, ansible_default_ipv4
+
+  vars:
+    candidate_user: "candidate" # Adjust if your test user is different
+    primary_dns: "1.1.1.1"
+    secondary_dns: "9.9.9.9"
+    host_entry1_ip: "192.168.100.10"
+    host_entry1_name: "web.example.local"
+    host_entry2_ip: "192.168.100.20"
+    host_entry2_name: "api.example.local"
+    tcp_listen_port: 6001
+    udp_listen_port: 6002
+    firewall_allow_port: 7070
+    details_file_path: "/home/{{ candidate_user }}/primary_iface_details.txt"
+    connectivity_file_path: "/home/{{ candidate_user }}/connectivity_tests.txt"
+
+  tasks:
+    # --- Task 1: DNS Client Configuration ---
+    - name: "TASK 1: Check /etc/resolv.conf for primary DNS {{ primary_dns }}"
+      ansible.builtin.lineinfile:
+        path: /etc/resolv.conf
+        # Check for line starting with 'nameserver' followed by spaces/tabs and the IP
+        regexp: "^nameserver[ \t]+{{ primary_dns | regex_escape() }}$"
+        state: present
+      check_mode: yes # Only check, don't modify
+      register: check_dns_primary
+      failed_when: check_dns_primary.changed # If lineinfile *would* add it, it wasn't there
+      ignore_errors: yes # So playbook continues
+      tags: task1_dns
+
+    - name: "TASK 1: Check /etc/resolv.conf for secondary DNS {{ secondary_dns }}"
+      ansible.builtin.lineinfile:
+        path: /etc/resolv.conf
+        regexp: "^nameserver[ \t]+{{ secondary_dns | regex_escape() }}$"
+        state: present
+      check_mode: yes
+      register: check_dns_secondary
+      failed_when: check_dns_secondary.changed
+      ignore_errors: yes
+      tags: task1_dns
+
+    - name: "TASK 1: DNS Configuration Result"
+      ansible.builtin.debug:
+        msg: >
+          DNS Check for {{ primary_dns }}: {{ 'PASS' if not check_dns_primary.changed else 'FAIL (or not found)' }}.
+          DNS Check for {{ secondary_dns }}: {{ 'PASS' if not check_dns_secondary.changed else 'FAIL (or not found)' }}.
+      tags: task1_dns
+
+    # --- Task 2: Hostname Resolution ---
+    - name: "TASK 2: Check /etc/hosts for '{{ host_entry1_name }}'"
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        # Regex: starts with IP, whitespace, then anything, then hostname, then anything (or end of line)
+        regexp: "^{{ host_entry1_ip | regex_escape() }}[ \t]+.*{{ host_entry1_name | regex_escape() }}([ \t]+.*)?$"
+        state: present
+      check_mode: yes
+      register: check_host1
+      failed_when: check_host1.changed
+      ignore_errors: yes
+      tags: task2_hosts
+
+    - name: "TASK 2: Check /etc/hosts for '{{ host_entry2_name }}'"
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: "^{{ host_entry2_ip | regex_escape() }}[ \t]+.*{{ host_entry2_name | regex_escape() }}([ \t]+.*)?$"
+        state: present
+      check_mode: yes
+      register: check_host2
+      failed_when: check_host2.changed
+      ignore_errors: yes
+      tags: task2_hosts
+
+    - name: "TASK 2: Hostname Resolution Result"
+      ansible.builtin.debug:
+        msg: >
+          /etc/hosts check for {{ host_entry1_name }} ({{ host_entry1_ip }}): {{ 'PASS' if not check_host1.changed else 'FAIL' }}.
+          /etc/hosts check for {{ host_entry2_name }} ({{ host_entry2_ip }}): {{ 'PASS' if not check_host2.changed else 'FAIL' }}.
+      tags: task2_hosts
+
+    # --- Task 3: Basic Port Listening ---
+    # This requires the candidate's processes to still be running.
+    - name: "TASK 3: Check for TCP listener on port {{ tcp_listen_port }}"
+      ansible.builtin.shell:
+        cmd: "ss -Hltnp4 sport = :{{ tcp_listen_port }} | awk '{print $1}'"
+      register: tcp_listen_check
+      changed_when: false
+      failed_when: "'LISTEN' not in tcp_listen_check.stdout"
+      ignore_errors: yes
+      tags: task3_ports
+
+    - name: "TASK 3: Check for UDP listener on port {{ udp_listen_port }}"
+      ansible.builtin.shell:
+        cmd: "ss -Hlunp4 sport = :{{ udp_listen_port }} | awk '{print $1}'"
+      register: udp_listen_check
+      changed_when: false
+      failed_when: "'UNCONN' not in udp_listen_check.stdout and 'ESTAB' not in udp_listen_check.stdout" # UDP often shows UNCONN
+      ignore_errors: yes
+      tags: task3_ports
+
+    - name: "TASK 3: Port Listening Result"
+      ansible.builtin.debug:
+        msg: >
+          TCP Listener on {{ tcp_listen_port }}: {{ 'PASS (found listener)' if 'LISTEN' in tcp_listen_check.stdout else 'FAIL (no listener or error)' }}.
+          UDP Listener on {{ udp_listen_port }}: {{ 'PASS (found listener)' if ('UNCONN' in udp_listen_check.stdout or 'ESTAB' in udp_listen_check.stdout) else 'FAIL (no listener or error)' }}.
+      tags: task3_ports
+
+    # --- Task 4: Simple Firewall Rule ---
+    - name: "TASK 4: Check firewall (UFW) for rule allowing TCP {{ firewall_allow_port }}"
+      ansible.builtin.ufw:
+        rule: allow
+        port: "{{ firewall_allow_port }}"
+        proto: tcp
+      check_mode: yes
+      register: ufw_check_allow
+      failed_when: ufw_check_allow.changed
+      when: "'ufw.service' in ansible_facts.services or 'ufw' in ansible_facts.services"
+      ignore_errors: yes
+      tags: task4_firewall
+
+    - name: "TASK 4: Check firewall (firewalld) for rule allowing TCP {{ firewall_allow_port }}"
+      ansible.posix.firewalld: # Ensure ansible.posix or community.general collection is available
+        port: "{{ firewall_allow_port }}/tcp"
+        state: enabled
+        permanent: yes # Check the persistent configuration
+      check_mode: yes
+      register: firewalld_check_allow
+      failed_when: firewalld_check_allow.changed
+      when: "'firewalld.service' in ansible_facts.services"
+      ignore_errors: yes
+      tags: task4_firewall
+
+    - name: "TASK 4: Firewall Rule Result"
+      ansible.builtin.debug:
+        msg: >
+          Firewall rule for TCP {{ firewall_allow_port }}:
+          UFW Check: {{ 'PASS' if ufw_check_allow is defined and not ufw_check_allow.changed else ('FAIL/SKIPPED' if ufw_check_allow is defined else 'SKIPPED (UFW not detected)') }}.
+          Firewalld Check: {{ 'PASS' if firewalld_check_allow is defined and not firewalld_check_allow.changed else ('FAIL/SKIPPED' if firewalld_check_allow is defined else 'SKIPPED (Firewalld not detected)') }}.
+      tags: task4_firewall
+
+    # --- Task 5: Network Interface Information ---
+    - name: "TASK 5: Fetch content of {{ details_file_path }}"
+      ansible.builtin.slurp:
+        src: "{{ details_file_path }}"
+      register: slurp_details_file
+      become: no # Read as candidate user
+      ignore_errors: yes # If file doesn't exist, slurp fails; we want to report that gracefully
+      tags: task5_iface_info
+
+    - name: "TASK 5: Parse and Validate {{ details_file_path }} content"
+      ansible.builtin.set_fact:
+        candidate_ip: "{{ (slurp_details_file.content | b64decode).split('\n')[0] | trim if slurp_details_file.rc == 0 and slurp_details_file.content else 'FILE_NOT_FOUND_OR_EMPTY' }}"
+        candidate_mac: "{{ (slurp_details_file.content | b64decode).split('\n')[1] | trim if slurp_details_file.rc == 0 and slurp_details_file.content and ((slurp_details_file.content | b64decode).split('\n') | length > 1) else 'FILE_NOT_FOUND_OR_MALFORMED' }}"
+      when: slurp_details_file is defined # Ensure slurp task ran
+      tags: task5_iface_info
+
+    - name: "TASK 5: Network Interface Information Result"
+      ansible.builtin.debug:
+        msg: >
+          Primary interface details file check ({{ details_file_path }}):
+          File Parsed IP: {{ candidate_ip | default('N/A') }}
+          Actual Primary IP (from facts): {{ ansible_default_ipv4.address if ansible_default_ipv4 is defined else 'N/A' }}
+          IP Match: {{ 'PASS' if ansible_default_ipv4 is defined and candidate_ip == ansible_default_ipv4.address else 'FAIL/NO_FILE' }}
+
+          File Parsed MAC: {{ candidate_mac | default('N/A') }}
+          Actual Primary MAC (from facts): {{ ansible_default_ipv4.macaddress if ansible_default_ipv4 is defined else 'N/A' }}
+          MAC Match: {{ 'PASS' if ansible_default_ipv4 is defined and (candidate_mac | lower) == (ansible_default_ipv4.macaddress | lower) else 'FAIL/NO_FILE' }}
+      tags: task5_iface_info
+
+    # --- Task 6: Basic Network Connectivity Test ---
+    - name: "TASK 6: Fetch content of {{ connectivity_file_path }}"
+      ansible.builtin.slurp:
+        src: "{{ connectivity_file_path }}"
+      register: slurp_connectivity_file
+      become: no
+      ignore_errors: yes
+      tags: task6_connectivity
+
+    - name: "TASK 6: Validate {{ connectivity_file_path }} content"
+      ansible.builtin.set_fact:
+        ping_success: "{{ '3 packets transmitted, 3 received' in (slurp_connectivity_file.content | b64decode) if slurp_connectivity_file.rc == 0 and slurp_connectivity_file.content else false }}"
+        # A simple check for presence of wikipedia.org in the output for DNS lookup
+        dns_lookup_present: "{{ 'wikipedia.org' in (slurp_connectivity_file.content | b64decode) if slurp_connectivity_file.rc == 0 and slurp_connectivity_file.content else false }}"
+      when: slurp_connectivity_file is defined
+      tags: task6_connectivity
+
+    - name: "TASK 6: Connectivity Test Result"
+      ansible.builtin.debug:
+        msg: >
+          Connectivity tests file check ({{ connectivity_file_path }}):
+          Ping to google.com (3/3 packets) found in file: {{ 'PASS' if ping_success | default(false) else 'FAIL/NOT_FOUND' }}
+          DNS lookup for wikipedia.org output present in file: {{ 'PASS' if dns_lookup_present | default(false) else 'FAIL/NOT_FOUND' }}
+      tags: task6_connectivity
