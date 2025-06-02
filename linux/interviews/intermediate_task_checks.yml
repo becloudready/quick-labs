@@ -1,0 +1,201 @@
+---
+- name: Intermediate Linux Admin Practical Assessment
+  hosts: candidate_vm
+  become: yes
+  gather_facts: yes
+
+  vars:
+    # Define vars as in the previous comprehensive example
+    candidate_user: "candidate"
+    developer_group: "developers"
+    test_user: "jdoe"
+    app_dir: "/opt/appdata"
+    config_file_name: "config.ini"
+    config_file_path: "{{ app_dir }}/{{ config_file_name }}"
+    config_link_path: "/etc/app_config.ini"
+    web_server_package: "{{ 'nginx' if ansible_os_family == 'Debian' else 'httpd' }}"
+    web_server_service: "{{ 'nginx' if ansible_os_family == 'Debian' else 'httpd' }}"
+    backup_script_name: "backup_logs.sh"
+    candidate_home: "~"
+    backup_script_path: "{{ candidate_home }}/{{ backup_script_name }}"
+    backup_dest_dir: "/tmp"
+    current_date_str: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}"
+    expected_backup_filename: "logs_backup_{{ current_date_str }}.tar.gz"
+    expected_backup_path: "{{ backup_dest_dir }}/{{ expected_backup_filename }}"
+
+  tasks:
+    # === USER AND GROUP MANAGEMENT ===
+    - name: "INTERMEDIATE 1.1: Ensure group '{{ developer_group }}' exists"
+      ansible.builtin.group:
+        name: "{{ developer_group }}"
+        state: present
+      check_mode: yes
+      register: check_dev_group
+      failed_when: check_dev_group.changed
+      tags: intermediate_user_management
+
+    - name: "INTERMEDIATE 1.2: Ensure user '{{ test_user }}' exists"
+      ansible.builtin.user:
+        name: "{{ test_user }}"
+        state: present
+      check_mode: yes
+      register: check_test_user
+      failed_when: check_test_user.changed
+      tags: intermediate_user_management
+
+    - name: "INTERMEDIATE 1.3: Check if '{{ test_user }}' has a password set"
+      ansible.builtin.command: "sudo grep '^{{ test_user }}:[^!*]' /etc/shadow"
+      register: test_user_password_check
+      changed_when: false
+      check_mode: no
+      failed_when: test_user_password_check.rc != 0
+      tags: intermediate_user_management
+
+    - name: "INTERMEDIATE 1.4: Ensure '{{ test_user }}' is a member of '{{ developer_group }}'"
+      ansible.builtin.user:
+        name: "{{ test_user }}"
+        groups: "{{ developer_group }}"
+        append: yes
+      check_mode: yes
+      register: check_user_in_group
+      failed_when: check_user_in_group.changed
+      tags: intermediate_user_management
+
+    # === FILE AND DIRECTORY MANAGEMENT ===
+    - name: "INTERMEDIATE 2.1: Ensure directory '{{ app_dir }}' exists"
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+      check_mode: yes
+      register: check_app_dir
+      failed_when: check_app_dir.changed
+      tags: intermediate_file_management
+
+    - name: "INTERMEDIATE 2.2: Ensure '{{ config_file_path }}' exists and has correct content"
+      # Keywords like check_mode and tags that apply to the whole block structure
+      # are at this level, alongside 'block', 'rescue', 'always'.
+      check_mode: yes
+      tags: intermediate_file_management
+      block: # The 'block' keyword, defining the start of a task group
+        - name: "STAT config file"
+          ansible.builtin.stat:
+            path: "{{ config_file_path }}"
+          register: stat_config_file
+          failed_when: not stat_config_file.stat.exists
+
+        - name: "SLURP config file"
+          ansible.builtin.slurp:
+            src: "{{ config_file_path }}"
+          register: slurp_config_file
+          when: stat_config_file.stat.exists # Only slurp if file exists
+
+        - name: "ASSERT config content"
+          ansible.builtin.assert:
+            that:
+              - "'version=1.0' in (slurp_config_file.content | b64decode)"
+              - "'loglevel=INFO' in (slurp_config_file.content | b64decode)"
+            fail_msg: "Config file content mismatch or file unreadable."
+            success_msg: "Config file content is correct."
+          when: 
+            - stat_config_file.stat.exists
+            - slurp_config_file.content is defined # Ensure content was slurped
+
+    - name: "INTERMEDIATE 2.3: Ensure '{{ app_dir }}' ownership is '{{ test_user }}:{{ developer_group }}'"
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        owner: "{{ test_user }}"
+        group: "{{ developer_group }}"
+        state: directory
+        recurse: yes # Check contents too
+      check_mode: yes
+      register: check_dir_ownership
+      failed_when: check_dir_ownership.changed
+      tags: intermediate_file_management
+
+    - name: "INTERMEDIATE 2.4: Ensure '{{ app_dir }}' permissions are 750"
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        mode: '0750'
+        state: directory
+      check_mode: yes
+      register: check_dir_perms
+      failed_when: check_dir_perms.changed
+      tags: intermediate_file_management
+
+    - name: "INTERMEDIATE 2.5: Ensure '{{ config_link_path }}' is a symlink to '{{ config_file_path }}'"
+      ansible.builtin.file:
+        src: "{{ config_file_path }}"
+        dest: "{{ config_link_path }}"
+        state: link
+      check_mode: yes
+      register: check_symlink
+      failed_when: check_symlink.changed
+      tags: intermediate_file_management
+
+    # === PACKAGE AND SERVICE MANAGEMENT ===
+    - name: "INTERMEDIATE 3.1: Ensure '{{ web_server_package }}' is installed"
+      ansible.builtin.package:
+        name: "{{ web_server_package }}"
+        state: present
+      check_mode: yes
+      register: check_package_install
+      failed_when: check_package_install.changed
+      tags: intermediate_package_service
+
+    - name: "INTERMEDIATE 3.2: Ensure '{{ web_server_service }}' is running and enabled"
+      ansible.builtin.service:
+        name: "{{ web_server_service }}"
+        state: started
+        enabled: yes
+      check_mode: yes
+      register: check_service_status
+      failed_when: check_service_status.changed
+      tags: intermediate_package_service
+
+    # === BASIC SCRIPTING ===
+    - name: "INTERMEDIATE 4.1: Check backup script '{{ backup_script_path }}' exists and is executable"
+      ansible.builtin.stat:
+        path: "{{ backup_script_path }}"
+      register: stat_backup_script
+      failed_when: not stat_backup_script.stat.exists or not stat_backup_script.stat.executable
+      tags: intermediate_scripting
+
+    - name: "INTERMEDIATE 4.2: (Setup) Run candidate's backup script"
+      ansible.builtin.shell: |
+        rm -f {{ backup_dest_dir }}/logs_backup_*.tar.gz
+        "{{ backup_script_path }}"
+      args: { chdir: "{{ candidate_home }}" }
+      register: script_execution_result
+      changed_when: false
+      check_mode: no
+      when: stat_backup_script.stat.exists and stat_backup_script.stat.executable
+      tags: intermediate_scripting
+
+    - name: "INTERMEDIATE 4.3: Check if backup archive '{{ expected_backup_path }}' was created"
+      ansible.builtin.stat:
+        path: "{{ expected_backup_path }}"
+      register: stat_backup_archive
+      failed_when: not stat_backup_archive.stat.exists or not stat_backup_archive.stat.isfile
+      when: script_execution_result is defined and script_execution_result.rc == 0
+      tags: intermediate_scripting
+
+    - name: "INTERMEDIATE 4.4: Check script output for 'Backup complete'"
+      ansible.builtin.assert:
+        that:
+          - "'Backup complete:' in script_execution_result.stdout"
+      when: script_execution_result is defined and script_execution_result.stdout is defined
+      tags: intermediate_scripting
+
+    # === BASIC TROUBLESHOOTING (STATE CHECK) ===
+    # Example: Candidate is told a specific file should be writable by 'jdoe' but it isn't.
+    # They need to fix it. This task checks the fix.
+    - name: "INTERMEDIATE 5.1: Ensure /srv/shared/report.txt is writable by user '{{ test_user }}'"
+      # Pre-setup for this task: `sudo mkdir -p /srv/shared; sudo touch /srv/shared/report.txt; sudo chown root:root /srv/shared/report.txt; sudo chmod 644 /srv/shared/report.txt`
+      ansible.builtin.file:
+        path: /srv/shared/report.txt
+        owner: "{{ test_user }}" # Or check for group writability if that was the task
+        mode: '0664' # Example: rw-rw-r-- (user and group can write)
+      check_mode: yes
+      register: check_report_writable
+      failed_when: check_report_writable.changed
+      tags: intermediate_troubleshooting

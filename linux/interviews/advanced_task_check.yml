@@ -1,0 +1,97 @@
+---
+- name: Advanced Linux Admin Practical Assessment
+  hosts: candidate_vm
+  become: yes
+  gather_facts: yes
+
+  vars:
+    # Pre-requisite: Ensure /dev/sdb and /dev/sdc are available as unused block devices for LVM tasks.
+    # Adjust device names as per your test VM setup.
+    lvm_pv_device1: /dev/xvdbb
+    lvm_pv_device2: /dev/xvdbb
+    lvm_vg_name: "datavg"
+    lvm_lv_name: "applv"
+    lvm_lv_mount_point: "/mnt/appdata"
+    lvm_lv_initial_size: "512M"
+    lvm_lv_extended_size_abs: "768M" # Absolute size after extension
+
+  tasks:
+    - name: "ADVANCED 1.4: Ensure firewall blocks incoming TCP traffic on port 9090 but allows 8080"
+      ansible.builtin.ufw:
+        rule: allow
+        port: '8080'
+        proto: tcp
+      check_mode: yes
+      register: ufw_allow_8080
+      failed_when: ufw_allow_8080.changed
+    - name: Check ufw rule for port 9090 deny (or not explicitly allowed)
+      # This is harder to check for "blocked". Easiest is to check "not allowed".
+      # For an explicit deny rule:
+      ansible.builtin.ufw:
+        rule: deny
+        port: '9090'
+        proto: tcp
+      check_mode: yes
+      register: ufw_deny_9090
+      failed_when: ufw_deny_9090.changed # If a deny rule had to be added, it wasn't there
+      tags: advanced_networking
+
+    - name: "ADVANCED 2.1a: Check if LVM Physical Volume '{{ lvm_pv_device1 }}' exists and is in '{{ lvm_vg_name }}'"
+      ansible.builtin.shell: "pvs --noheadings -o vg_name {{ lvm_pv_device1 }} 2>/dev/null | xargs"
+      register: pv1_vg_output
+      changed_when: false # This is a check task, so no change
+      failed_when: pv1_vg_output.stdout | trim != lvm_vg_name
+      # The above failed_when assumes if pvs outputs anything, it's the VG name.
+      # If output is empty, it means PV doesn't exist or isn't part of a VG.
+      # You might need a more robust check if the PV exists at all, e.g., lsblk.
+      tags: advanced_lvm
+
+    - name: "ADVANCED 2.1b: Check if LVM Physical Volume '{{ lvm_pv_device2 }}' exists and is in '{{ lvm_vg_name }}'"
+      ansible.builtin.shell: "pvs --noheadings -o vg_name {{ lvm_pv_device2 }} 2>/dev/null | xargs"
+      register: pv2_vg_output
+      changed_when: false
+      failed_when: pv2_vg_output.stdout | trim != lvm_vg_name
+      tags: advanced_lvm
+
+    - name: "ADVANCED 2.2: Check if LVM Volume Group '{{ lvm_vg_name }}' exists"
+      ansible.builtin.shell: "vgs --noheadings -o vg_name {{ lvm_vg_name }} 2>/dev/null | xargs"
+      register: vg_check_output
+      changed_when: false
+      failed_when: vg_check_output.stdout | trim != lvm_vg_name
+      tags: advanced_lvm
+
+    - name: "ADVANCED 2.3: Check LVM Logical Volume '{{ lvm_lv_name }}' in VG '{{ lvm_vg_name }}'"
+      community.general.lvs_info:
+        vgname: "{{ lvm_vg_name }}"
+        lvname: "{{ lvm_lv_name }}"
+      register: lv_info
+      failed_when: not lv_info.lvs # Fails if LV doesn't exist
+      tags: advanced_lvm
+
+    - name: "ADVANCED 2.3b: Assert LV '{{ lvm_lv_name }}' initial size is approximately {{ lvm_lv_initial_size }}"
+      ansible.builtin.assert:
+        that:
+          - lv_info.lvs is defined
+          - lv_info.lvs | length > 0
+          # lv_info.lvs[0].lv_size is in bytes (as a string, e.g., "536870912")
+          # Convert lvm_lv_initial_size ("512M") to bytes
+          - (lv_info.lvs[0].lv_size | float) >= (expected_initial_bytes * 0.95) # Allow 5% smaller
+          - (lv_info.lvs[0].lv_size | float) <= (expected_initial_bytes * 1.05) # Allow 5% larger
+        fail_msg: >
+          LV '{{ lvm_lv_name }}' in VG '{{ lvm_vg_name }}' size {{ lv_info.lvs[0].lv_size if lv_info.lvs else 'N/A' }} bytes
+          is not approximately {{ lvm_lv_initial_size }} (expected {{ expected_initial_bytes }} bytes).
+        success_msg: "LV '{{ lvm_lv_name }}' size is approximately {{ lvm_lv_initial_size }}."
+      vars:
+        # Helper to convert "512M", "1G" etc. to bytes
+        _size_str: "{{ lvm_lv_initial_size | upper }}"
+        _size_unit: "{{ _size_str[-1] }}"
+        _size_val: "{{ _size_str | regex_replace('M|G|T|P', '') | float }}"
+        _multiplier: >-
+          {%- if _size_unit == 'M' -%} 1024*1024
+          {%- elif _size_unit == 'G' -%} 1024*1024*1024
+          {%- elif _size_unit == 'T' -%} 1024*1024*1024*1024
+          {%- elif _size_unit == 'P' -%} 1024*1024*1024*1024*1024
+          {%- else -%} 1 {%- endif -%}
+        expected_initial_bytes: "{{ _size_val * _multiplier }}"
+      when: lv_info.lvs is defined and lv_info.lvs | length > 0
+      tags: advanced_lvm
