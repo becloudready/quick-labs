@@ -57,12 +57,6 @@ If your training program, sales-engineering team, or partner enablement track ne
 
 → **Book a 30-min discovery call: [becloudready.com/labs](https://becloudready.com/labs)**
 
-Typical engagement sizes:
-
-- Cloud Training Labs — $15K–$30K per program
-- AI &amp; GPU Labs — $20K–$40K per cohort
-- Sales Demo Environments — $10K–$25K per template
-
 ---
 
 ## Repo layout
