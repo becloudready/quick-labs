@@ -1,5 +1,56 @@
-venv/
-digitalocean/YT_intro.py
-digitalocean/api_token.py
+# Environment
+.env
+*.env.local
+
+# Outputs — contain credentials, never commit
+outputs/
+!outputs/.gitkeep
+
+# Terraform — state holds account IDs, ARNs, and plaintext sensitive outputs (login_profile.password, etc.)
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+# Lock files SHOULD be committed (pin provider versions) — don't ignore .terraform.lock.hcl.
+
+# Python
 __pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Key pairs — private keys generated for students
+*.pem
+
+# Legacy script secrets (preserved from original quick-labs)
+api_token.py
 ConnectionDetails.txt
+examples/digitalocean/YT_intro.py
+
+# macOS
+.DS_Store
+
+# Editor / tooling
+.idea/
+.vscode/
+
+# Claude Code — share skills/agents/commands; keep per-user settings local
+.claude/settings.local.json
+.claude/.cache/
+.claude/projects/
+.claude/sessions/

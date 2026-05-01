@@ -1,0 +1,10 @@
+{
+  "ResultConfiguration": {
+    "OutputLocation": "s3://quicklabs-{USERNAME}-athena-results/results/",
+    "EncryptionConfiguration": {
+      "EncryptionOption": "SSE_S3"
+    }
+  },
+  "EnforceWorkGroupConfiguration": true,
+  "PublishCloudWatchMetricsEnabled": false
+}
