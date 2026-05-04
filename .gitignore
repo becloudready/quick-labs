@@ -37,6 +37,10 @@ venv/
 # Key pairs — private keys generated for students
 *.pem
 
+# Student rosters + generated credentials — contain PII / plaintext passwords
+students.csv
+students-credentials.csv
+
 # Legacy script secrets (preserved from original quick-labs)
 api_token.py
 ConnectionDetails.txt
