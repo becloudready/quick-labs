@@ -50,7 +50,7 @@ Expect 4 buckets listed.
 ## Step 2 — Upload CSV + Glue script
 
 ```bash
-aws s3 cp ~/Downloads/Crude_Oil_historical_data.csv \
+aws s3 cp /Users/kchandan/Documents/bcr/training/Crude_Oil_historical_data.csv \
   s3://quicklabs-${USERNAME}-raw/oil/Crude_Oil_historical_data.csv
 
 aws s3 cp oil_csv_to_parquet.py \
