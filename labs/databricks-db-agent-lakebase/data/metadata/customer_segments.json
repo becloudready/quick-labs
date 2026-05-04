@@ -1,0 +1,16 @@
+{
+  "table": "customer_segments",
+  "layer": "olap",
+  "description": "One row per customer with lifetime spend, order count, a coarse value segment, and a cancellation-rate risk score.",
+  "columns": {
+    "customer_id": "Customer identifier — joinable to oltp.customers and oltp.orders",
+    "total_spent": "Sum of payment_value across all orders (BRL)",
+    "total_orders": "Distinct order count",
+    "segment": "Bucket derived from total_spent: 'high' (>=1000), 'mid' (>=200), 'low' (<200)",
+    "risk_score": "Share of orders with status='canceled', in [0, 1]"
+  },
+  "relationships": [
+    "customer_segments.customer_id = oltp.customers.customer_id",
+    "customer_segments.customer_id = oltp.orders.customer_id"
+  ]
+}

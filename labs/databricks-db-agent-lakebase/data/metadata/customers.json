@@ -1,0 +1,14 @@
+{
+  "table": "customers",
+  "layer": "oltp",
+  "description": "One row per customer record observed at checkout. customer_id is per-order; customer_unique_id is the stable identity across orders.",
+  "columns": {
+    "customer_id": "Order-scoped customer identifier (PK)",
+    "customer_unique_id": "Stable identity used to link a person across orders",
+    "city": "Customer city at order time",
+    "state": "Two-letter Brazilian state code at order time"
+  },
+  "relationships": [
+    "customers.customer_id = orders.customer_id"
+  ]
+}

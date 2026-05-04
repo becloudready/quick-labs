@@ -1,0 +1,15 @@
+{
+  "table": "product_catalog",
+  "layer": "olap",
+  "description": "Per-product summary: category, average sale price, and a freight-headroom-based margin proxy.",
+  "columns": {
+    "product_id": "Product identifier — joinable to oltp.products",
+    "category": "product_category copied from oltp.products",
+    "avg_price": "Average price across order_items (BRL)",
+    "margin_percent": "Lab-grade margin proxy: avg((price - freight_value) / price) * 100"
+  },
+  "relationships": [
+    "product_catalog.product_id = oltp.products.product_id",
+    "product_catalog.product_id = oltp.order_items.product_id"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "table": "category_performance",
+  "layer": "olap",
+  "description": "Per-category per-quarter revenue and average order value. Use for category-level trend and AOV questions.",
+  "columns": {
+    "category": "product_category from oltp.products",
+    "quarter": "Quarter start timestamp (DATE_TRUNC('QUARTER', order_purchase_timestamp))",
+    "total_revenue": "Sum of (price + freight_value) across line items in that quarter (BRL)",
+    "avg_order_value": "total_revenue divided by distinct order count in that category-quarter"
+  },
+  "relationships": [
+    "category_performance.category = oltp.products.product_category"
+  ]
+}

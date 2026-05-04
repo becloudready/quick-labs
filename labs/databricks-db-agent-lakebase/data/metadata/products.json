@@ -1,0 +1,16 @@
+{
+  "table": "products",
+  "layer": "oltp",
+  "description": "Catalog of sellable products. One row per product_id. Physical dimensions are useful for shipping cost analysis.",
+  "columns": {
+    "product_id": "Unique product identifier (PK)",
+    "product_category": "Category name in Portuguese (e.g. 'cama_mesa_banho')",
+    "product_weight": "Weight in grams",
+    "product_length": "Length in centimeters",
+    "product_height": "Height in centimeters",
+    "product_width": "Width in centimeters"
+  },
+  "relationships": [
+    "products.product_id = order_items.product_id"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "table": "order_items",
+  "layer": "oltp",
+  "description": "Line items within an order. An order can contain multiple items; each row is one (order, product, seller) tuple with its price and freight.",
+  "columns": {
+    "order_id": "Order this line belongs to — FK to orders",
+    "product_id": "Product purchased — FK to products",
+    "seller_id": "Seller fulfilling this line",
+    "price": "Item price paid by the customer (BRL)",
+    "freight_value": "Shipping cost charged for this line (BRL)"
+  },
+  "relationships": [
+    "order_items.order_id = orders.order_id",
+    "order_items.product_id = products.product_id"
+  ]
+}

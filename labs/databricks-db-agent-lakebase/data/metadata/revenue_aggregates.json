@@ -1,0 +1,14 @@
+{
+  "table": "revenue_aggregates",
+  "layer": "olap",
+  "description": "Per-customer per-quarter revenue rollup. Use for time-windowed top-N revenue questions.",
+  "columns": {
+    "customer_id": "Customer identifier — joinable to oltp.customers",
+    "quarter": "Quarter start timestamp (DATE_TRUNC('QUARTER', order_purchase_timestamp))",
+    "total_revenue": "Sum of payment_value for orders placed that quarter (BRL)",
+    "order_count": "Distinct order count for that customer in that quarter"
+  },
+  "relationships": [
+    "revenue_aggregates.customer_id = oltp.customers.customer_id"
+  ]
+}

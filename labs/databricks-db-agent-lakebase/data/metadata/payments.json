@@ -1,0 +1,14 @@
+{
+  "table": "payments",
+  "layer": "oltp",
+  "description": "Payment records per order. An order can have multiple payment rows (split tender). Sum payment_value over order_id for total paid.",
+  "columns": {
+    "order_id": "Order this payment is applied to — FK to orders",
+    "payment_type": "Method: credit_card | boleto | voucher | debit_card | not_defined",
+    "payment_value": "Amount paid in this transaction (BRL)",
+    "payment_installments": "Number of installments (credit_card only; otherwise 1)"
+  },
+  "relationships": [
+    "payments.order_id = orders.order_id"
+  ]
+}
