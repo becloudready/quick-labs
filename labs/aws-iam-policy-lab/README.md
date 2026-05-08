@@ -1,6 +1,6 @@
 # AWS IAM Policy Lab
 
-A 60–90 minute hands-on lab that teaches students to read, predict, and write AWS IAM policies — using **their own sandbox policy** from the AWS Data Lake lab as the textbook.
+A hands-on lab that teaches students to read, predict, and write AWS IAM policies — using **their own sandbox policy** from the AWS Data Lake lab as the textbook.
 
 ## Prereqs for students
 
