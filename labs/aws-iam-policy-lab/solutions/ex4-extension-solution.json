@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InventoryConfigOnOwnBuckets",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketInventoryConfiguration",
+        "s3:PutBucketInventoryConfiguration"
+      ],
+      "Resource": "arn:aws:s3:::quicklabs-{USERNAME}-*"
+    }
+  ]
+}

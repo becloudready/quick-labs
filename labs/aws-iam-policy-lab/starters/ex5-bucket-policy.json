@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadOnPublicPrefix",
+      "Effect": "_____",
+      "Principal": "_____",
+      "Action": [
+        "_____"
+      ],
+      "Resource": "arn:aws:s3:::quicklabs-{USERNAME}-public/_____/*"
+    }
+  ]
+}

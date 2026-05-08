@@ -1,0 +1,65 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyOutsideUSWest2",
+      "Effect": "Deny",
+      "NotAction": ["iam:*", "sts:*", "s3:ListAllMyBuckets", "s3:GetBucketLocation"],
+      "Resource": "*",
+      "Condition": {
+        "StringNotEqualsIfExists": {"aws:RequestedRegion": "us-west-2"}
+      }
+    },
+    {
+      "Sid": "S3ReadOwnBuckets",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketLocation",
+        "s3:ListBucket",
+        "s3:GetObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::quicklabs-{USERNAME}-*",
+        "arn:aws:s3:::quicklabs-{USERNAME}-*/*"
+      ]
+    },
+    {
+      "Sid": "GlueCatalogRead",
+      "Effect": "Allow",
+      "Action": ["glue:Get*", "glue:List*", "glue:BatchGet*", "glue:SearchTables"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AthenaQueryReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "athena:StartQueryExecution",
+        "athena:StopQueryExecution",
+        "athena:GetQueryExecution",
+        "athena:GetQueryResults",
+        "athena:GetQueryResultsStream",
+        "athena:ListQueryExecutions",
+        "athena:GetWorkGroup",
+        "athena:ListWorkGroups",
+        "athena:GetDataCatalog",
+        "athena:GetDatabase",
+        "athena:ListDatabases",
+        "athena:GetTableMetadata",
+        "athena:ListTableMetadata"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SelfRead",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetUser",
+        "iam:ListAttachedUserPolicies",
+        "iam:ListUserPolicies",
+        "iam:GetUserPolicy"
+      ],
+      "Resource": "arn:aws:iam::*:user/${aws:username}"
+    }
+  ]
+}
