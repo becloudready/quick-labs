@@ -31,6 +31,10 @@ You need either path to work — pick one for setup. Most exercises offer both l
 # Use AWS CloudShell (top-right icon in the console — credentials are auto-injected)
 # OR your laptop with `aws configure` against your quicklabs-<USER> creds.
 
+# Login to ec2 Machine, change to the <userid>
+
+sudo su - student3
+
 aws sts get-caller-identity              # confirm you're signed in
 USER=<your-short-name>                   # e.g. suresh — drop the `quicklabs-` prefix
 ACCT=$(aws sts get-caller-identity --query Account --output text)
