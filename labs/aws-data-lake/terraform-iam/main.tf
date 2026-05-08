@@ -33,7 +33,16 @@ locals {
     "{ACCOUNT_ID}", local.account_id)))
   }
 
-  rendered_glue_trust_policy = file("${local.policies_dir}/glue-role-trust-policy.json")
+  # Trust policy needs per-student rendering because it grants the student's
+  # IAM user the right to assume the role (required for Glue Interactive
+  # Sessions / notebooks — without it, CreateSession returns
+  # "Cross-account pass role is not allowed" even within the same account).
+  rendered_glue_trust_policy = {
+    for u, s in local.students : u => replace(replace(
+      file("${local.policies_dir}/glue-role-trust-policy.json"),
+      "{USERNAME}", u),
+    "{ACCOUNT_ID}", local.account_id)
+  }
 
   rendered_glue_inline_policy = {
     for u, s in local.students : u => jsonencode(jsondecode(replace(replace(replace(
@@ -57,7 +66,7 @@ locals {
 resource "aws_iam_role" "glue" {
   for_each           = local.students
   name               = "quicklabs-${each.key}-glue-role"
-  assume_role_policy = local.rendered_glue_trust_policy
+  assume_role_policy = local.rendered_glue_trust_policy[each.key]
   tags               = local.student_tags[each.key]
 }
 

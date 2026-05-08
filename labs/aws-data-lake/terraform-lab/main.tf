@@ -122,6 +122,13 @@ resource "aws_glue_job" "oil_etl" {
   number_of_workers = 2
   timeout           = 30
 
+  # Default is 1 — students hit ConcurrentRunsExceededException after a
+  # double-click before the previous run finishes. 3 absorbs accidents
+  # without letting a runaway loop balloon DPU-hour cost.
+  execution_property {
+    max_concurrent_runs = 3
+  }
+
   command {
     name            = "glueetl"
     script_location = "s3://${aws_s3_bucket.scripts.id}/${aws_s3_object.etl_script.key}"

@@ -21,7 +21,9 @@ Time: ~90 minutes including the assignment.
 | Password | (one-time, change on first login) |
 | Region | **us-west-2 (Oregon)** — anything else is denied |
 
-Throughout this doc, replace `<USER>` with your username (e.g. `suresh`). Your resources are all named with that prefix.
+Throughout this doc, `<USER>` means the **short** part of your username — without the `quicklabs-` prefix.
+
+> ⚠ If your console login is `quicklabs-suresh`, then `<USER>` is just **`suresh`**, not `quicklabs-suresh`. Every resource name in this lab is already shaped as `quicklabs-<USER>-…`, so re-adding the prefix yourself produces `quicklabs-quicklabs-suresh-…` which **does not match your sandbox policy** — Glue / S3 / Athena will return `not authorized to perform … because no identity-based policy allows the action`.
 
 | Resource | Name |
 |---|---|
@@ -148,12 +150,14 @@ Suggested flow:
    ```
    Use the S3 console (Upload button) or CLI (`aws s3 cp`).
 3. **Crawl it.** Glue → Crawlers → Create crawler:
-   - Name: `quicklabs-<USER>-<dataset>-crawler`
+   - Name: `quicklabs-<USER>-<dataset>-crawler` &nbsp; *(short `<USER>`, no `quicklabs-` prefix — see warning above)*
    - Data source: `s3://quicklabs-<USER>-raw/<your-dataset-name>/`
    - IAM role: pick the existing `quicklabs-<USER>-glue-role`
    - Database: `quicklabs_<USER>_lake`
    - Table prefix: `raw_`
    - Run it → check the new table appears.
+
+   > If you see `not authorized to perform: glue:CreateCrawler … because no identity-based policy allows the action`, the crawler name is wrong. Concrete check: if your console username is `quicklabs-student3`, the crawler name must start with `quicklabs-student3-` (e.g. `quicklabs-student3-orders-crawler`), **never** `quicklabs-quicklabs-student3-…`.
 4. **Query it in Athena.** Try `SELECT * LIMIT 10`, `COUNT(*)`, basic aggregations.
 5. **(Stretch) Write your own ETL job.** Either:
    - Modify `oil_csv_to_parquet.py` (in `s3://quicklabs-<USER>-scripts/`) to fit your dataset's schema, OR

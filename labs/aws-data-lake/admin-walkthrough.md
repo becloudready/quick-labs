@@ -306,7 +306,7 @@ aws glue get-statement --session-id "$SESSION_ID" --id "$STATEMENT_ID" --query S
 aws glue delete-session --id "$SESSION_ID"
 ```
 
-For students to use notebooks, the IAM policy needs additional perms (`glue:CreateSession`, `glue:RunStatement`, etc.) scoped to `arn:aws:glue:us-west-2:ACCT:session/quicklabs-${USERNAME}-*`. Not in `student-user-policy.json` yet — add when you're ready to teach notebooks.
+Students can use Glue Studio notebooks: the `GlueOwnSessions` statement in `student-user-policy.json` allows `glue:*` on `session/quicklabs-${USERNAME}-*`. The student must **explicitly name** their notebook with the `quicklabs-<USER>-` prefix (the notebook name becomes the session name) — Glue Studio's auto-generated session names won't match the policy.
 
 ## Cleanup
 

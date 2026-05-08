@@ -4,13 +4,17 @@ One sandbox IAM user per student in your personal AWS account, region-locked to 
 
 ## Files in this folder
 
-| File | What it is |
+| Path | What it is |
 |---|---|
-| `student-user-policy.json` | The big inline policy attached to each student's IAM user |
+| [`terraform-iam/`](terraform-iam/) | Bulk-creates IAM users + Glue roles + Athena workgroups + sandbox policies from `students.csv`. Run this **first** for the cohort. |
+| [`terraform-lab/`](terraform-lab/) | Pre-provisions each student's data pipeline (S3 buckets, Glue DB, crawlers, ETL job). Run **after** `terraform-iam`, one Terraform workspace per student. |
+| `student-user-policy.json` | The big inline policy attached to each student's IAM user (rendered by both Terraform and the manual fallback) |
 | `glue-role-trust-policy.json` | Trust policy for the per-student Glue service role |
 | `glue-role-inline-policy.json` | Inline policy on the Glue role (S3 access + catalog scope) |
-| `athena-workgroup-config.json` | Config for the per-student Athena workgroup |
+| `athena-workgroup-config.json` | Config for the per-student Athena workgroup (manual fallback only — Terraform inlines it) |
 | `oil_csv_to_parquet.py` | Sample Glue ETL job (Kaggle Crude Oil CSV → partitioned Parquet) |
+| `admin-walkthrough.md` | End-to-end pipeline walkthrough you run once under admin creds before handing the lab to students |
+| `student-lab.md` | The exercise students follow once they've got their console credentials |
 
 ## Placeholders to substitute
 
@@ -22,9 +26,165 @@ All JSONs use these placeholders. Replace before applying.
 | `{USERNAME}` | `alice` | Student's username. Lowercase, alphanumeric + hyphens. |
 | `{USERNAME_UNDERSCORED}` | `alice` (or `alice_johnson` if hyphenated) | Same as `{USERNAME}` but with hyphens replaced by underscores — Glue databases can't have hyphens |
 
-## One-shot setup script (per student)
+## Bulk cohort setup with Terraform (recommended)
 
-Set the variables at the top, paste the rest into a us-west-2 shell.
+Two Terraform modules, applied in order. They are deliberately split so a failed apply on the data-pipeline side doesn't sit on top of the IAM state:
+
+```
+terraform-iam/   ← one apply for the whole cohort (for_each over students.csv)
+terraform-lab/   ← one workspace + apply per student (state isolation)
+```
+
+### Prereqs
+
+- AWS CLI configured with admin creds (`aws sts get-caller-identity` works)
+- Terraform ≥ 1.5 (`brew install terraform`)
+- Olist Crude Oil CSV downloaded locally — its path becomes `var.csv_local_path` for `terraform-lab`. e.g. `~/Documents/bcr/training/Crude_Oil_historical_data.csv`
+
+### Step 1 — provision IAM users from a CSV roster
+
+```bash
+cd labs/aws-data-lake/terraform-iam
+
+# 1. Roster. Format: username,full_name,email  (only `username` is required;
+#    full_name + email become AWS resource tags). Copy the template and edit:
+cp students.csv.example students.csv
+$EDITOR students.csv
+
+# 2. One-time init.
+terraform init
+
+# 3. Plan, then apply.
+terraform plan
+terraform apply
+```
+
+Outputs land in two places:
+
+- A sensitive map via `terraform output -json students` — useful in scripts
+- `students-credentials.csv` (chmod 0600, gitignored at the repo root) — one row per student with everything you'd put in a welcome email: `username, full_name, email, console_url, console_password, region, athena_workgroup`
+
+What got created per student (`<u>` = the username from the CSV):
+
+- IAM user `quicklabs-<u>` with console password (must change on first login)
+- Sandbox policy `quicklabs-<u>-data-lake-sandbox` attached to the user
+- Glue service role `quicklabs-<u>-glue-role` (trust + S3/catalog scope)
+- Athena workgroup `quicklabs-<u>-wg`
+- S3 bucket `quicklabs-<u>-athena-results` (encrypted, private)
+
+### Step 2 — provision each student's data pipeline
+
+`terraform-lab` takes a single `username` per apply, so we use **Terraform workspaces** to keep each student's state isolated. One workspace per student, one state file per workspace.
+
+```bash
+CSV_PATH=~/Documents/bcr/training/Crude_Oil_historical_data.csv
+ROSTER=../terraform-iam/students.csv
+
+cd ../terraform-lab
+terraform init   # one-time
+
+# Loop the roster — skip header + blank lines, one workspace per student.
+tail -n +2 "$ROSTER" | awk -F, 'NF >= 1 && $1 != ""' | while IFS=, read -r username _; do
+  echo "── provisioning lab for $username ──"
+  terraform workspace select "$username" 2>/dev/null \
+    || terraform workspace new "$username"
+  terraform apply -auto-approve \
+    -var username="$username" \
+    -var csv_local_path="$CSV_PATH"
+done
+```
+
+What this creates per student (~2–3 min each, mostly the CSV upload):
+
+- 3 S3 buckets: `quicklabs-<u>-{raw,curated,scripts}` (encrypted, private)
+- Uploads `oil_csv_to_parquet.py` to the scripts bucket
+- Uploads the Crude Oil CSV to `s3://quicklabs-<u>-raw/oil/`
+- Glue catalog database `quicklabs_<u>_lake`
+- 2 Glue crawlers (raw + curated)
+- 1 Glue ETL job pointing at the IAM module's role
+
+### Distribute credentials
+
+`students-credentials.csv` from `terraform-iam` is a ready-to-email roster. One-liner to spit out one block per student:
+
+```bash
+cd ../terraform-iam
+while IFS=, read -r username full_name email console_url console_password region wg; do
+  [[ "$username" == "username" ]] && continue
+  cat <<EOF
+to: $email
+  AWS console: $console_url
+  username:    $username
+  password:    $console_password   (must change on first login)
+  region:      $region
+  workgroup:   $wg
+
+EOF
+done < students-credentials.csv
+```
+
+### Inspecting / managing workspaces
+
+```bash
+cd ../terraform-lab
+terraform workspace list                # all students + default
+terraform workspace select alice        # switch context
+terraform output                        # alice's bucket names, Glue DB, etc.
+terraform state list                    # what's tracked for alice
+```
+
+### Adding or removing a student later
+
+**IAM module** — edit the CSV, re-apply:
+
+```bash
+cd ../terraform-iam
+$EDITOR students.csv          # add or remove rows
+terraform apply               # creates new students or destroys dropped ones
+```
+
+`for_each` keys to `username`, so untouched rows stay untouched.
+
+**Lab module** — for a new student, run the loop again (existing workspaces are skipped because their state shows nothing to do). To remove a student's lab:
+
+```bash
+cd ../terraform-lab
+terraform workspace select alice
+terraform destroy -auto-approve -var username=alice -var csv_local_path=$CSV_PATH
+terraform workspace select default
+terraform workspace delete alice
+```
+
+### Cohort teardown
+
+```bash
+# 1. Destroy every student's lab.
+cd labs/aws-data-lake/terraform-lab
+for ws in $(terraform workspace list | tr -d '*' | awk 'NF && $1 != "default"'); do
+  terraform workspace select "$ws"
+  terraform destroy -auto-approve -var username="$ws" -var csv_local_path="$CSV_PATH"
+done
+terraform workspace select default
+for ws in $(terraform workspace list | tr -d '*' | awk 'NF && $1 != "default"'); do
+  terraform workspace delete "$ws"
+done
+
+# 2. Destroy IAM users + per-student policies/roles/workgroups.
+cd ../terraform-iam
+terraform destroy
+```
+
+### Troubleshooting notes
+
+- **Order matters.** Always `terraform-iam` first, `terraform-lab` second. The lab module references the IAM module's Glue role ARN by string (`arn:aws:iam::ACCT:role/quicklabs-<u>-glue-role`) — if the role doesn't exist, Glue job creation fails with `EntityNotFoundException`.
+- **Stale state on the IAM side.** If a student's IAM user gets deleted out-of-band in AWS, the IAM module's next apply will fail trying to update tags on the missing user. Fix: `terraform apply -refresh-only` (drops the missing entries from state), then `terraform apply` recreates them.
+- **One bad student doesn't break the cohort.** Per-student workspaces in `terraform-lab` mean a failed apply for `bob` doesn't touch alice's state. Just re-run the loop after fixing the issue — completed students no-op.
+
+---
+
+## Manual single-student setup (fallback)
+
+The bash one-shot below creates the same IAM resources as `terraform-iam` for **one** student. Use it when you don't have Terraform installed, or for a one-off student outside the cohort flow.
 
 ```bash
 # --- Set per student ---

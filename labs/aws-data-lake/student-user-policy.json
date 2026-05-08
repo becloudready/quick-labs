@@ -143,14 +143,22 @@
       ]
     },
     {
-      "Sid": "GlueOwnCrawlersJobsTriggersConnections",
+      "Sid": "GlueCrawlersJobsTriggersConnectionsCohortWide",
       "Effect": "Allow",
       "Action": ["glue:*"],
       "Resource": [
-        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:crawler/quicklabs-{USERNAME}-*",
-        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:job/quicklabs-{USERNAME}-*",
-        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:trigger/quicklabs-{USERNAME}-*",
-        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:connection/quicklabs-{USERNAME}-*"
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:crawler/*",
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:job/*",
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:trigger/*",
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:connection/*"
+      ]
+    },
+    {
+      "Sid": "GlueOwnSessions",
+      "Effect": "Allow",
+      "Action": ["glue:*"],
+      "Resource": [
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:session/quicklabs-{USERNAME}-*"
       ]
     },
     {
