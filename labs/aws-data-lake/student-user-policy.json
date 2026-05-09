@@ -71,6 +71,32 @@
       "Resource": "arn:aws:iam::{ACCOUNT_ID}:user/quicklabs-{USERNAME}"
     },
     {
+      "Sid": "ManageOwnVirtualMFADevice",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateVirtualMFADevice",
+        "iam:DeleteVirtualMFADevice"
+      ],
+      "Resource": "arn:aws:iam::{ACCOUNT_ID}:mfa/quicklabs-{USERNAME}*"
+    },
+    {
+      "Sid": "ManageMFAOnOwnUser",
+      "Effect": "Allow",
+      "Action": [
+        "iam:DeactivateMFADevice",
+        "iam:EnableMFADevice",
+        "iam:ListMFADevices",
+        "iam:ResyncMFADevice"
+      ],
+      "Resource": "arn:aws:iam::{ACCOUNT_ID}:user/quicklabs-{USERNAME}"
+    },
+    {
+      "Sid": "ListVirtualMFADevices",
+      "Effect": "Allow",
+      "Action": "iam:ListVirtualMFADevices",
+      "Resource": "*"
+    },
+    {
       "Sid": "ReadIamRolesForGlueConsole",
       "Effect": "Allow",
       "Action": [
@@ -79,6 +105,19 @@
         "iam:ListRolePolicies",
         "iam:ListAttachedRolePolicies",
         "iam:ListRoles"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "PolicySimulator",
+      "Effect": "Allow",
+      "Action": [
+        "iam:SimulateCustomPolicy",
+        "iam:SimulatePrincipalPolicy",
+        "iam:GetPolicy",
+        "iam:GetPolicyVersion",
+        "iam:ListPolicies",
+        "iam:ListUsers"
       ],
       "Resource": "*"
     },
