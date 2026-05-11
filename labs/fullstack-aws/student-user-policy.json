@@ -1,0 +1,72 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "RegionLockUsEast1",
+      "Effect": "Deny",
+      "NotAction": [
+        "iam:*",
+        "sts:*",
+        "support:*",
+        "cloudfront:*",
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "DenyIamMutations",
+      "Effect": "Deny",
+      "Action": [
+        "iam:CreateUser",
+        "iam:DeleteUser",
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:AttachUserPolicy",
+        "iam:AttachRolePolicy",
+        "iam:PutUserPolicy",
+        "iam:PutRolePolicy"
+      ],
+      "Resource": "*"
+    },
+
+    {
+      "Sid": "TODO_S3Namespace",
+      "Effect": "Allow",
+      "Action": [],
+      "Resource": [
+        "arn:aws:s3:::quicklabs-{USERNAME}-*",
+        "arn:aws:s3:::quicklabs-{USERNAME}-*/*"
+      ]
+    },
+    {
+      "Sid": "TODO_LambdaNamespace",
+      "Effect": "Allow",
+      "Action": [],
+      "Resource": "arn:aws:lambda:us-east-1:{ACCOUNT_ID}:function:quicklabs-{USERNAME}-*"
+    },
+    {
+      "Sid": "TODO_ApiGatewayNamespace",
+      "Effect": "Allow",
+      "Action": [],
+      "Resource": "*"
+    },
+    {
+      "Sid": "TODO_DynamoDbNamespace",
+      "Effect": "Allow",
+      "Action": [],
+      "Resource": "arn:aws:dynamodb:us-east-1:{ACCOUNT_ID}:table/quicklabs-{USERNAME}-*"
+    },
+    {
+      "Sid": "TODO_CloudWatchLogsRead",
+      "Effect": "Allow",
+      "Action": [],
+      "Resource": "arn:aws:logs:us-east-1:{ACCOUNT_ID}:log-group:/quicklabs-{USERNAME}-*"
+    }
+  ]
+}
