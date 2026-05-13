@@ -1,20 +1,36 @@
 # AWS Data Lake Lab — copy-paste setup
 
-One sandbox IAM user per student in your personal AWS account, region-locked to **us-west-2**, scoped to the `quicklabs-{username}` namespace. Students can build a small data lake (S3 → Glue Crawler → Glue Catalog → Glue ETL → Parquet → Athena) without touching anyone else's resources.
+One sandbox IAM user per student in your personal AWS account, region-locked to **us-west-2**, scoped to the `quicklabs-{username}` namespace. Students can build:
+
+- a small data lake (S3 → Glue Crawler → Glue Catalog → Glue ETL → Parquet → Athena), and
+- an event-driven ingestion pipeline on Lambda (S3 → SQS → Lambda, and S3 → Lambda direct — see [`lab-2-lambda-ingestion/student-lambda-lab.md`](lab-2-lambda-ingestion/student-lambda-lab.md)),
+
+…without touching anyone else's resources.
 
 ## Files in this folder
 
 | Path | What it is |
 |---|---|
 | [`terraform-iam/`](terraform-iam/) | Bulk-creates IAM users + Glue roles + Athena workgroups + sandbox policies from `students.csv`. Run this **first** for the cohort. |
-| [`terraform-lab/`](terraform-lab/) | Pre-provisions each student's data pipeline (S3 buckets, Glue DB, crawlers, ETL job). Run **after** `terraform-iam`, one Terraform workspace per student. |
-| `student-user-policy.json` | The big inline policy attached to each student's IAM user (rendered by both Terraform and the manual fallback) |
-| `glue-role-trust-policy.json` | Trust policy for the per-student Glue service role |
-| `glue-role-inline-policy.json` | Inline policy on the Glue role (S3 access + catalog scope) |
-| `athena-workgroup-config.json` | Config for the per-student Athena workgroup (manual fallback only — Terraform inlines it) |
-| `oil_csv_to_parquet.py` | Sample Glue ETL job (Kaggle Crude Oil CSV → partitioned Parquet) |
-| `admin-walkthrough.md` | End-to-end pipeline walkthrough you run once under admin creds before handing the lab to students |
-| `student-lab.md` | The exercise students follow once they've got their console credentials |
+| [`terraform-lab/`](terraform-lab/) | One Terraform module **per lab** (`lab-1-data-lake/`, `lab-3-lake-formation/`, …). Each pre-provisions that lab's resources per student via workspaces. Run **after** `terraform-iam`. |
+| [`lab-1-data-lake/`](lab-1-data-lake/) | **Lab 1 — S3 / Glue / Athena data lake.** Cohort-wide `admin-walkthrough.md`, student walkthrough, ETL script, base sandbox policy, Glue + Athena role policies. The foundational lab; everything later builds on it. |
+| [`lab-2-lambda-ingestion/`](lab-2-lambda-ingestion/) | **Lab 2 — Event-driven ingestion** (S3 → SQS → Lambda + S3 → Lambda direct). Student walkthrough, two sample handlers, Lambda execution-role policies. |
+| [`lab-3-lake-formation/`](lab-3-lake-formation/) | **Lab 3 — Lake Formation governance** (row/column/tag-based access). Slide content, assignments, MCQ quiz, CDC demo walkthrough, LF + analyst-role policies. |
+| `lab-1-data-lake/student-user-policy.json` | Lab-1 managed policy. Cross-cutting base (region-deny, console nav, IAM read/simulate, MFA) + Glue/Athena/S3 namespace permissions. Attached as `quicklabs-<u>-data-lake-sandbox`. |
+| `lab-2-lambda-ingestion/student-user-policy.json` | Lab-2 **incremental** managed policy. SQS + Lambda + Lambda-role `iam:PassRole` + Lambda CloudWatch Logs. Attached as `quicklabs-<u>-lambda-ingestion`. Does not duplicate or replace Lab-1 — IAM Allows are union, so Lab 1 access stays intact. |
+| `lab-1-data-lake/glue-role-trust-policy.json` | Trust policy for the per-student Glue service role |
+| `lab-1-data-lake/glue-role-inline-policy.json` | Inline policy on the Glue role (S3 access + catalog scope) |
+| `lab-1-data-lake/athena-workgroup-config.json` | Config for the per-student Athena workgroup (manual fallback only — Terraform inlines it) |
+| `lab-1-data-lake/oil_csv_to_parquet.py` | Sample Glue ETL job (Kaggle Crude Oil CSV → partitioned Parquet) |
+| `lab-1-data-lake/admin-walkthrough.md` | End-to-end pipeline walkthrough you run once under admin creds before handing the cohort their sandbox. |
+| `lab-1-data-lake/student-lab.md` | The Lab-1 data-lake exercise students follow once they've got their console credentials |
+| `lab-2-lambda-ingestion/lambda-role-trust-policy.json` | Trust policy for the per-student Lambda execution role |
+| `lab-2-lambda-ingestion/lambda-role-inline-policy.json` | Inline policy on the Lambda role (S3 read/write to own buckets + SQS receive/delete on own queues) |
+| `lab-2-lambda-ingestion/image_metadata_handler.py` | Sample Lambda — SQS-triggered, extracts metadata from S3 image uploads (use case 1) |
+| `lab-2-lambda-ingestion/batch_file_handler.py` | Sample Lambda — S3-triggered, copies batch drops to the curated bucket (use case 2) |
+| `lab-2-lambda-ingestion/student-lambda-lab.md` | The Lambda / event-driven ingestion exercise (depends on the same sandbox as Lab 1) |
+| `lab-3-lake-formation/lakeformation-user-policy.json` | Second managed policy attached to each student. Lake Formation governance actions (grant, revoke, LF-Tags, data cells filters) + `sts:AssumeRole` on the analyst role. |
+| `lab-3-lake-formation/analyst-role-trust-policy.json` / `lab-3-lake-formation/analyst-role-inline-policy.json` | Trust + inline policy for the per-student `quicklabs-<u>-data-analyst-role`. Used to demonstrate LF row/column/tag enforcement from a non-owner persona. |
 
 ## Placeholders to substitute
 
@@ -31,15 +47,24 @@ All JSONs use these placeholders. Replace before applying.
 Two Terraform modules, applied in order. They are deliberately split so a failed apply on the data-pipeline side doesn't sit on top of the IAM state:
 
 ```
-terraform-iam/   ← one apply for the whole cohort (for_each over students.csv)
-terraform-lab/   ← one workspace + apply per student (state isolation)
+terraform-iam/                       ← one apply for the whole cohort (for_each over students.csv)
+terraform-lab/
+  lab-1-data-lake/                   ← one workspace + apply per student (state isolation)
+  lab-3-lake-formation/              ← Lake Formation governance lab
+  lab-4-redshift/                    ← Redshift / Spectrum lab (coming)
+  lab-5-opensearch/                  ← OpenSearch lab (coming)
+  lab-6-security-patterns/           ← Cross-service security lab (coming)
+  lab-7-orchestration/               ← Step Functions + monitoring lab (coming)
+  lab-8-monitoring/                  ← CloudWatch / CloudTrail / Cost ops lab (coming)
+  lab-9-dynamodb/                    ← DynamoDB lab (coming)
+  lab-10-documentdb/                 ← DocumentDB lab (coming)
 ```
 
 ### Prereqs
 
 - AWS CLI configured with admin creds (`aws sts get-caller-identity` works)
 - Terraform ≥ 1.5 (`brew install terraform`)
-- Olist Crude Oil CSV downloaded locally — its path becomes `var.csv_local_path` for `terraform-lab`. e.g. `~/Documents/bcr/training/Crude_Oil_historical_data.csv`
+- Olist Crude Oil CSV downloaded locally — its path becomes `var.csv_local_path` for `terraform-lab/lab-1-data-lake/`. e.g. `~/Documents/bcr/training/Crude_Oil_historical_data.csv`
 
 ### Step 1 — provision IAM users from a CSV roster
 
@@ -69,18 +94,19 @@ What got created per student (`<u>` = the username from the CSV):
 - IAM user `quicklabs-<u>` with console password (must change on first login)
 - Sandbox policy `quicklabs-<u>-data-lake-sandbox` attached to the user
 - Glue service role `quicklabs-<u>-glue-role` (trust + S3/catalog scope)
+- Lambda execution role `quicklabs-<u>-lambda-role` (S3 + SQS scope; for the Lambda lab)
 - Athena workgroup `quicklabs-<u>-wg`
 - S3 bucket `quicklabs-<u>-athena-results` (encrypted, private)
 
 ### Step 2 — provision each student's data pipeline
 
-`terraform-lab` takes a single `username` per apply, so we use **Terraform workspaces** to keep each student's state isolated. One workspace per student, one state file per workspace.
+Each `terraform-lab/lab-N-*/` module takes a single `username` per apply, so we use **Terraform workspaces** to keep each student's state isolated. One workspace per student per lab, one state file per workspace.
 
 ```bash
 CSV_PATH=~/Documents/bcr/training/Crude_Oil_historical_data.csv
 ROSTER=../terraform-iam/students.csv
 
-cd ../terraform-lab
+cd ../terraform-lab/lab-1-data-lake
 terraform init   # one-time
 
 # Loop the roster — skip header + blank lines, one workspace per student.
@@ -126,7 +152,7 @@ done < students-credentials.csv
 ### Inspecting / managing workspaces
 
 ```bash
-cd ../terraform-lab
+cd ../terraform-lab/lab-1-data-lake
 terraform workspace list                # all students + default
 terraform workspace select alice        # switch context
 terraform output                        # alice's bucket names, Glue DB, etc.
@@ -145,10 +171,10 @@ terraform apply               # creates new students or destroys dropped ones
 
 `for_each` keys to `username`, so untouched rows stay untouched.
 
-**Lab module** — for a new student, run the loop again (existing workspaces are skipped because their state shows nothing to do). To remove a student's lab:
+**Lab module** — for a new student, run the loop again (existing workspaces are skipped because their state shows nothing to do). To remove a student's Lab 1 (data lake) provisioning:
 
 ```bash
-cd ../terraform-lab
+cd ../terraform-lab/lab-1-data-lake
 terraform workspace select alice
 terraform destroy -auto-approve -var username=alice -var csv_local_path=$CSV_PATH
 terraform workspace select default
@@ -158,8 +184,8 @@ terraform workspace delete alice
 ### Cohort teardown
 
 ```bash
-# 1. Destroy every student's lab.
-cd labs/aws-data-lake/terraform-lab
+# 1. Destroy every student's Lab 1 (data lake) provisioning.
+cd labs/aws-data-lake/terraform-lab/lab-1-data-lake
 for ws in $(terraform workspace list | tr -d '*' | awk 'NF && $1 != "default"'); do
   terraform workspace select "$ws"
   terraform destroy -auto-approve -var username="$ws" -var csv_local_path="$CSV_PATH"
@@ -176,9 +202,9 @@ terraform destroy
 
 ### Troubleshooting notes
 
-- **Order matters.** Always `terraform-iam` first, `terraform-lab` second. The lab module references the IAM module's Glue role ARN by string (`arn:aws:iam::ACCT:role/quicklabs-<u>-glue-role`) — if the role doesn't exist, Glue job creation fails with `EntityNotFoundException`.
+- **Order matters.** Always `terraform-iam` first, `terraform-lab/lab-N-*` after. The Lab 1 module references the IAM module's Glue role ARN by string (`arn:aws:iam::ACCT:role/quicklabs-<u>-glue-role`) — if the role doesn't exist, Glue job creation fails with `EntityNotFoundException`. The same pattern holds for the Lambda role (Lab 2) and Lake Formation admin settings (Lab 3).
 - **Stale state on the IAM side.** If a student's IAM user gets deleted out-of-band in AWS, the IAM module's next apply will fail trying to update tags on the missing user. Fix: `terraform apply -refresh-only` (drops the missing entries from state), then `terraform apply` recreates them.
-- **One bad student doesn't break the cohort.** Per-student workspaces in `terraform-lab` mean a failed apply for `bob` doesn't touch alice's state. Just re-run the loop after fixing the issue — completed students no-op.
+- **One bad student doesn't break the cohort.** Per-student workspaces in each `terraform-lab/lab-N-*` module mean a failed apply for `bob` doesn't touch alice's state. Just re-run the loop after fixing the issue — completed students no-op.
 
 ---
 
@@ -197,12 +223,18 @@ export AWS_DEFAULT_REGION=us-west-2
 
 # --- Render the policies (replaces {USERNAME}, {ACCOUNT_ID}, {USERNAME_UNDERSCORED}) ---
 mkdir -p /tmp/quicklabs-$USERNAME
-for f in student-user-policy.json glue-role-trust-policy.json \
-         glue-role-inline-policy.json athena-workgroup-config.json; do
+render() {  # $1 = source dir, $2 = file
   sed -e "s/{ACCOUNT_ID}/${ACCOUNT_ID}/g" \
       -e "s/{USERNAME_UNDERSCORED}/${USERNAME_UNDERSCORED}/g" \
       -e "s/{USERNAME}/${USERNAME}/g" \
-      "$f" > "/tmp/quicklabs-$USERNAME/$f"
+      "$1/$2" > "/tmp/quicklabs-$USERNAME/$2"
+}
+for f in student-user-policy.json glue-role-trust-policy.json \
+         glue-role-inline-policy.json athena-workgroup-config.json; do
+  render lab-1-data-lake "$f"
+done
+for f in lambda-role-trust-policy.json lambda-role-inline-policy.json; do
+  render lab-2-lambda-ingestion "$f"
 done
 
 # --- 1. Athena results bucket (workgroup needs this) ---
@@ -234,6 +266,18 @@ aws iam put-role-policy \
   --policy-name "quicklabs-bucket-and-catalog-scope" \
   --policy-document "file:///tmp/quicklabs-$USERNAME/glue-role-inline-policy.json"
 
+# --- 3b. Lambda execution role (assumed by Lambda functions in the Lambda lab) ---
+aws iam create-role \
+  --role-name "quicklabs-${USERNAME}-lambda-role" \
+  --assume-role-policy-document "file:///tmp/quicklabs-$USERNAME/lambda-role-trust-policy.json"
+aws iam attach-role-policy \
+  --role-name "quicklabs-${USERNAME}-lambda-role" \
+  --policy-arn "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+aws iam put-role-policy \
+  --role-name "quicklabs-${USERNAME}-lambda-role" \
+  --policy-name "quicklabs-bucket-and-queue-scope" \
+  --policy-document "file:///tmp/quicklabs-$USERNAME/lambda-role-inline-policy.json"
+
 # --- 4. Student IAM user + console password ---
 aws iam create-user --user-name "quicklabs-${USERNAME}"
 PASSWORD=$(openssl rand -base64 18 | tr -d '/+=' | head -c 16)Aa1!
@@ -255,6 +299,7 @@ echo "Password    : ${PASSWORD}"
 echo "Region      : us-west-2 (anything else is denied)"
 echo "Workgroup   : quicklabs-${USERNAME}-wg"
 echo "Glue role   : quicklabs-${USERNAME}-glue-role"
+echo "Lambda role : quicklabs-${USERNAME}-lambda-role"
 ```
 
 ## What the student can do
@@ -268,6 +313,10 @@ In **us-west-2 only**:
 - Create Glue crawlers / jobs / triggers / connections named `quicklabs-{username}-*`
 - Run Athena queries through their own workgroup (`quicklabs-{username}-wg`)
 - Read CloudWatch Logs for crawler / job runs (`/aws-glue/*` log groups)
+- Create SQS queues named `quicklabs-{username}-*` (and configure DLQs on them)
+- Create Lambda functions named `quicklabs-{username}-*` and wire S3 / SQS triggers
+- Pass the per-student Lambda role (`quicklabs-{username}-lambda-role`) to Lambda only
+- Read Lambda CloudWatch Logs under `/aws/lambda/quicklabs-{username}-*`
 
 ## What the student cannot do
 
@@ -296,7 +345,7 @@ Sign in as `quicklabs-{username}` in an incognito window and run:
 | Try to switch to Athena `primary` workgroup | ❌ denied |
 | Try to create another IAM user | ❌ denied |
 
-Each failed expectation = one edit to `student-user-policy.json` (or `glue-role-inline-policy.json`) → re-render → re-apply with `aws iam put-user-policy` (or `put-role-policy`).
+Each failed expectation = one edit to `lab-1-data-lake/student-user-policy.json` (or `lab-1-data-lake/glue-role-inline-policy.json`) → re-render → re-apply with `aws iam put-user-policy` (or `put-role-policy`).
 
 ## Sample data + Glue script demo
 
@@ -310,7 +359,7 @@ aws s3 mb s3://quicklabs-${USERNAME}-scripts   --region us-west-2
 
 aws s3 cp ~/Downloads/Crude_Oil_historical_data.csv \
   s3://quicklabs-${USERNAME}-raw/oil/Crude_Oil_historical_data.csv
-aws s3 cp oil_csv_to_parquet.py \
+aws s3 cp lab-1-data-lake/oil_csv_to_parquet.py \
   s3://quicklabs-${USERNAME}-scripts/oil_csv_to_parquet.py
 ```
 
@@ -355,6 +404,17 @@ aws iam delete-role-policy   --role-name "quicklabs-${USERNAME}-glue-role" --pol
 aws iam detach-role-policy   --role-name "quicklabs-${USERNAME}-glue-role" --policy-arn "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole" || true
 aws iam delete-role          --role-name "quicklabs-${USERNAME}-glue-role"
 
+# Lambda role
+aws iam delete-role-policy   --role-name "quicklabs-${USERNAME}-lambda-role" --policy-name "quicklabs-bucket-and-queue-scope" || true
+aws iam detach-role-policy   --role-name "quicklabs-${USERNAME}-lambda-role" --policy-arn "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" || true
+aws iam delete-role          --role-name "quicklabs-${USERNAME}-lambda-role"
+
+# Lambda functions, SQS queues, and event source mappings the student created
+# (manual — list, detach triggers, then delete)
+aws lambda list-functions --query "Functions[?starts_with(FunctionName,'quicklabs-${USERNAME}-')].FunctionName" --output text
+aws sqs list-queues --queue-name-prefix "quicklabs-${USERNAME}-" --query "QueueUrls" --output text
+# then: aws lambda delete-event-source-mapping / aws lambda delete-function / aws sqs delete-queue for each
+
 # Glue databases / crawlers / jobs the student created (manual — list and delete)
 aws glue get-databases --query "DatabaseList[?starts_with(Name,'quicklabs_${USERNAME_UNDERSCORED}_')].Name" --output text
 aws glue get-crawlers  --query "Crawlers[?starts_with(Name,'quicklabs-${USERNAME}-')].Name"      --output text
@@ -366,7 +426,7 @@ aws glue get-jobs      --query "Jobs[?starts_with(Name,'quicklabs-${USERNAME}-')
 
 The whole lab is the policies + the script. When smoke-testing turns up gaps:
 
-1. Edit `student-user-policy.json` or `glue-role-inline-policy.json`
+1. Edit `lab-1-data-lake/student-user-policy.json` or `lab-1-data-lake/glue-role-inline-policy.json`
 2. Re-render with `sed` (the one-shot script handles this)
 3. `aws iam put-user-policy` / `put-role-policy` to update
 4. Re-test

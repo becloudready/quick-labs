@@ -1,0 +1,104 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Lab2ConsoleNav",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:ListQueues",
+        "lambda:ListFunctions",
+        "lambda:ListLayers",
+        "lambda:ListEventSourceMappings",
+        "lambda:GetAccountSettings",
+        "redshift:DescribeClusters",
+        "redshift-serverless:ListWorkgroups",
+        "redshift-serverless:ListNamespaces",
+        "redshift-data:ListStatements"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SQSOwnQueues",
+      "Effect": "Allow",
+      "Action": ["sqs:*"],
+      "Resource": "arn:aws:sqs:us-west-2:{ACCOUNT_ID}:quicklabs-{USERNAME}-*"
+    },
+    {
+      "Sid": "LambdaOwnFunctions",
+      "Effect": "Allow",
+      "Action": ["lambda:*"],
+      "Resource": [
+        "arn:aws:lambda:us-west-2:{ACCOUNT_ID}:function:quicklabs-{USERNAME}-*",
+        "arn:aws:lambda:us-west-2:{ACCOUNT_ID}:event-source-mapping:*"
+      ]
+    },
+    {
+      "Sid": "PassOwnLambdaRole",
+      "Effect": "Allow",
+      "Action": ["iam:PassRole"],
+      "Resource": "arn:aws:iam::{ACCOUNT_ID}:role/quicklabs-{USERNAME}-lambda-role",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "lambda.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "LambdaExecutionLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams",
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents",
+        "logs:PutRetentionPolicy"
+      ],
+      "Resource": [
+        "arn:aws:logs:us-west-2:{ACCOUNT_ID}:log-group:/aws/lambda/quicklabs-{USERNAME}-*",
+        "arn:aws:logs:us-west-2:{ACCOUNT_ID}:log-group:/aws/lambda/quicklabs-{USERNAME}-*:*"
+      ]
+    },
+    {
+      "Sid": "RedshiftDataApiForVerification",
+      "Effect": "Allow",
+      "Action": [
+        "redshift-data:ExecuteStatement",
+        "redshift-data:BatchExecuteStatement",
+        "redshift-data:DescribeStatement",
+        "redshift-data:GetStatementResult",
+        "redshift-data:CancelStatement"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "RedshiftIdentityForDataApi",
+      "Effect": "Allow",
+      "Action": [
+        "redshift-serverless:GetCredentials",
+        "redshift-serverless:GetWorkgroup",
+        "redshift-serverless:GetNamespace",
+        "redshift:GetClusterCredentialsWithIAM"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "GlueOwnPartitions",
+      "Effect": "Allow",
+      "Action": [
+        "glue:CreatePartition",
+        "glue:BatchCreatePartition",
+        "glue:UpdatePartition",
+        "glue:DeletePartition",
+        "glue:BatchDeletePartition",
+        "glue:GetPartition",
+        "glue:GetPartitions"
+      ],
+      "Resource": [
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:catalog",
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:database/quicklabs_{USERNAME_UNDERSCORED}_*",
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:table/quicklabs_{USERNAME_UNDERSCORED}_*/*"
+      ]
+    }
+  ]
+}

@@ -29,7 +29,7 @@
       }
     },
     {
-      "Sid": "ConsoleNavGlobals",
+      "Sid": "ConsoleNav",
       "Effect": "Allow",
       "Action": [
         "s3:ListAllMyBuckets",
@@ -38,14 +38,7 @@
         "sts:GetCallerIdentity",
         "athena:ListWorkGroups",
         "athena:ListDataCatalogs",
-        "athena:ListEngineVersions"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "ConsoleChrome",
-      "Effect": "Allow",
-      "Action": [
+        "athena:ListEngineVersions",
         "notifications:ListNotificationHubs",
         "notifications:ListChannels",
         "notifications:ListEventRules",
@@ -71,24 +64,20 @@
       "Resource": "arn:aws:iam::{ACCOUNT_ID}:user/quicklabs-{USERNAME}"
     },
     {
-      "Sid": "ManageOwnVirtualMFADevice",
+      "Sid": "ManageOwnMFA",
       "Effect": "Allow",
       "Action": [
         "iam:CreateVirtualMFADevice",
-        "iam:DeleteVirtualMFADevice"
-      ],
-      "Resource": "arn:aws:iam::{ACCOUNT_ID}:mfa/quicklabs-{USERNAME}*"
-    },
-    {
-      "Sid": "ManageMFAOnOwnUser",
-      "Effect": "Allow",
-      "Action": [
+        "iam:DeleteVirtualMFADevice",
         "iam:DeactivateMFADevice",
         "iam:EnableMFADevice",
         "iam:ListMFADevices",
         "iam:ResyncMFADevice"
       ],
-      "Resource": "arn:aws:iam::{ACCOUNT_ID}:user/quicklabs-{USERNAME}"
+      "Resource": [
+        "arn:aws:iam::{ACCOUNT_ID}:mfa/quicklabs-{USERNAME}*",
+        "arn:aws:iam::{ACCOUNT_ID}:user/quicklabs-{USERNAME}"
+      ]
     },
     {
       "Sid": "ListVirtualMFADevices",
@@ -97,23 +86,18 @@
       "Resource": "*"
     },
     {
-      "Sid": "ReadIamRolesForGlueConsole",
+      "Sid": "IamReadAndSimulate",
       "Effect": "Allow",
       "Action": [
         "iam:GetRole",
         "iam:GetRolePolicy",
         "iam:ListRolePolicies",
         "iam:ListAttachedRolePolicies",
-        "iam:ListRoles"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "PolicySimulator",
-      "Effect": "Allow",
-      "Action": [
+        "iam:ListRoles",
         "iam:SimulateCustomPolicy",
         "iam:SimulatePrincipalPolicy",
+        "iam:GetContextKeysForCustomPolicy",
+        "iam:GetContextKeysForPrincipalPolicy",
         "iam:GetPolicy",
         "iam:GetPolicyVersion",
         "iam:ListPolicies",
@@ -177,26 +161,18 @@
       "Resource": [
         "arn:aws:glue:us-west-2:{ACCOUNT_ID}:catalog",
         "arn:aws:glue:us-west-2:{ACCOUNT_ID}:database/quicklabs_{USERNAME_UNDERSCORED}_*",
-        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:table/quicklabs_{USERNAME_UNDERSCORED}_*/*",
-        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:userDefinedFunction/quicklabs_{USERNAME_UNDERSCORED}_*/*"
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:table/quicklabs_{USERNAME_UNDERSCORED}_*/*"
       ]
     },
     {
-      "Sid": "GlueCrawlersJobsTriggersConnectionsCohortWide",
+      "Sid": "GlueCohortAndOwnSessions",
       "Effect": "Allow",
       "Action": ["glue:*"],
       "Resource": [
         "arn:aws:glue:us-west-2:{ACCOUNT_ID}:crawler/*",
         "arn:aws:glue:us-west-2:{ACCOUNT_ID}:job/*",
         "arn:aws:glue:us-west-2:{ACCOUNT_ID}:trigger/*",
-        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:connection/*"
-      ]
-    },
-    {
-      "Sid": "GlueOwnSessions",
-      "Effect": "Allow",
-      "Action": ["glue:*"],
-      "Resource": [
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:connection/*",
         "arn:aws:glue:us-west-2:{ACCOUNT_ID}:session/quicklabs-{USERNAME}-*"
       ]
     },
@@ -248,7 +224,7 @@
       }
     },
     {
-      "Sid": "ReadGlueExecutionLogs",
+      "Sid": "GlueExecutionLogs",
       "Effect": "Allow",
       "Action": [
         "logs:DescribeLogGroups",
