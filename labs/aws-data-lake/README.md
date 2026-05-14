@@ -15,21 +15,6 @@ One sandbox IAM user per student in your personal AWS account, region-locked to 
 | [`lab-1-data-lake/`](lab-1-data-lake/) | **Lab 1 — S3 / Glue / Athena data lake.** Cohort-wide `admin-walkthrough.md`, student walkthrough, ETL script, base sandbox policy, Glue + Athena role policies. The foundational lab; everything later builds on it. |
 | [`lab-2-lambda-ingestion/`](lab-2-lambda-ingestion/) | **Lab 2 — Event-driven ingestion** (S3 → SQS → Lambda + S3 → Lambda direct). Student walkthrough, two sample handlers, Lambda execution-role policies. |
 | [`lab-3-lake-formation/`](lab-3-lake-formation/) | **Lab 3 — Lake Formation governance** (row/column/tag-based access). Slide content, assignments, MCQ quiz, CDC demo walkthrough, LF + analyst-role policies. |
-| `lab-1-data-lake/student-user-policy.json` | Lab-1 managed policy. Cross-cutting base (region-deny, console nav, IAM read/simulate, MFA) + Glue/Athena/S3 namespace permissions. Attached as `quicklabs-<u>-data-lake-sandbox`. |
-| `lab-2-lambda-ingestion/student-user-policy.json` | Lab-2 **incremental** managed policy. SQS + Lambda + Lambda-role `iam:PassRole` + Lambda CloudWatch Logs. Attached as `quicklabs-<u>-lambda-ingestion`. Does not duplicate or replace Lab-1 — IAM Allows are union, so Lab 1 access stays intact. |
-| `lab-1-data-lake/glue-role-trust-policy.json` | Trust policy for the per-student Glue service role |
-| `lab-1-data-lake/glue-role-inline-policy.json` | Inline policy on the Glue role (S3 access + catalog scope) |
-| `lab-1-data-lake/athena-workgroup-config.json` | Config for the per-student Athena workgroup (manual fallback only — Terraform inlines it) |
-| `lab-1-data-lake/oil_csv_to_parquet.py` | Sample Glue ETL job (Kaggle Crude Oil CSV → partitioned Parquet) |
-| `lab-1-data-lake/admin-walkthrough.md` | End-to-end pipeline walkthrough you run once under admin creds before handing the cohort their sandbox. |
-| `lab-1-data-lake/student-lab.md` | The Lab-1 data-lake exercise students follow once they've got their console credentials |
-| `lab-2-lambda-ingestion/lambda-role-trust-policy.json` | Trust policy for the per-student Lambda execution role |
-| `lab-2-lambda-ingestion/lambda-role-inline-policy.json` | Inline policy on the Lambda role (S3 read/write to own buckets + SQS receive/delete on own queues) |
-| `lab-2-lambda-ingestion/image_metadata_handler.py` | Sample Lambda — SQS-triggered, extracts metadata from S3 image uploads (use case 1) |
-| `lab-2-lambda-ingestion/batch_file_handler.py` | Sample Lambda — S3-triggered, copies batch drops to the curated bucket (use case 2) |
-| `lab-2-lambda-ingestion/student-lambda-lab.md` | The Lambda / event-driven ingestion exercise (depends on the same sandbox as Lab 1) |
-| `lab-3-lake-formation/lakeformation-user-policy.json` | Second managed policy attached to each student. Lake Formation governance actions (grant, revoke, LF-Tags, data cells filters) + `sts:AssumeRole` on the analyst role. |
-| `lab-3-lake-formation/analyst-role-trust-policy.json` / `lab-3-lake-formation/analyst-role-inline-policy.json` | Trust + inline policy for the per-student `quicklabs-<u>-data-analyst-role`. Used to demonstrate LF row/column/tag enforcement from a non-owner persona. |
 
 ## Placeholders to substitute
 
