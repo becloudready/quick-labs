@@ -1,4 +1,4 @@
-# AWS Data Lake Lab — copy-paste setup
+# AWS Data Lake Lab 
 
 One sandbox IAM user per student in your personal AWS account, region-locked to **us-west-2**, scoped to the `quicklabs-{username}` namespace. Students can build:
 
