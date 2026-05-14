@@ -5,7 +5,6 @@ One sandbox IAM user per student in your personal AWS account, region-locked to 
 - a small data lake (S3 → Glue Crawler → Glue Catalog → Glue ETL → Parquet → Athena), and
 - an event-driven ingestion pipeline on Lambda (S3 → SQS → Lambda, and S3 → Lambda direct — see [`lab-2-lambda-ingestion/student-lambda-lab.md`](lab-2-lambda-ingestion/student-lambda-lab.md)),
 
-…without touching anyone else's resources.
 
 ## Files in this folder
 
