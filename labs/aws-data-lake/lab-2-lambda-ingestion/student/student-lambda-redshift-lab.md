@@ -31,7 +31,7 @@ The Glue catalog entry from step 5 makes the new partition queryable from Redshi
 | COPY-only (skip step 5) | Wait for COPY | Cheap once loaded | Hot data, dashboard-backed |
 | Both | Best of both | Storage 2× | The realistic answer most orgs land on |
 
-Reference handler — [`csv_to_parquet_curated.py`](csv_to_parquet_curated.py) — implements all seven steps, with COPY gated on `REDSHIFT_WORKGROUP` env-var presence so you can demo the S3-only path first and add Redshift later.
+Reference handler — [`csv_to_parquet_curated.py`](lambda-code/csv_to_parquet_curated.py) — implements all seven steps, with COPY gated on `REDSHIFT_WORKGROUP` env-var presence so you can demo the S3-only path first and add Redshift later.
 
 ### Architecture
 

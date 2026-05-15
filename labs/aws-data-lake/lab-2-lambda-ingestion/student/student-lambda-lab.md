@@ -47,9 +47,9 @@ The Lambda execution role (`quicklabs-<USER>-lambda-role`) additionally has:
 
 Sample handler code is in this folder:
 
-- [`image_metadata_handler.py`](image_metadata_handler.py) — SQS-triggered, use case 1
-- [`batch_file_handler.py`](batch_file_handler.py) — S3-triggered, use case 2
-- [`csv_to_parquet_curated.py`](csv_to_parquet_curated.py) — Lambda-as-ETL, use case 3
+- [`image_metadata_handler.py`](lambda-code/image_metadata_handler.py) — SQS-triggered, use case 1
+- [`batch_file_handler.py`](lambda-code/batch_file_handler.py) — S3-triggered, use case 2
+- [`csv_to_parquet_curated.py`](lambda-code/csv_to_parquet_curated.py) — Lambda-as-ETL, use case 3
 
 ---
 
