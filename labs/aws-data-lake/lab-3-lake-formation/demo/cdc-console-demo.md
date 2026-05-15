@@ -226,9 +226,55 @@ containing both the old and new values of the row.
 ### 6. Delete the row
 
 ```sql
+DELETE FROM public.crude_oil_daily WHERE trade_ts = '2026-06-01 00:00:00-04';
+```
+
+Refresh S3. Third file — prefixed with `D` (Delete).
+
+### Consolidated copy-paste version
+
+For when you want one block to paste into psql and watch S3 refresh between
+each statement. Each statement is on its own line so you can run them
+one-by-one (`\;` in psql submits the current line):
+
+```sql
+-- 1. INSERT — watch for an "I"-tagged file in S3
+INSERT INTO public.crude_oil_daily (trade_ts, open, high, low, close, volume, ticker, name)
+VALUES ('2026-06-01 00:00:00-04', 75.00, 76.50, 74.80, 75.90, 250000, 'CL=F', 'Crude Oil Futures (CL=F)');
+
+-- 2. UPDATE — watch for a "U"-tagged file
+UPDATE public.crude_oil_daily SET close = 999.99
+WHERE trade_ts = '2026-06-01 00:00:00-04';
+
+-- 3. DELETE — watch for a "D"-tagged file
 DELETE FROM public.crude_oil_daily
 WHERE trade_ts = '2026-06-01 00:00:00-04';
 ```
+
+### Variant statements for re-running the demo
+
+After running the demo once, the row for `2026-06-01` is gone (DELETE
+happened). For a clean second run, use a different `trade_ts`:
+
+```sql
+-- second run — different trade_ts
+INSERT INTO public.crude_oil_daily (trade_ts, open, high, low, close, volume, ticker, name)
+VALUES ('2026-06-02 00:00:00-04', 78.20, 79.10, 77.50, 78.85, 310000, 'CL=F', 'Crude Oil Futures (CL=F)');
+
+UPDATE public.crude_oil_daily SET close = 1234.56 WHERE trade_ts = '2026-06-02 00:00:00-04';
+
+DELETE FROM public.crude_oil_daily WHERE trade_ts = '2026-06-02 00:00:00-04';
+```
+
+```sql
+-- third run — different trade_ts, batch INSERT (shows DMS handling multiple rows in one statement)
+INSERT INTO public.crude_oil_daily (trade_ts, open, high, low, close, volume, ticker, name) VALUES
+    ('2026-06-03 00:00:00-04', 80.00, 81.00, 79.80, 80.50, 200000, 'CL=F', 'Crude Oil Futures (CL=F)'),
+    ('2026-06-04 00:00:00-04', 81.10, 82.50, 80.90, 82.20, 215000, 'CL=F', 'Crude Oil Futures (CL=F)'),
+    ('2026-06-05 00:00:00-04', 82.40, 83.00, 81.70, 82.85, 198000, 'CL=F', 'Crude Oil Futures (CL=F)');
+```
+
+(A multi-row INSERT produces a single S3 file containing all three rows — good for showing that DMS batches efficiently rather than emitting one file per row.)
 
 Refresh S3. Third file — prefixed with `D` (Delete).
 
