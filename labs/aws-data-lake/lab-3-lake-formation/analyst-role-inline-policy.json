@@ -1,0 +1,65 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AthenaQueryViaOwnWorkgroup",
+      "Effect": "Allow",
+      "Action": [
+        "athena:StartQueryExecution",
+        "athena:StopQueryExecution",
+        "athena:GetQueryExecution",
+        "athena:GetQueryResults",
+        "athena:GetQueryResultsStream",
+        "athena:ListQueryExecutions",
+        "athena:GetWorkGroup",
+        "athena:GetDataCatalog",
+        "athena:GetDatabase",
+        "athena:ListDatabases",
+        "athena:GetTableMetadata",
+        "athena:ListTableMetadata"
+      ],
+      "Resource": [
+        "arn:aws:athena:us-west-2:{ACCOUNT_ID}:workgroup/quicklabs-{USERNAME}-wg",
+        "arn:aws:athena:us-west-2:{ACCOUNT_ID}:datacatalog/AwsDataCatalog"
+      ]
+    },
+    {
+      "Sid": "WriteAthenaResults",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketLocation",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::quicklabs-{USERNAME}-athena-results",
+        "arn:aws:s3:::quicklabs-{USERNAME}-athena-results/*"
+      ]
+    },
+    {
+      "Sid": "LakeFormationDataAccess",
+      "Effect": "Allow",
+      "Action": ["lakeformation:GetDataAccess"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "GlueCatalogReadForAnalyst",
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetDatabase",
+        "glue:GetDatabases",
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:GetPartitions",
+        "glue:GetPartition",
+        "glue:SearchTables"
+      ],
+      "Resource": [
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:catalog",
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:database/quicklabs_{USERNAME_UNDERSCORED}_*",
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:table/quicklabs_{USERNAME_UNDERSCORED}_*/*"
+      ]
+    }
+  ]
+}
