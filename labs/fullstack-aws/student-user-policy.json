@@ -20,53 +20,264 @@
       }
     },
     {
-      "Sid": "DenyIamMutations",
+      "Sid": "DenyUserMutations",
       "Effect": "Deny",
       "Action": [
         "iam:CreateUser",
         "iam:DeleteUser",
-        "iam:CreateRole",
-        "iam:DeleteRole",
         "iam:AttachUserPolicy",
-        "iam:AttachRolePolicy",
+        "iam:DetachUserPolicy",
         "iam:PutUserPolicy",
-        "iam:PutRolePolicy"
+        "iam:DeleteUserPolicy",
+        "iam:CreateLoginProfile",
+        "iam:UpdateLoginProfile",
+        "iam:AddUserToGroup",
+        "iam:RemoveUserFromGroup",
+        "iam:CreateGroup",
+        "iam:DeleteGroup"
       ],
       "Resource": "*"
     },
-
     {
-      "Sid": "TODO_S3Namespace",
+      "Sid": "SelfServiceOwnUser",
       "Effect": "Allow",
-      "Action": [],
-      "Resource": [
-        "arn:aws:s3:::quicklabs-{USERNAME}-*",
-        "arn:aws:s3:::quicklabs-{USERNAME}-*/*"
-      ]
+      "Action": [
+        "iam:ChangePassword",
+        "iam:GetLoginProfile",
+        "iam:GetUser",
+        "iam:ListAccessKeys",
+        "iam:CreateAccessKey",
+        "iam:UpdateAccessKey",
+        "iam:DeleteAccessKey",
+        "iam:ListMFADevices",
+        "iam:ListSigningCertificates",
+        "iam:ListServiceSpecificCredentials",
+        "iam:ListSSHPublicKeys"
+      ],
+      "Resource": "arn:aws:iam::{ACCOUNT_ID}:user/${aws:username}"
     },
     {
-      "Sid": "TODO_LambdaNamespace",
+      "Sid": "AccountReadOnlyForConsole",
       "Effect": "Allow",
-      "Action": [],
-      "Resource": "arn:aws:lambda:us-east-1:{ACCOUNT_ID}:function:quicklabs-{USERNAME}-*"
-    },
-    {
-      "Sid": "TODO_ApiGatewayNamespace",
-      "Effect": "Allow",
-      "Action": [],
+      "Action": [
+        "iam:GetAccountPasswordPolicy",
+        "iam:GetAccountSummary"
+      ],
       "Resource": "*"
     },
     {
-      "Sid": "TODO_DynamoDbNamespace",
+      "Sid": "ConsoleReadOnly",
       "Effect": "Allow",
-      "Action": [],
-      "Resource": "arn:aws:dynamodb:us-east-1:{ACCOUNT_ID}:table/quicklabs-{USERNAME}-*"
+      "Action": [
+        "sts:GetCallerIdentity",
+        "iam:ListRoles",
+        "iam:ListPolicies",
+        "iam:GetUser",
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketLocation",
+        "lambda:ListFunctions",
+        "lambda:GetAccountSettings",
+        "apigateway:GET",
+        "dynamodb:ListTables",
+        "logs:DescribeLogGroups",
+        "cloudwatch:ListMetrics",
+        "cloudwatch:GetMetricData",
+        "cloudwatch:GetMetricStatistics",
+        "cloudwatch:ListDashboards",
+        "ec2:Describe*",
+        "ec2:GetConsoleOutput",
+        "ec2:GetPasswordData",
+        "cloudfront:List*",
+        "cloudfront:Get*"
+      ],
+      "Resource": "*"
     },
     {
-      "Sid": "TODO_CloudWatchLogsRead",
+      "Sid": "S3Namespace",
       "Effect": "Allow",
-      "Action": [],
-      "Resource": "arn:aws:logs:us-east-1:{ACCOUNT_ID}:log-group:/quicklabs-{USERNAME}-*"
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::student-${aws:PrincipalTag/slug}-*",
+        "arn:aws:s3:::student-${aws:PrincipalTag/slug}-*/*"
+      ]
+    },
+    {
+      "Sid": "LambdaNamespace",
+      "Effect": "Allow",
+      "Action": "lambda:*",
+      "Resource": [
+        "arn:aws:lambda:us-east-1:{ACCOUNT_ID}:function:student-${aws:PrincipalTag/slug}-*",
+        "arn:aws:lambda:us-east-1:{ACCOUNT_ID}:function:student-${aws:PrincipalTag/slug}-*:*",
+        "arn:aws:lambda:us-east-1:{ACCOUNT_ID}:layer:student-${aws:PrincipalTag/slug}-*",
+        "arn:aws:lambda:us-east-1:{ACCOUNT_ID}:layer:student-${aws:PrincipalTag/slug}-*:*"
+      ]
+    },
+    {
+      "Sid": "ApiGatewayInRegion",
+      "Effect": "Allow",
+      "Action": "apigateway:*",
+      "Resource": [
+        "arn:aws:apigateway:us-east-1::/apis",
+        "arn:aws:apigateway:us-east-1::/apis/*",
+        "arn:aws:apigateway:us-east-1::/restapis",
+        "arn:aws:apigateway:us-east-1::/restapis/*",
+        "arn:aws:apigateway:us-east-1::/tags/*"
+      ]
+    },
+    {
+      "Sid": "DynamoDbNamespace",
+      "Effect": "Allow",
+      "Action": "dynamodb:*",
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:{ACCOUNT_ID}:table/student-${aws:PrincipalTag/slug}-*",
+        "arn:aws:dynamodb:us-east-1:{ACCOUNT_ID}:table/student-${aws:PrincipalTag/slug}-*/index/*",
+        "arn:aws:dynamodb:us-east-1:{ACCOUNT_ID}:table/student-${aws:PrincipalTag/slug}-*/stream/*"
+      ]
+    },
+    {
+      "Sid": "LogsNamespace",
+      "Effect": "Allow",
+      "Action": "logs:*",
+      "Resource": [
+        "arn:aws:logs:us-east-1:{ACCOUNT_ID}:log-group:/aws/lambda/student-${aws:PrincipalTag/slug}-*",
+        "arn:aws:logs:us-east-1:{ACCOUNT_ID}:log-group:/aws/lambda/student-${aws:PrincipalTag/slug}-*:*",
+        "arn:aws:logs:us-east-1:{ACCOUNT_ID}:log-group:/aws/apigateway/student-${aws:PrincipalTag/slug}-*",
+        "arn:aws:logs:us-east-1:{ACCOUNT_ID}:log-group:/aws/apigateway/student-${aws:PrincipalTag/slug}-*:*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchDashboardsAndAlarms",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutDashboard",
+        "cloudwatch:GetDashboard",
+        "cloudwatch:DeleteDashboards",
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:DeleteAlarms",
+        "cloudwatch:DescribeAlarms",
+        "cloudwatch:PutMetricData"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EC2RunInstancesMicroOnly",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "*",
+      "Condition": {
+        "StringEqualsIfExists": {
+          "ec2:InstanceType": ["t2.micro", "t3.micro"]
+        }
+      }
+    },
+    {
+      "Sid": "EC2LifecycleAndSupport",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:TerminateInstances",
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:RebootInstances",
+        "ec2:CreateTags",
+        "ec2:DeleteTags",
+        "ec2:CreateKeyPair",
+        "ec2:DeleteKeyPair",
+        "ec2:ImportKeyPair",
+        "ec2:CreateSecurityGroup",
+        "ec2:DeleteSecurityGroup",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:RevokeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupEgress",
+        "ec2:ModifyInstanceAttribute",
+        "ec2:AssociateIamInstanceProfile",
+        "ec2:DisassociateIamInstanceProfile"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudFrontGlobal",
+      "Effect": "Allow",
+      "Action": "cloudfront:*",
+      "Resource": "*"
+    },
+    {
+      "Sid": "IamRoleNamespace",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:UpdateRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:TagRole",
+        "iam:UntagRole",
+        "iam:ListRoleTags",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:GetRolePolicy",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:GetInstanceProfile",
+        "iam:AddRoleToInstanceProfile",
+        "iam:RemoveRoleFromInstanceProfile"
+      ],
+      "Resource": [
+        "arn:aws:iam::{ACCOUNT_ID}:role/*",
+        "arn:aws:iam::{ACCOUNT_ID}:instance-profile/*"
+      ]
+    },
+    {
+      "Sid": "IamAttachLimitedPoliciesOnly",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::{ACCOUNT_ID}:role/*",
+      "Condition": {
+        "ArnLike": {
+          "iam:PolicyARN": [
+            "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+            "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+            "arn:aws:iam::{ACCOUNT_ID}:policy/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "IamPolicyNamespace",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreatePolicy",
+        "iam:DeletePolicy",
+        "iam:GetPolicy",
+        "iam:GetPolicyVersion",
+        "iam:ListPolicyVersions",
+        "iam:CreatePolicyVersion",
+        "iam:DeletePolicyVersion",
+        "iam:ListEntitiesForPolicy",
+        "iam:TagPolicy",
+        "iam:UntagPolicy"
+      ],
+      "Resource": "arn:aws:iam::{ACCOUNT_ID}:policy/*"
+    },
+    {
+      "Sid": "IamPassRoleToLambdaAndEC2",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::{ACCOUNT_ID}:role/*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": [
+            "lambda.amazonaws.com",
+            "ec2.amazonaws.com",
+            "apigateway.amazonaws.com"
+          ]
+        }
+      }
     }
   ]
 }
