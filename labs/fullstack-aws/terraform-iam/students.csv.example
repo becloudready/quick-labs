@@ -1,3 +1,3 @@
-username,full_name,email,github_username
-alice,Alice Johnson,alice@quicklabs.internal,alice-gh
-bob,Bob Patel,bob@quicklabs.internal,bob-gh
+username,full_name,cohort,active
+alice-johnson@quicklabs.internal,Alice Johnson,fullstack-aws-batch-a,true
+bob-patel@quicklabs.internal,Bob Patel,fullstack-aws-batch-a,false

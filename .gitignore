@@ -37,9 +37,13 @@ venv/
 # Key pairs — private keys generated for students
 *.pem
 
-# Student rosters + generated credentials — contain PII / plaintext passwords
-students.csv
-students-credentials.csv
+# Student rosters + generated credentials — contain PII / plaintext passwords.
+# .example and .example.csv templates are NOT ignored — they're safe to commit.
+students*.csv
+github-roster*.csv
+*-credentials-*.csv
+*-roster-*.csv
+*-roster.csv
 
 # Legacy script secrets (preserved from original quick-labs)
 api_token.py
