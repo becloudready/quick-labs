@@ -36,18 +36,6 @@ Each lab folder contains:
 - `terraform-*` — per-cohort and per-student infrastructure (state files are gitignored)
 - Policy JSONs, ETL scripts, sample data references
 
----
-
-## Examples — legacy teaching content
-
-The [`examples/`](examples/) directory holds material from earlier workshops and bootcamps (5+ years of teaching content). It runs independently of the `labs/` engagements:
-
-- [`examples/linux-interviews/`](examples/linux-interviews/) — Linux interview question bank (networking, storage, LVM) plus Ansible playbooks that auto-grade candidate VMs
-- [`examples/aws-ec2/`](examples/aws-ec2/), [`examples/aws-flask-app/`](examples/aws-flask-app/), [`examples/aws-rds/`](examples/aws-rds/) — boto3 + Flask reference snippets used in early AWS workshops
-- [`examples/aws-private-subnet-jumpbox.md`](examples/aws-private-subnet-jumpbox.md) — VPC + jumpbox pattern write-up
-- [`examples/digitalocean/`](examples/digitalocean/) — doctl + DO API recipes, plus reusable GitHub Actions for spinning up DO Kubernetes clusters
-
-These stay in the repo as reference, not as actively-maintained labs.
 
 ---
 
@@ -55,18 +43,7 @@ These stay in the repo as reference, not as actively-maintained labs.
 
 If your training program, sales-engineering team, or partner enablement track needs a custom lab — same pattern as what's in [`labs/`](labs/) but tailored to your stack and curriculum:
 
-→ **Book a 30-min discovery call: [becloudready.com/labs](https://becloudready.com/labs)**
-
----
-
-## Repo layout
-
-```
-labs/                 — published case-study labs (one folder per engagement)
-examples/             — legacy teaching content from earlier workshops
-  digitalocean/
-    github-actions/   — reusable DO Kubernetes setup workflows
-```
+→ **Book a 30-min discovery call: [becloudready.com/labs](https://calendly.com/kchandank/30-mins-meeting)**
 
 ---
 
