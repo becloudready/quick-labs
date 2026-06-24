@@ -1,0 +1,53 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "FederatedQuerySecrets",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetResourcePolicy",
+        "secretsmanager:ListSecretVersionIds"
+      ],
+      "Resource": "arn:aws:secretsmanager:us-west-2:{ACCOUNT_ID}:secret:quicklabs-${aws:PrincipalTag/slug}-redshift-fed-*"
+    },
+    {
+      "Sid": "SpectrumGlueCatalog",
+      "Effect": "Allow",
+      "Action": [
+        "glue:CreateDatabase",
+        "glue:GetDatabase",
+        "glue:GetDatabases",
+        "glue:CreateTable",
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:UpdateTable",
+        "glue:DeleteTable",
+        "glue:CreatePartition",
+        "glue:GetPartition",
+        "glue:GetPartitions",
+        "glue:BatchCreatePartition",
+        "glue:UpdatePartition",
+        "glue:DeletePartition"
+      ],
+      "Resource": [
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:catalog",
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:database/quicklabs_${aws:PrincipalTag/slug_us}_*",
+        "arn:aws:glue:us-west-2:{ACCOUNT_ID}:table/quicklabs_${aws:PrincipalTag/slug_us}_*/*"
+      ]
+    },
+    {
+      "Sid": "SpectrumS3Read",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::quicklabs-${aws:PrincipalTag/slug}-*",
+        "arn:aws:s3:::quicklabs-${aws:PrincipalTag/slug}-*/*"
+      ]
+    }
+  ]
+}
