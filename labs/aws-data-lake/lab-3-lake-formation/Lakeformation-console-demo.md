@@ -22,6 +22,9 @@ exist, `quicklabs_student8_lake.curated_oil` is queryable in Athena.
 ## Prerequisites (verify, 1 min)
 
 1. **Lake Formation console** → region in top-right is **us-west-2**.
+
+![Lake Formation service selection](images/01-01-lf-service-selection.png)
+
 2. Left nav → **Administration → Administrative roles and tasks** → confirm
    `quicklabs-student8` is in **Data lake administrators**. (Should already
    be — terraform-iam adds all 15 students.)
@@ -44,6 +47,8 @@ exist, `quicklabs_student8_lake.curated_oil` is queryable in Athena.
 | Permission mode | **Lake Formation mode** |
 
 **Register location**.
+
+![Register S3 location in Lake Formation](images/01-02-lf-register-location.png)
 
 > **Troubleshooting:** if you get `iam:PutRolePolicy ... not authorized` here,
 > the student LF policy didn't yet include the permission to update the
@@ -88,6 +93,8 @@ SELECT * FROM quicklabs_student8_lake.curated_oil LIMIT 5;
 Expect `Insufficient Lake Formation permission(s)` or `Table not found`.
 Either is fine — both prove "no grant = no access."
 
+![Athena query showing access denied before any grant](images/01-03-lf-athena-query-access-denied.png)
+
 Leave this window open. Refresh / rerun after each grant change.
 
 ---
@@ -108,9 +115,13 @@ Back in student8's window.
 
 **Grant**.
 
+![Grant table-level SELECT permissions in Lake Formation](images/01-04-01-lf-grant-permissions.png)
+
 Also grant **Describe** on the **database** (so student7 can see the table
 exists). Same wizard, only fill in Databases (no Tables), check **Describe**
 under Database permissions. **Grant**.
+
+![Grant database Describe permission](images/01-04-02-if-grant-permissions.png)
 
 **Verify** in student7's window:
 
@@ -119,6 +130,8 @@ SELECT * FROM quicklabs_student8_lake.curated_oil LIMIT 5;
 ```
 
 Returns 5 rows, all columns.
+
+![Athena query returning all rows after table-level grant](images/01-05-lf-athena-query-working.png)
 
 **Talking point:** "Student7 has no IAM access to student8's S3 bucket. The
 query still works because LF issued temporary credentials via
@@ -209,6 +222,12 @@ Revoke Demo 3's column grant first.
 | Row-level access | **Filter expression** |
 | Filter expression | `month = 12` |
 
+![Create data filter — name and target table](images/02-01-lf-grant-data-filter.png)
+
+![Create data filter — column access settings](images/02-02-lf-grant-data-filter.png)
+
+![Create data filter — row filter expression](images/02-03-lf-grant-data-filter.png)
+
 > **LF row-filter limitations:**
 > - Supports **STRING, INT, BIGINT, BOOLEAN** column types only.
 > - **DATE and TIMESTAMP are NOT supported** — you cannot filter rows by
@@ -236,6 +255,10 @@ Then grant SELECT on the filter:
 | Table permissions | **Data filter** → `student7-recent-oil` |
 | Permissions | **Select** |
 
+![Grant permissions using the data filter — principal selection](images/02-04-lf-grant-data-filter.png)
+
+![Grant permissions using the data filter — filter selection](images/02-05-lf-grant-data-filter.png)
+
 **Grant**.
 
 **Verify** in student7's window:
@@ -244,6 +267,8 @@ Then grant SELECT on the filter:
 SELECT MIN(month), MAX(month), COUNT(*) FROM quicklabs_student8_lake.curated_oil;
 -- Both MIN and MAX = 12; row count is ~1/12th of the full table
 ```
+
+![Athena query showing row-filtered results (month = 12 only)](images/02-06-lf-athena-query-with-filter.png)
 
 **Talking point:** "Same physical Parquet files. Same SQL. LF rewrites the
 query to add `WHERE month = 12` and strips columns. The analyst can't see
@@ -266,6 +291,8 @@ Revoke Demo 4's grant first.
 
 **Save**.
 
+![Add LF-Tag with key and values](images/03-01-lf-add-lf-tag.png)
+
 ### 5b. Tag the table and the sensitive column
 
 **Tables → `curated_oil`** → top right **Actions → Edit LF-Tags**.
@@ -276,8 +303,22 @@ Revoke Demo 4's grant first.
 
 **Save**.
 
+![Select table to edit LF-Tags](images/03-02-lf-add-lf-tag-table.png)
+
+![Assign sensitivity=public tag to curated_oil table](images/03-03-lf-add-lf-tag-table.png)
+
+![Table view after tagging with sensitivity=public](images/03-04-lf-lf-tag-table-view.png)
+
 Then **Tables → `curated_oil` → Schema** → click the `volume` column →
 top right **Edit LF-Tags** → `sensitivity = restricted`. **Save**.
+
+![Navigate to column schema to edit volume column tag](images/03-05-lf-edit-table-lf-tag.png)
+
+![Edit LF-Tag on volume column](images/03-06-lf-edit-table-lf-tag.png)
+
+![Assign sensitivity=restricted to volume column](images/03-07-lf-edit-table-lf-tag.png)
+
+![Final view of table with column-level LF-Tags applied](images/03-09-lf-view-table-lf-tag.png)
 
 ### 5c. Grant by tag, not by name
 
@@ -291,6 +332,10 @@ top right **Edit LF-Tags** → `sensitivity = restricted`. **Save**.
 | Permissions | **Select**, **Describe** |
 
 **Grant**.
+
+![Grant permissions using LF-Tag expression](images/04-01-grant-resource-lf-tags.png)
+
+![Confirm grant by LF-Tag — sensitivity=public](images/04-02-grant-resource-lf-tags.png)
 
 **Verify** in student7's window:
 
