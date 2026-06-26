@@ -1,60 +1,54 @@
 # Quick Labs
 
-**Open-source companion to BeCloudReady's Lab Engineering practice.**
-
-Real, runnable cloud labs we've built for corporate L&amp;D, sales engineering, and partner enablement engagements — published here so the patterns are reusable. Each lab under [`labs/`](labs/) is a complete student-sandbox environment: IAM scoping, Terraform for the shared infrastructure, the student-facing walkthrough, and an admin walkthrough for the instructor running the cohort.
-
-> If you're evaluating us for a custom training, demo, or GPU-cohort engagement, these labs are the work samples. The full service line lives at [becloudready.com/labs](https://becloudready.com/labs).
+Hands-on cloud labs built by [BeCloudReady](https://becloudready.com) for corporate training, partner enablement, and sales engineering. Each lab is a self-contained student environment — scoped IAM permissions, step-by-step console walkthroughs, and sample data included.
 
 ---
 
-## What we ship
+## Labs
 
-BeCloudReady designs custom cloud labs across three lanes. Each engagement produces an open-source companion lab in this repo when the client agrees to it.
-
-| Lane | What it solves | Buyer |
+| Lab | What you build | Stack |
 |---|---|---|
-| **Cloud Training Labs** | Per-student sandboxes for AWS / Azure / GCP / Databricks bootcamps — region-locked, namespace-scoped, teardown-clean | Corporate L&amp;D, training providers |
-| **AI &amp; GPU Labs** | H100 / A100 cohorts on neo-cloud (Lambda Labs, Shadeform, RunPod) — 30–70% cheaper than hyperscaler equivalents | AI training programs, vendor partner enablement |
-| **Sales Demo Environments** | Reproducible demo stacks for SE teams + partner programs | VPs of Sales Engineering, Partner Programs |
+| [`labs/aws-data-lake/`](labs/aws-data-lake/) | End-to-end data lake — raw ingestion → ETL → governance → CDC → analytics | S3, Glue, Athena, Lake Formation, Redshift, DMS, OpenSearch |
+| [`labs/aws-iam-policy-lab/`](labs/aws-iam-policy-lab/) | Read, predict, and write IAM policies using a real sandbox policy as the textbook | IAM, CloudShell |
+| [`labs/fullstack-aws/`](labs/fullstack-aws/) | Full-stack app sandbox with GitHub Copilot seats and namespace-scoped AWS access | EC2, Lambda, S3, DynamoDB, CloudFront, API Gateway |
+| [`labs/databricks-db-agent-lakebase/`](labs/databricks-db-agent-lakebase/) | Text-to-SQL agent backed by Lakebase (Postgres), Databricks Unity Catalog, and a self-hosted vLLM endpoint | Databricks, Delta Lake, vLLM |
+
+### AWS Data Lake — 6-lab curriculum
+
+Labs 1–3 build on each other. Labs 4–6 are standalone.
+
+| Lab | Topic |
+|---|---|
+| Lab 1 | S3 · Glue Crawler · Glue ETL (PySpark) · Athena |
+| Lab 2 | Event-driven ingestion — S3 → SQS → Lambda |
+| Lab 3 | Data governance — Lake Formation row/column/tag-based access control |
+| Lab 4 | Redshift Serverless · federated query from Aurora RDS |
+| Lab 5 | Change Data Capture — Postgres → DMS → S3 or Postgres target |
+| Lab 6 | OpenSearch — ingestion, search, and dashboards |
 
 ---
 
-## Published labs
+## Who builds these
 
-| Lab | Lane | Stack | Status |
-|---|---|---|---|
-| [`labs/aws-data-lake/`](labs/aws-data-lake/) | Cloud Training | S3 → Glue → Athena, IAM-scoped per student, region-locked to `us-west-2` | ✅ Shipped |
-| `labs/databricks-text-to-sql/` | Cloud Training | Databricks workspace + Unity Catalog scoping for [`db-agent`](https://github.com/db-agent/db-agent) cohorts | 🚧 In progress |
-| `labs/h100-cohort-jupyter/` | AI &amp; GPU | Per-student H100 + JupyterHub on neo-cloud, Terraform-provisioned | 🚧 In progress |
+BeCloudReady is a Databricks Registered Partner specializing in custom cloud lab environments across three lanes:
 
-Each lab folder contains:
+| Lane | What it solves |
+|---|---|
+| **Cloud Training Labs** | Per-student AWS / Azure / GCP / Databricks sandboxes — region-locked, namespace-scoped, teardown-clean |
+| **AI & GPU Labs** | H100 / A100 cohorts on neo-cloud (Lambda Labs, Shadeform, RunPod) — 30–70% cheaper than hyperscaler equivalents |
+| **Sales Demo Environments** | Reproducible demo stacks for SE teams and partner programs |
 
-- `README.md` — folder map + setup script
-- `student-lab.md` — what the student does (the actual hands-on doc)
-- `admin-walkthrough.md` — what the instructor does end-to-end before students arrive
-- `terraform-*` — per-cohort and per-student infrastructure (state files are gitignored)
-- Policy JSONs, ETL scripts, sample data references
+Community talks and workshops: [TorontoAI](https://torontoai.io)
 
-
----
-
-## Want this for your team?
-
-If your training program, sales-engineering team, or partner enablement track needs a custom lab — same pattern as what's in [`labs/`](labs/) but tailored to your stack and curriculum:
-
-→ **Book a 30-min discovery call: [becloudready.com/labs](https://calendly.com/kchandank/30-mins-meeting)**
+**Need a custom lab for your team?**
+→ [becloudready.com/labs](https://becloudready.com/labs) · [Book a 30-min call](https://calendly.com/kchandank/30-mins-meeting)
 
 ---
 
 ## Contributing
 
-This is primarily a portfolio repo for BeCloudReady's Lab Engineering practice, but useful issues and PRs are welcome:
-
-- Found a policy gap or typo in a published lab? Open an issue or PR.
-- Have an open-source lab that fits one of the three lanes? Reach out before opening a PR — we want labs we can stand behind.
-
----
+Found a bug or policy gap in a published lab? Issues and PRs are welcome.
+Have a lab that fits one of the lanes above? Reach out before opening a PR.
 
 ## License
 
