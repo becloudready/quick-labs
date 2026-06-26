@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 11 — Data Security Patterns in Practice</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ── Slide shell ─────────────────────────────────────── */
+    .slide {
+      width: 1280px;
+      min-height: 720px;
+      margin: 40px auto;
+      padding: 44px 64px 48px;
+      border-radius: 14px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0,0,0,.10);
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    hr.divider {
+      width: 1280px;
+      margin: 0 auto;
+      border: none;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    /* ── Top bar ─────────────────────────────────────────── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 26px;
+    }
+
+    .module-pill {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+    }
+
+    .slide-num {
+      font-size: 12px;
+      color: #94a3b8;
+      letter-spacing: .06em;
+    }
+
+    /* ── Headings ────────────────────────────────────────── */
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+
+    .sub {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    /* ── Utility ─────────────────────────────────────────── */
+    .red    { color: #dc2626; }
+    .orange { color: #ea580c; }
+    .yellow { color: #d97706; }
+    .green  { color: #16a34a; }
+    .blue   { color: #2563eb; }
+    .purple { color: #7c3aed; }
+    .cyan   { color: #0e7490; }
+    .slate  { color: #475569; }
+
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #0369a1;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 1 — Title / Overview
+    ═══════════════════════════════════════════════════════ */
+    .s1-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      flex: 1;
+    }
+
+    .objectives-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 24px 26px;
+    }
+
+    .objectives-card h3 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #dc2626;
+      margin-bottom: 14px;
+    }
+
+    .objectives-card ul {
+      list-style: none;
+      font-size: 13.5px;
+      color: #374151;
+      line-height: 1.75;
+    }
+
+    .objectives-card ul li::before {
+      content: "→ ";
+      color: #dc2626;
+      font-weight: 700;
+    }
+
+    .stack-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stack-visual h3 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    .layer-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 7px;
+      border-left: 4px solid;
+    }
+
+    .layer-row .l-icon { font-size: 18px; min-width: 22px; }
+    .layer-row .l-name { font-size: 13px; font-weight: 700; min-width: 160px; }
+    .layer-row .l-desc { font-size: 12px; color: #475569; }
+
+    .l-iam    { background: #eff6ff; border-color: #3b82f6; }
+    .l-lf     { background: #ecfeff; border-color: #06b6d4; }
+    .l-kms    { background: #fefce8; border-color: #eab308; }
+    .l-vpc    { background: #f0fdf4; border-color: #22c55e; }
+    .l-gd     { background: #fef2f2; border-color: #ef4444; }
+    .l-ct     { background: #faf5ff; border-color: #a78bfa; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 2 — Encryption
+    ═══════════════════════════════════════════════════════ */
+    .enc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .enc-col h3 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #eab308;
+      margin-bottom: 14px;
+    }
+
+    .enc-service {
+      background: #fefce8;
+      border: 1px solid #fde68a;
+      border-left: 4px solid #eab308;
+      border-radius: 7px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+
+    .enc-service .svc-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #854d0e;
+      margin-bottom: 5px;
+    }
+
+    .enc-service ul {
+      list-style: none;
+      font-size: 12.5px;
+      color: #374151;
+      line-height: 1.65;
+    }
+
+    .enc-service ul li::before { content: "▸ "; color: #eab308; }
+
+    .transit-card {
+      background: #ecfeff;
+      border: 1px solid #a5f3fc;
+      border-left: 4px solid #06b6d4;
+      border-radius: 7px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+
+    .transit-card .svc-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0e7490;
+      margin-bottom: 5px;
+    }
+
+    .transit-card ul {
+      list-style: none;
+      font-size: 12.5px;
+      color: #374151;
+      line-height: 1.65;
+    }
+
+    .transit-card ul li::before { content: "▸ "; color: #22d3ee; }
+
+    .kms-box {
+      background: #fefce8;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-top: 4px;
+    }
+
+    .kms-box p {
+      font-size: 12.5px;
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    .kms-box strong { color: #854d0e; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 3 — Network Isolation
+    ═══════════════════════════════════════════════════════ */
+    .net-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      flex: 1;
+    }
+
+    .net-card {
+      background: #f8fafc;
+      border: 1px solid #bbf7d0;
+      border-top: 3px solid #22c55e;
+      border-radius: 8px;
+      padding: 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .net-card .nc-icon { font-size: 26px; }
+
+    .net-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #86efac;
+    }
+
+    .net-card ul {
+      list-style: none;
+      font-size: 12.5px;
+      color: #94a3b8;
+      line-height: 1.7;
+      flex: 1;
+    }
+
+    .net-card ul li::before { content: "▸ "; color: #22c55e; }
+
+    .net-card .nc-rule {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 5px;
+      background: #0d1f1a;
+      color: #4ade80;
+      margin-top: auto;
+    }
+
+    .vpc-flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-top: 20px;
+      padding: 12px 20px;
+      background: #f8fafc;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #475569;
+    }
+
+    .vpc-flow .vf-label {
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #22c55e;
+      margin-right: 16px;
+      white-space: nowrap;
+    }
+
+    .vpc-chip {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      background: #0d1f1a;
+      color: #4ade80;
+      border: 1px solid #22c55e33;
+    }
+
+    .vpc-arrow { padding: 0 8px; color: #86efac; font-size: 14px; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 4 — IAM + LF Hybrid + SCPs
+    ═══════════════════════════════════════════════════════ */
+    .perm-body {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    .eval-order {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .eval-order h3 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #60a5fa;
+      margin-bottom: 8px;
+    }
+
+    .eval-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 7px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    .eval-step .e-num {
+      font-size: 18px;
+      font-weight: 900;
+      color: #3b82f6;
+      min-width: 24px;
+      line-height: 1;
+    }
+
+    .eval-step .e-content .e-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin-bottom: 2px;
+    }
+
+    .eval-step .e-content .e-desc {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .scp-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .scp-col h3 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #a78bfa;
+      margin-bottom: 2px;
+    }
+
+    .scp-card {
+      background: #f8fafc;
+      border: 1px solid #e9d5ff;
+      border-left: 4px solid #a78bfa;
+      border-radius: 7px;
+      padding: 14px 16px;
+    }
+
+    .scp-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4c1d95;
+      margin-bottom: 6px;
+    }
+
+    .scp-card ul {
+      list-style: none;
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.65;
+    }
+
+    .scp-card ul li::before { content: "▸ "; color: #a78bfa; }
+
+    .deny-box {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 7px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #b91c1c;
+    }
+
+    .deny-box strong { color: #dc2626; display: block; margin-bottom: 4px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 5 — GuardDuty + CloudTrail
+    ═══════════════════════════════════════════════════════ */
+    .detect-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      flex: 1;
+    }
+
+    .detect-col h3 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .gd-col h3 { color: #f87171; }
+    .ct-col h3 { color: #a78bfa; }
+
+    .threat-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 13px;
+      border-radius: 6px;
+      background: #fef2f2;
+      border: 1px solid #fecdd3;
+      margin-bottom: 8px;
+    }
+
+    .threat-item .t-icon { font-size: 16px; min-width: 20px; }
+    .threat-item .t-name { font-size: 13px; font-weight: 700; color: #991b1b; display: block; margin-bottom: 2px; }
+    .threat-item .t-desc { font-size: 12px; color: #64748b; line-height: 1.45; }
+
+    .trail-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 13px;
+      border-radius: 6px;
+      background: #faf5ff;
+      border: 1px solid #e9d5ff;
+      margin-bottom: 8px;
+    }
+
+    .trail-item .t-icon { font-size: 16px; min-width: 20px; }
+    .trail-item .t-name { font-size: 13px; font-weight: 700; color: #5b21b6; display: block; margin-bottom: 2px; }
+    .trail-item .t-desc { font-size: 12px; color: #64748b; line-height: 1.45; }
+
+    .alert-flow {
+      margin-top: 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .alert-flow .af-label {
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #f87171;
+      margin-right: 8px;
+    }
+
+    .af-chip {
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .af-r { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
+    .af-p { background: #faf5ff; color: #5b21b6; border: 1px solid #e9d5ff; }
+    .af-y { background: #fefce8; color: #854d0e; border: 1px solid #fde68a; }
+    .af-g { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .af-arr { color: #94a3b8; font-size: 13px; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 6 — Real-World Scenario: Least Privilege Pipeline
+    ═══════════════════════════════════════════════════════ */
+    .pipeline-stages {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .p-stage {
+      display: grid;
+      grid-template-columns: 180px 1fr 1fr 1fr;
+      align-items: start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    .p-stage .ps-svc {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ps-icon { font-size: 20px; }
+
+    .ps-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .ps-layer {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .ps-layer .pl-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .col-iam .pl-label  { color: #60a5fa; }
+    .col-enc .pl-label  { color: #eab308; }
+    .col-net .pl-label  { color: #22c55e; }
+
+    .col-iam .ps-layer  { border-left: 2px solid #3b82f655; padding-left: 8px; }
+    .col-enc .ps-layer  { border-left: 2px solid #eab30855; padding-left: 8px; }
+    .col-net .ps-layer  { border-left: 2px solid #22c55e55; padding-left: 8px; }
+
+    .scenario-note {
+      margin-top: 14px;
+      padding: 12px 18px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #22c55e;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #166534;
+      line-height: 1.6;
+    }
+
+    .scenario-note strong { color: #15803d; }
+
+    /* ── Bottom key-concept bar (reused across slides) ───── */
+    .key-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-top: 20px;
+      padding: 11px 18px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      font-size: 12.5px;
+    }
+
+    .kb-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #ef4444;
+      margin-right: 14px;
+      white-space: nowrap;
+    }
+
+    .kb-text { color: #374151; line-height: 1.5; }
+    .kb-text strong { color: #0f172a; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 1 — Module Overview
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 11 · Day 3</div>
+    <div class="slide-num">1 / 6</div>
+  </div>
+
+  <h1>Data Security Patterns in Practice</h1>
+  <p class="sub">Security as a cross-cutting layer across every service in the data platform</p>
+
+  <div class="s1-body">
+    <div class="objectives-card">
+      <h3>What We Cover</h3>
+      <ul>
+        <li>Cross-service security: IAM + Lake Formation + KMS + VPC working together</li>
+        <li>Encryption at rest and in transit across S3, Redshift, Lake Formation</li>
+        <li>S3 bucket policies, VPC endpoints, network-level data isolation</li>
+        <li>IAM + Lake Formation hybrid permission model in production</li>
+        <li>SCPs and permission boundaries for org-level governance</li>
+        <li>GuardDuty for data platform threat detection</li>
+        <li>CloudTrail deep dive — auditing access and detecting anomalies</li>
+        <li>Real-world scenario: least privilege across the full enterprise pipeline</li>
+      </ul>
+    </div>
+
+    <div class="stack-visual">
+      <h3>The Six Security Layers</h3>
+      <div class="layer-row l-iam">
+        <div class="l-icon">🔑</div>
+        <div class="l-name blue">IAM</div>
+        <div class="l-desc">Identity · roles · policies · who can call what API</div>
+      </div>
+      <div class="layer-row l-lf">
+        <div class="l-icon">🏛️</div>
+        <div class="l-name cyan">Lake Formation</div>
+        <div class="l-desc">Column / row / cell-level data access control</div>
+      </div>
+      <div class="layer-row l-kms">
+        <div class="l-icon">🔐</div>
+        <div class="l-name yellow">KMS</div>
+        <div class="l-desc">Encryption at rest — CMKs across S3, Redshift, LF</div>
+      </div>
+      <div class="layer-row l-vpc">
+        <div class="l-icon">🛡️</div>
+        <div class="l-name green">VPC / Endpoints</div>
+        <div class="l-desc">Network isolation — no public internet path to data</div>
+      </div>
+      <div class="layer-row l-gd">
+        <div class="l-icon">🚨</div>
+        <div class="l-name red">GuardDuty</div>
+        <div class="l-desc">Threat detection — anomalous API calls, exfiltration signals</div>
+      </div>
+      <div class="layer-row l-ct">
+        <div class="l-icon">📋</div>
+        <div class="l-name purple">CloudTrail</div>
+        <div class="l-desc">Immutable audit trail — every API call, every data access</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-bar">
+    <span class="kb-label">Core Principle</span>
+    <span class="kb-text">Security is not a feature you add at the end — it is the <strong>cross-cutting layer applied at every stage</strong> of the pipeline, from S3 ingestion through Lake Formation to Redshift and OpenSearch.</span>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 2 — Encryption At Rest & In Transit
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 11 · Day 3</div>
+    <div class="slide-num">2 / 6</div>
+  </div>
+
+  <h2>Encryption — At Rest &amp; In Transit</h2>
+  <p class="sub">KMS as the unified encryption control plane across the entire data platform</p>
+
+  <div class="enc-grid">
+
+    <div class="enc-col">
+      <h3>Encryption at Rest (KMS)</h3>
+
+      <div class="enc-service">
+        <div class="svc-name">Amazon S3</div>
+        <ul>
+          <li>SSE-S3 (AWS managed) or SSE-KMS (your CMK)</li>
+          <li>Bucket default encryption — every new object encrypted automatically</li>
+          <li>Bucket policy can <code>Deny</code> uploads without encryption header</li>
+          <li>CMK gives you key rotation + usage audit in CloudTrail</li>
+        </ul>
+      </div>
+
+      <div class="enc-service">
+        <div class="svc-name">Amazon Redshift</div>
+        <ul>
+          <li>Cluster-level encryption using your KMS CMK</li>
+          <li>Encrypts all data on disk, snapshots, and backups</li>
+          <li>Redshift HSM integration available for regulated workloads</li>
+        </ul>
+      </div>
+
+      <div class="enc-service">
+        <div class="svc-name">Lake Formation + Glue Catalog</div>
+        <ul>
+          <li>Catalog encryption: metadata encrypted with KMS</li>
+          <li>Connection passwords encrypted with KMS</li>
+          <li>Applies to all Glue catalog databases and table definitions</li>
+        </ul>
+      </div>
+
+      <div class="kms-box">
+        <p><strong>Envelope encryption:</strong> KMS encrypts a data key → the data key encrypts the actual data. You never send raw data to KMS. The CMK never leaves KMS hardware.</p>
+      </div>
+    </div>
+
+    <div class="enc-col">
+      <h3 style="color:#0e7490;">Encryption in Transit (TLS)</h3>
+
+      <div class="transit-card">
+        <div class="svc-name">S3 — Force HTTPS</div>
+        <ul>
+          <li>Bucket policy with <code>Deny</code> on <code>aws:SecureTransport: false</code></li>
+          <li>Blocks any HTTP (unencrypted) request to the bucket</li>
+          <li>Apply to both source and destination buckets</li>
+        </ul>
+      </div>
+
+      <div class="transit-card">
+        <div class="svc-name">Redshift</div>
+        <ul>
+          <li>Require SSL in parameter group: <code>require_ssl = true</code></li>
+          <li>TLS 1.2 minimum for all client connections</li>
+          <li>JDBC/ODBC drivers enforce certificate validation</li>
+        </ul>
+      </div>
+
+      <div class="transit-card">
+        <div class="svc-name">Lake Formation / Athena / OpenSearch</div>
+        <ul>
+          <li>All API calls to AWS services are HTTPS (enforced by AWS)</li>
+          <li>Athena query results written to S3 — inherit bucket encryption</li>
+          <li>OpenSearch: enforce HTTPS + TLS security policy on domain</li>
+        </ul>
+      </div>
+
+      <div class="transit-card" style="background:#faf5ff;border-color:#e9d5ff;border-left-color:#7c3aed;">
+        <div class="svc-name" style="color:#4c1d95;">Secrets Manager</div>
+        <ul>
+          <li>All credentials (DB passwords, API keys) stored encrypted</li>
+          <li>Never inline credentials in IAM policies or code</li>
+          <li>Automatic rotation reduces long-lived secret risk</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-bar">
+    <span class="kb-label">Key Takeaway</span>
+    <span class="kb-text">Use <strong>one CMK per data classification level</strong> (raw, enriched, consolidated) — not one key for everything. Separate keys give you independent rotation schedules, access policies, and audit trails.</span>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 3 — Network Isolation
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 11 · Day 3</div>
+    <div class="slide-num">3 / 6</div>
+  </div>
+
+  <h2>Network-Level Data Isolation</h2>
+  <p class="sub">S3 bucket policies · VPC endpoints · private network paths — keep data traffic off the public internet</p>
+
+  <div class="net-grid">
+
+    <div class="net-card">
+      <div class="nc-icon">🪣</div>
+      <h3>S3 Bucket Policies</h3>
+      <ul>
+        <li>Restrict access to specific VPC endpoints only (<code>aws:sourceVpce</code>)</li>
+        <li>Deny all requests not originating from approved VPC</li>
+        <li>Restrict to specific IAM principals (service roles, not individuals)</li>
+        <li>Enforce HTTPS — deny <code>aws:SecureTransport: false</code></li>
+        <li>Block public ACLs at the account level (S3 Block Public Access)</li>
+        <li>Scope resource to prefix level, not whole bucket where possible</li>
+      </ul>
+      <div class="nc-rule">Deny: "aws:sourceVpce" ≠ your VPC endpoint ID</div>
+    </div>
+
+    <div class="net-card">
+      <div class="nc-icon">🔌</div>
+      <h3>VPC Endpoints</h3>
+      <ul>
+        <li><strong style="color:#166534;">Gateway endpoint</strong> — S3 &amp; DynamoDB: free, route-table-based, no ENI</li>
+        <li><strong style="color:#166534;">Interface endpoint</strong> — all other services: creates ENI in your subnet, private IP, SG controls</li>
+        <li>Once endpoint is in place, traffic never traverses the public internet</li>
+        <li>Endpoint policy limits which S3 buckets the endpoint can reach</li>
+        <li>Use separate endpoints per subnet for HA across AZs</li>
+      </ul>
+      <div class="nc-rule">Services: S3, STS, Glue, Athena, Secrets Manager, KMS</div>
+    </div>
+
+    <div class="net-card">
+      <div class="nc-icon">🏗️</div>
+      <h3>VPC Architecture for Data Platform</h3>
+      <ul>
+        <li>All compute (Glue, Lambda, DMS, Redshift) in private subnets — no internet gateway route</li>
+        <li>Security groups: allow only required service-to-service ports</li>
+        <li>NACLs as a coarse subnet-level backstop</li>
+        <li>No public IP addresses on data service instances</li>
+        <li>NAT gateway only if external dependencies genuinely require outbound internet</li>
+        <li>Separate VPCs per environment (dev / staging / prod) with Transit Gateway or peering for approved paths</li>
+      </ul>
+      <div class="nc-rule">Rule: if data can leave via public IP, the network design is wrong</div>
+    </div>
+
+  </div>
+
+  <div class="vpc-flow">
+    <span class="vf-label">Private Data Path (no internet)</span>
+    <span class="vpc-chip">Lambda (private subnet)</span>
+    <span class="vpc-arrow">→</span>
+    <span class="vpc-chip">VPC Endpoint (S3 Gateway)</span>
+    <span class="vpc-arrow">→</span>
+    <span class="vpc-chip">S3 Bucket (VPC-only policy)</span>
+    <span class="vpc-arrow">→</span>
+    <span class="vpc-chip">KMS (Interface endpoint)</span>
+    <span style="margin-left:auto;font-size:12px;color:#475569;">Zero public internet traversal</span>
+  </div>
+
+  <div class="key-bar" style="margin-top:12px;">
+    <span class="kb-label">Key Takeaway</span>
+    <span class="kb-text"><strong>Bucket policy + VPC endpoint + SG = defense in depth at the network layer.</strong> A bucket policy alone can be bypassed by an over-privileged role elsewhere; combining it with VPC enforcement closes that gap.</span>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 4 — IAM + Lake Formation Hybrid + SCPs
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 11 · Day 3</div>
+    <div class="slide-num">4 / 6</div>
+  </div>
+
+  <h2>IAM + Lake Formation Hybrid Models &amp; Org-Level Governance</h2>
+  <p class="sub">How IAM and Lake Formation permissions combine · SCPs and permission boundaries in production</p>
+
+  <div class="perm-body">
+
+    <div>
+      <div class="eval-order">
+        <h3>Permission Evaluation Order</h3>
+
+        <div class="eval-step">
+          <div class="e-num">1</div>
+          <div class="e-content">
+            <div class="e-title">SCP (Service Control Policy)</div>
+            <div class="e-desc">Org-level ceiling. No principal in the account can exceed what the SCP allows, regardless of their IAM policy. Explicit Deny here is final.</div>
+          </div>
+        </div>
+
+        <div class="eval-step">
+          <div class="e-num">2</div>
+          <div class="e-content">
+            <div class="e-title">Permission Boundaries</div>
+            <div class="e-desc">Role-level ceiling. The effective permission is the intersection of the identity policy and the boundary. Used to safely delegate role creation to teams.</div>
+          </div>
+        </div>
+
+        <div class="eval-step">
+          <div class="e-num">3</div>
+          <div class="e-content">
+            <div class="e-title">IAM Identity Policy</div>
+            <div class="e-desc">Must explicitly Allow the service API (e.g. <code>s3:GetObject</code>, <code>glue:GetTable</code>). No implicit Allow — if not listed, denied.</div>
+          </div>
+        </div>
+
+        <div class="eval-step">
+          <div class="e-num">4</div>
+          <div class="e-content">
+            <div class="e-title">Lake Formation Data Permission</div>
+            <div class="e-desc">For Athena / Spectrum queries: principal must have BOTH IAM Allow AND Lake Formation grant. Either one absent = access denied. This is the hybrid model.</div>
+          </div>
+        </div>
+
+        <div class="eval-step">
+          <div class="e-num">5</div>
+          <div class="e-content">
+            <div class="e-title">Resource Policy (bucket policy, KMS key policy)</div>
+            <div class="e-desc">Evaluated at the resource. Can further restrict even if steps 1–4 allow. An explicit Deny here overrides everything above.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scp-col">
+      <h3>SCPs — Org-Level Controls</h3>
+
+      <div class="scp-card">
+        <h4>Common Data Platform SCPs</h4>
+        <ul>
+          <li>Deny disabling S3 Block Public Access</li>
+          <li>Deny deleting CloudTrail trails</li>
+          <li>Deny creating unencrypted S3 buckets</li>
+          <li>Restrict to approved regions only</li>
+          <li>Deny IAM actions that could create admin roles without boundaries</li>
+        </ul>
+      </div>
+
+      <div class="scp-card">
+        <h4>Permission Boundaries in Practice</h4>
+        <ul>
+          <li>Attach a boundary to every role a team creates</li>
+          <li>Boundary says: "this role can never exceed read-only on S3"</li>
+          <li>Team can grant the role any identity policy — boundary caps it</li>
+          <li>Prevents privilege escalation through role creation</li>
+        </ul>
+      </div>
+
+      <div class="deny-box">
+        <strong>Explicit Deny Rule</strong>
+        An explicit <code>Deny</code> at ANY layer (SCP, boundary, IAM, resource policy, LF) overrides every Allow above it. When debugging access denials, check all five layers — not just IAM.
+      </div>
+
+      <div class="scp-card" style="border-left-color:#06b6d4;background:#ecfeff;">
+        <h4 style="color:#0e7490;">IAM + LF Hybrid: the critical rule</h4>
+        <ul>
+          <li>IAM controls <em>which AWS APIs</em> the principal can call</li>
+          <li>Lake Formation controls <em>which data</em> the query can see</li>
+          <li>Both must Allow — missing either blocks access</li>
+          <li>LF column/row filters apply after IAM clears the API call</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-bar">
+    <span class="kb-label">Key Takeaway</span>
+    <span class="kb-text"><strong>Never treat IAM + Lake Formation as OR.</strong> Access requires both to Allow. SCPs set the org ceiling; permission boundaries prevent escalation; LF adds data-level granularity IAM cannot provide.</span>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 5 — GuardDuty + CloudTrail
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 11 · Day 3</div>
+    <div class="slide-num">5 / 6</div>
+  </div>
+
+  <h2>Threat Detection &amp; Audit — GuardDuty + CloudTrail</h2>
+  <p class="sub">Detect threats in real time · maintain an immutable record of every data access</p>
+
+  <div class="detect-grid">
+
+    <div class="detect-col gd-col">
+      <h3>GuardDuty — Continuous Threat Detection</h3>
+
+      <div class="threat-item">
+        <div class="t-icon">🚨</div>
+        <div>
+          <span class="t-name">Unusual API Activity</span>
+          <span class="t-desc">Flags calls to S3, Athena, or Glue from unfamiliar IPs, geolocations, or at unusual hours. Baseline is learned automatically over 2 weeks.</span>
+        </div>
+      </div>
+
+      <div class="threat-item">
+        <div class="t-icon">📤</div>
+        <div>
+          <span class="t-name">S3 Data Exfiltration Signals</span>
+          <span class="t-desc">Detects high-volume <code>GetObject</code> calls, large data downloads, or objects being copied to buckets in other accounts or public.</span>
+        </div>
+      </div>
+
+      <div class="threat-item">
+        <div class="t-icon">🔓</div>
+        <div>
+          <span class="t-name">Compromised Credentials</span>
+          <span class="t-desc">IAM role being used from a Tor exit node, known malicious IP, or from a region the role has never used before.</span>
+        </div>
+      </div>
+
+      <div class="threat-item">
+        <div class="t-icon">⚙️</div>
+        <div>
+          <span class="t-name">Data Platform Specific Findings</span>
+          <span class="t-desc">Athena queries scanning unexpectedly large volumes; Glue crawler accessing buckets outside its configured scope; Lambda accessing S3 cross-account.</span>
+        </div>
+      </div>
+
+      <div class="alert-flow">
+        <span class="af-label">Response flow</span>
+        <span class="af-chip af-r">GuardDuty Finding</span>
+        <span class="af-arr">→</span>
+        <span class="af-chip af-y">EventBridge Rule</span>
+        <span class="af-arr">→</span>
+        <span class="af-chip af-g">SNS Alert</span>
+        <span class="af-arr">→</span>
+        <span class="af-chip af-p">Lambda Remediation</span>
+      </div>
+    </div>
+
+    <div class="detect-col ct-col">
+      <h3>CloudTrail — Deep Dive Audit</h3>
+
+      <div class="trail-item">
+        <div class="t-icon">📋</div>
+        <div>
+          <span class="t-name">What CloudTrail Records</span>
+          <span class="t-desc">Every API call: who (principal ARN), what (API action), when (timestamp), where (source IP), on what (resource ARN) — including read/write events on S3, Glue, Athena, Lake Formation, Redshift.</span>
+        </div>
+      </div>
+
+      <div class="trail-item">
+        <div class="t-icon">🏷️</div>
+        <div>
+          <span class="t-name">Data Events (critical for data platforms)</span>
+          <span class="t-desc">S3 object-level events (<code>GetObject</code>, <code>PutObject</code>, <code>DeleteObject</code>) are <em>not</em> logged by default — enable S3 data events on sensitive buckets explicitly.</span>
+        </div>
+      </div>
+
+      <div class="trail-item">
+        <div class="t-icon">🔍</div>
+        <div>
+          <span class="t-name">Detecting Anomalies with Athena</span>
+          <span class="t-desc">Query CloudTrail logs in S3 with Athena. Find: who accessed a sensitive table in the last 7 days; which role made the most <code>AssumeRole</code> calls; denied access patterns.</span>
+        </div>
+      </div>
+
+      <div class="trail-item">
+        <div class="t-icon">🔒</div>
+        <div>
+          <span class="t-name">Protecting the Audit Trail</span>
+          <span class="t-desc">Write CloudTrail logs to a dedicated S3 bucket with: Object Lock (WORM), no delete permission for any role, CloudWatch alarm on <code>DeleteTrail</code> or <code>StopLogging</code> API calls.</span>
+        </div>
+      </div>
+
+      <div class="alert-flow" style="border-color:#e9d5ff;">
+        <span class="af-label" style="color:#7c3aed;">Audit query</span>
+        <span class="af-chip af-p">CloudTrail → S3</span>
+        <span class="af-arr">→</span>
+        <span class="af-chip af-p">Athena table</span>
+        <span class="af-arr">→</span>
+        <span class="af-chip af-p">SQL query</span>
+        <span class="af-arr">→</span>
+        <span class="af-chip af-g">Access report</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-bar">
+    <span class="kb-label">Key Takeaway</span>
+    <span class="kb-text">GuardDuty detects <strong>what is happening now</strong>; CloudTrail tells you <strong>what happened and who did it</strong>. Both are required for a complete security posture — detection without audit history makes forensics impossible.</span>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 6 — Real-World Scenario: Least Privilege Pipeline
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 11 · Day 3</div>
+    <div class="slide-num">6 / 6</div>
+  </div>
+
+  <h2>Real-World Scenario — Least Privilege Across the Full Pipeline</h2>
+  <p class="sub">Every service, every stage, every layer — security controls applied end-to-end</p>
+
+  <div class="pipeline-stages">
+
+    <div class="p-stage" style="border-color:#bbf7d0;">
+      <div class="p-stage ps-svc">
+        <span class="ps-icon">🪣</span>
+        <span class="ps-name">S3<br/><span style="font-size:11px;color:#475569;">Raw Layer</span></span>
+      </div>
+      <div class="col-iam">
+        <div class="ps-layer">
+          <div class="pl-label">IAM</div>
+          Ingest role has <code>s3:PutObject</code> on raw prefix only. No <code>GetObject</code>, no <code>DeleteObject</code>.
+        </div>
+      </div>
+      <div class="col-enc">
+        <div class="ps-layer">
+          <div class="pl-label">Encryption</div>
+          SSE-KMS with raw-data CMK. Bucket policy denies non-encrypted uploads (<code>s3:x-amz-server-side-encryption</code>).
+        </div>
+      </div>
+      <div class="col-net">
+        <div class="ps-layer">
+          <div class="pl-label">Network</div>
+          Bucket policy denies any request not from the designated VPC endpoint. Block Public Access enabled.
+        </div>
+      </div>
+    </div>
+
+    <div class="p-stage" style="border-color:#a5f3fc;">
+      <div class="p-stage ps-svc">
+        <span class="ps-icon">🏛️</span>
+        <span class="ps-name">Lake Formation<br/><span style="font-size:11px;color:#475569;">Enriched Layer</span></span>
+      </div>
+      <div class="col-iam">
+        <div class="ps-layer">
+          <div class="pl-label">IAM</div>
+          Analyst role has IAM Allow on <code>glue:GetTable</code> and <code>athena:StartQueryExecution</code> only.
+        </div>
+      </div>
+      <div class="col-enc">
+        <div class="ps-layer">
+          <div class="pl-label">Encryption</div>
+          Glue catalog encrypted with enriched CMK. Column data filtered by LF before reaching Athena — no raw PII exposed.
+        </div>
+      </div>
+      <div class="col-net">
+        <div class="ps-layer">
+          <div class="pl-label">Network</div>
+          Lake Formation + Glue API calls via Interface VPC endpoints. No public Glue service endpoints in use.
+        </div>
+      </div>
+    </div>
+
+    <div class="p-stage" style="border-color:#e0e7ff;">
+      <div class="p-stage ps-svc">
+        <span class="ps-icon">🔴</span>
+        <span class="ps-name">Redshift<br/><span style="font-size:11px;color:#475569;">Consolidated</span></span>
+      </div>
+      <div class="col-iam">
+        <div class="ps-layer">
+          <div class="pl-label">IAM</div>
+          Redshift cluster role scoped to specific S3 prefixes for COPY. Spectrum queries checked by LF — table-level + column-level grants.
+        </div>
+      </div>
+      <div class="col-enc">
+        <div class="ps-layer">
+          <div class="pl-label">Encryption</div>
+          Cluster encrypted with KMS CMK at creation. Automated snapshots inherit encryption. <code>require_ssl=true</code> in parameter group.
+        </div>
+      </div>
+      <div class="col-net">
+        <div class="ps-layer">
+          <div class="pl-label">Network</div>
+          Cluster in private subnet. Security group allows port 5439 from BI tool subnet only. No public endpoint.
+        </div>
+      </div>
+    </div>
+
+    <div class="p-stage" style="border-color:#f3e8ff;">
+      <div class="p-stage ps-svc">
+        <span class="ps-icon">🔍</span>
+        <span class="ps-name">OpenSearch<br/><span style="font-size:11px;color:#475569;">Search Layer</span></span>
+      </div>
+      <div class="col-iam">
+        <div class="ps-layer">
+          <div class="pl-label">IAM</div>
+          FGAC: reader role mapped to a backend role that grants read-only on specific indices only. No <code>DELETE</code> index permission.
+        </div>
+      </div>
+      <div class="col-enc">
+        <div class="ps-layer">
+          <div class="pl-label">Encryption</div>
+          Domain encryption at rest with KMS. Node-to-node encryption enabled. HTTPS enforced with TLS 1.2+ policy.
+        </div>
+      </div>
+      <div class="col-net">
+        <div class="ps-layer">
+          <div class="pl-label">Network</div>
+          Domain in VPC — no public access. Security group permits inbound 443 from application subnet only.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="scenario-note">
+    <strong>Across all stages:</strong> CloudTrail logs every API call · GuardDuty monitors for anomalies · SCP prevents disabling encryption or logging · CMKs are per-layer with independent rotation · No human has direct production data access — only service roles.
+  </div>
+
+  <div class="key-bar" style="margin-top:10px;">
+    <span class="kb-label">Module 11 Summary</span>
+    <span class="kb-text">Security = <strong>IAM</strong> (who) + <strong>Lake Formation</strong> (what data) + <strong>KMS</strong> (encrypted at rest) + <strong>VPC endpoints</strong> (no public path) + <strong>GuardDuty</strong> (detect threats) + <strong>CloudTrail</strong> (prove it). All six layers, every stage.</span>
+  </div>
+</div>
+
+</body>
+</html>

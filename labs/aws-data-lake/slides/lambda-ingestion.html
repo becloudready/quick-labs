@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event-Driven Ingestion — S3 as the Landing Zone</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f1117;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #f1f5f9;
+    padding: 40px 0;
+    min-height: 100vh;
+  }
+
+  .slide {
+    width: 1280px;
+    min-height: 720px;
+    margin: 40px auto;
+    padding: 56px 72px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1a1200 0%, #201800 100%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255,153,0,0.15);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #FF9900;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #f1f5f9;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+  }
+
+  .divider {
+    height: 2px;
+    background: linear-gradient(90deg, #FF9900 0%, transparent 100%);
+    margin-bottom: 28px;
+    width: 80px;
+  }
+
+  p {
+    color: #94a3b8;
+    font-size: 14.5px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 13.5px;
+  }
+
+  thead tr {
+    background: #1e293b;
+  }
+
+  thead th {
+    padding: 11px 14px;
+    text-align: left;
+    color: #f1f5f9;
+    font-weight: 700;
+    border: 1px solid #2d3748;
+    font-size: 12.5px;
+    letter-spacing: 0.4px;
+  }
+
+  tbody tr {
+    border: 1px solid #1e293b;
+  }
+
+  tbody tr:nth-child(even) {
+    background: rgba(255,255,255,0.025);
+  }
+
+  tbody tr:hover {
+    background: rgba(255,153,0,0.05);
+  }
+
+  tbody td {
+    padding: 10px 14px;
+    color: #94a3b8;
+    border: 1px solid #1e2d3d;
+    vertical-align: top;
+    line-height: 1.5;
+    font-size: 13px;
+  }
+
+  tbody td:first-child {
+    border-left: 3px solid #FF9900;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+
+  /* Code */
+  pre {
+    background: #0d1117;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    padding: 16px 20px;
+    border-radius: 8px;
+    border: 1px solid #21262d;
+    margin: 12px 0;
+    overflow-x: auto;
+  }
+
+  code {
+    background: #0d1117;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #21262d;
+  }
+
+  pre code {
+    background: transparent;
+    padding: 0;
+    border: none;
+    font-size: inherit;
+  }
+
+  ul {
+    margin: 10px 0 10px 20px;
+    color: #94a3b8;
+  }
+
+  li {
+    margin-bottom: 7px;
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  li strong { color: #e2e8f0; }
+
+  .slide-number {
+    position: absolute;
+    bottom: 28px;
+    right: 36px;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .info-box {
+    background: rgba(255,153,0,0.07);
+    border: 1px solid rgba(255,153,0,0.25);
+    border-left: 4px solid #FF9900;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    color: #e2e8f0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-top: 16px;
+  }
+
+  .use-case-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,153,0,0.18);
+    border-radius: 10px;
+    padding: 18px 18px;
+    border-top: 3px solid #FF9900;
+  }
+
+  .use-case-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #FF9900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 12.5px;
+    color: #94a3b8;
+  }
+
+  .flow-arrow {
+    color: #FF9900;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-size: 12px;
+    margin-top: 1px;
+  }
+
+  .step-list {
+    counter-reset: step;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .step-list li {
+    counter-increment: step;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+
+  .step-list li::before {
+    content: counter(step);
+    background: #FF9900;
+    color: #0f1117;
+    font-weight: 800;
+    font-size: 11px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-list li strong { color: #e2e8f0; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+
+  .cross-cut {
+    background: rgba(255,153,0,0.05);
+    border: 1px dashed rgba(255,153,0,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  .dlq-tag {
+    display: inline-block;
+    background: rgba(239,68,68,0.12);
+    color: #f87171;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .service-tag {
+    display: inline-block;
+    background: rgba(255,153,0,0.1);
+    color: #FF9900;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-right: 2px;
+  }
+
+  .design-panel {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,153,0,0.12);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+
+  .design-panel h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #FF9900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Slide 1 -->
+<div class="slide">
+  <div class="eyebrow">Event-Driven Ingestion — S3 as the Landing Zone</div>
+  <h1>Three Use Cases, One Landing Zone</h1>
+  <div class="divider"></div>
+
+  <p>S3 acts as the durable landing zone for all ingestion patterns. S3 ObjectCreated events are the trigger — the rest of the architecture differs per use case.</p>
+
+  <div class="arch-grid">
+    <div class="use-case-card">
+      <h3>UC-1 — SQS Fan-In (Async)</h3>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>Field devices PUT <code>.jpg</code> + sidecar → <strong style="color:#e2e8f0">S3 raw</strong> (images/)</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>S3 event → <strong style="color:#e2e8f0">SQS</strong> image-events queue</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>SQS → <strong style="color:#e2e8f0">Lambda</strong> image_metadata_handler</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>Lambda → <strong style="color:#e2e8f0">S3 curated</strong> (image-metadata/)</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>Poison messages → <span class="dlq-tag">DLQ</span> after maxReceiveCount=5</span></div>
+    </div>
+
+    <div class="use-case-card">
+      <h3>UC-2 — S3 Direct (Batch Drop)</h3>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>Batch scheduler PUTs <code>.csv</code> → <strong style="color:#e2e8f0">S3 raw</strong> (drop/)</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>S3 event → <strong style="color:#e2e8f0">Lambda</strong> batch_file_handler (async invoke)</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>Lambda → <strong style="color:#e2e8f0">S3 curated</strong> (batch/yyyy/mm/dd/)</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>Async failures after 2 retries → Lambda async <span class="dlq-tag">DLQ</span></span></div>
+    </div>
+
+    <div class="use-case-card">
+      <h3>UC-3 — Lambda-as-ETL</h3>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>Partner SFTP PUTs <code>.csv</code> → <strong style="color:#e2e8f0">S3 raw</strong> (oil_drop/)</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>S3 event → <strong style="color:#e2e8f0">Lambda</strong> csv_to_parquet_curated</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>Lambda → <strong style="color:#e2e8f0">S3 curated</strong> (Hive partition path)</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>Lambda → <strong style="color:#e2e8f0">Glue Catalog</strong> CreatePartition</span></div>
+      <div class="flow-step"><span class="flow-arrow">→</span><span>Lambda → <strong style="color:#e2e8f0">Redshift</strong> COPY via redshift-data API</span></div>
+    </div>
+  </div>
+
+  <div class="cross-cut">
+    <strong style="color:#FF9900;">Cross-cutting:</strong> CloudWatch Logs + Metrics + Alarms for all Lambdas &nbsp;·&nbsp; CloudTrail data events for all S3 buckets
+  </div>
+
+  <div class="slide-number">01 / 03</div>
+</div>
+
+<!-- Slide 2 -->
+<div class="slide">
+  <div class="eyebrow">Event-Driven Ingestion — S3 as the Landing Zone</div>
+  <h1>UC-1: SQS-Fronted Fan-In Sequence</h1>
+  <div class="divider"></div>
+
+  <div class="two-col">
+    <div>
+      <ol class="step-list">
+        <li>Device → S3 raw: <strong>PUT images/tank-1.jpg</strong> + <code>.json</code> sidecar</li>
+        <li>S3 raw → SQS: <strong>ObjectCreated event</strong> delivered to queue</li>
+        <li>SQS → Lambda: <strong>poll batch</strong> (size 10, window 5s)</li>
+        <li>Lambda → S3 raw: <strong>GetObject</strong> head + sidecar read</li>
+        <li>Lambda → S3 curated: <strong>PutObject</strong> image-metadata/...json</li>
+        <li>Lambda → SQS: success → <strong>DeleteMessage</strong></li>
+        <li>On repeated failure (maxReceiveCount=5) → message moved to <strong>DLQ by SQS</strong> automatically</li>
+      </ol>
+    </div>
+
+    <div>
+      <div class="design-panel">
+        <h3>Why SQS in Front?</h3>
+        <ul style="margin-left:16px; margin-top:4px;">
+          <li><strong>Decouples producer spike</strong> from Lambda concurrency limits — queue absorbs bursts</li>
+          <li><strong>SQS DLQ</strong> catches poison messages (malformed files, permission errors) without retrying forever</li>
+          <li><strong>Batch window</strong> allows Lambda to process 10 events per invocation → cheaper per-message cost</li>
+        </ul>
+      </div>
+
+      <table style="margin-top:18px;">
+        <thead>
+          <tr>
+            <th>Config</th>
+            <th>Value</th>
+            <th>Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Batch size</td>
+            <td>10</td>
+            <td>Cost efficiency per invocation</td>
+          </tr>
+          <tr>
+            <td>Batch window</td>
+            <td>5s</td>
+            <td>Small latency tradeoff for batching</td>
+          </tr>
+          <tr>
+            <td>maxReceiveCount</td>
+            <td>5</td>
+            <td>Retry 5× before DLQ quarantine</td>
+          </tr>
+          <tr>
+            <td>Visibility timeout</td>
+            <td>&gt; Lambda timeout</td>
+            <td>Prevents duplicate processing</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="slide-number">02 / 03</div>
+</div>
+
+<!-- Slide 3 -->
+<div class="slide">
+  <div class="eyebrow">Event-Driven Ingestion — S3 as the Landing Zone</div>
+  <h1>UC-3: Lambda-as-ETL Sequence (The Complex One)</h1>
+  <div class="divider"></div>
+
+  <div class="two-col">
+    <div>
+      <ol class="step-list">
+        <li>Partner → S3 raw: <strong>PUT oil_drop/oil-2025-05-12.csv</strong></li>
+        <li>S3 raw → Lambda: <strong>async invoke</strong> (ObjectCreated)</li>
+        <li>Lambda → S3 raw: <strong>GetObject</strong> (stream CSV)</li>
+        <li>Lambda: <strong>validate schema, transform → Parquet</strong>, group by trade_date</li>
+        <li>Lambda → S3 curated: <strong>PutObject</strong> <code>oil_curated/year=.../month=.../day=.../...parquet</code></li>
+        <li>Lambda → Glue Catalog: <strong>CreatePartition</strong> (Hive-style values)</li>
+        <li>Lambda → Redshift: <code>redshift-data</code> ExecuteStatement <strong>COPY ... FORMAT PARQUET</strong></li>
+        <li>Lambda → S3 raw: <strong>PutObjectTagging</strong> <code>ingest-status=processed</code></li>
+      </ol>
+    </div>
+
+    <div>
+      <div class="design-panel">
+        <h3>Key Design Choices</h3>
+        <ul style="margin-left:16px; margin-top:4px;">
+          <li><strong>Hive partition path written by Lambda</strong> — Glue Catalog discovery is immediate, no crawler needed after each drop</li>
+          <li><strong>Redshift COPY uses <code>redshift-data</code> API</strong> (async) — Lambda doesn't hold open a DB connection; Redshift polls on its own</li>
+          <li><strong>PutObjectTagging at end</strong> = idempotency marker — re-triggered Lambda events skip already-tagged files</li>
+        </ul>
+      </div>
+
+      <div class="info-box" style="margin-top:16px; font-size:13px;">
+        <strong style="color:#FF9900">Partition path convention:</strong>
+        <pre style="margin:8px 0 0; font-size:12px; padding:10px 14px;"><code>oil_curated/
+  year=2025/
+    month=05/
+      day=12/
+        part-0001.parquet</code></pre>
+        Athena and Glue recognize this pattern natively — no manual schema repair needed.
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-number">03 / 03</div>
+</div>
+
+</body>
+</html>

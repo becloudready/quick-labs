@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kinesis vs Kafka — AWS Streaming Services</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f1117;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #f1f5f9;
+    padding: 40px 0;
+    min-height: 100vh;
+  }
+
+  .slide {
+    width: 1280px;
+    min-height: 720px;
+    margin: 40px auto;
+    padding: 56px 72px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #160f20 0%, #1e1030 100%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255,153,0,0.12);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #FF9900;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 38px;
+    font-weight: 800;
+    color: #f1f5f9;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 17px;
+    color: #94a3b8;
+    margin-bottom: 36px;
+    line-height: 1.5;
+  }
+
+  .divider {
+    height: 2px;
+    background: linear-gradient(90deg, #FF9900 0%, transparent 100%);
+    margin-bottom: 32px;
+    width: 80px;
+  }
+
+  p {
+    color: #94a3b8;
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 14px;
+  }
+
+  thead tr {
+    background: #1e293b;
+  }
+
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    color: #f1f5f9;
+    font-weight: 700;
+    border: 1px solid #2d3748;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+  }
+
+  tbody tr {
+    border: 1px solid #1e293b;
+  }
+
+  tbody tr:nth-child(even) {
+    background: rgba(255,255,255,0.025);
+  }
+
+  tbody tr:hover {
+    background: rgba(255,153,0,0.05);
+  }
+
+  tbody td {
+    padding: 11px 16px;
+    color: #94a3b8;
+    border: 1px solid #1e2d3d;
+    vertical-align: top;
+    line-height: 1.5;
+    font-size: 13.5px;
+  }
+
+  tbody td:first-child {
+    border-left: 3px solid #FF9900;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+
+  /* Code */
+  pre {
+    background: #0d1117;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    padding: 18px 22px;
+    border-radius: 8px;
+    border: 1px solid #21262d;
+    margin: 16px 0;
+    overflow-x: auto;
+  }
+
+  code {
+    background: #0d1117;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #21262d;
+  }
+
+  pre code {
+    background: transparent;
+    padding: 0;
+    border: none;
+    font-size: inherit;
+  }
+
+  ul, ol {
+    margin: 10px 0 10px 20px;
+    color: #94a3b8;
+  }
+
+  li {
+    margin-bottom: 7px;
+    line-height: 1.6;
+    font-size: 14.5px;
+  }
+
+  li strong {
+    color: #e2e8f0;
+  }
+
+  .slide-number {
+    position: absolute;
+    bottom: 28px;
+    right: 36px;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .info-box {
+    background: rgba(255,153,0,0.07);
+    border: 1px solid rgba(255,153,0,0.25);
+    border-left: 4px solid #FF9900;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    color: #e2e8f0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 12px;
+  }
+
+  .model-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,153,0,0.2);
+    border-top: 3px solid #FF9900;
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+
+  .model-card h3 {
+    color: #FF9900;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .model-card p {
+    font-size: 14px;
+    margin-bottom: 0;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(255,153,0,0.15);
+    color: #FF9900;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Slide 1 -->
+<div class="slide">
+  <div class="eyebrow">Kinesis vs Kafka — AWS Streaming Services</div>
+  <h1>Kinesis Data Streams vs Firehose</h1>
+  <div class="divider"></div>
+
+  <div class="two-col" style="margin-bottom:24px;">
+    <div class="model-card">
+      <h3>Data Streams</h3>
+      <p>A <strong style="color:#f1f5f9">durable, replayable log</strong> you read from. You build the consumer — Lambda, KCL, or Managed Flink sits on top.</p>
+    </div>
+    <div class="model-card">
+      <h3>Firehose</h3>
+      <p>A <strong style="color:#f1f5f9">managed delivery service</strong> to AWS sinks. No consumer code — point at a destination and data flows.</p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>Kinesis Data Streams</th>
+        <th>Kinesis Firehose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Mental model</td>
+        <td>"Pipe you read from"</td>
+        <td>"Delivery service"</td>
+      </tr>
+      <tr>
+        <td>You write consumer code?</td>
+        <td>Yes — Lambda / KCL / Flink</td>
+        <td>No — Firehose delivers</td>
+      </tr>
+      <tr>
+        <td>Latency</td>
+        <td>Sub-second</td>
+        <td>~60 seconds (buffer)</td>
+      </tr>
+      <tr>
+        <td>Retention</td>
+        <td>24h default, up to 365 days</td>
+        <td>None — forwarded then forgotten</td>
+      </tr>
+      <tr>
+        <td>Throughput model</td>
+        <td>Shards — you provision (1 MB/s in, 2 MB/s out per shard)</td>
+        <td>Auto-scaling — no capacity planning</td>
+      </tr>
+      <tr>
+        <td>Destinations</td>
+        <td>Wherever your consumer writes</td>
+        <td>S3, Redshift, OpenSearch, Splunk, Datadog, HTTP</td>
+      </tr>
+      <tr>
+        <td>Multi-consumer</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>Pricing</td>
+        <td>Per-shard-hour + per-PUT</td>
+        <td>Per-GB ingested</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <strong style="color:#FF9900">Mnemonic:</strong> Streams = <em>stream</em> (you build on top). Firehose = <em>hose</em> (point at a sink, water flows).
+  </div>
+
+  <div class="slide-number">01 / 04</div>
+</div>
+
+<!-- Slide 2 -->
+<div class="slide">
+  <div class="eyebrow">Kinesis vs Kafka — AWS Streaming Services</div>
+  <h1>Kinesis Streams ≈ Kafka, with Renamed Parts</h1>
+  <div class="divider"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Kafka</th>
+        <th>Kinesis Data Streams</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>The "thing data lives in"</td>
+        <td>Topic</td>
+        <td>Stream</td>
+      </tr>
+      <tr>
+        <td>Subdivision for parallelism / ordering</td>
+        <td>Partition</td>
+        <td>Shard</td>
+      </tr>
+      <tr>
+        <td>Routing key for ordering</td>
+        <td>Partition key → partition</td>
+        <td>Partition key → shard</td>
+      </tr>
+      <tr>
+        <td>Position within partition</td>
+        <td>Offset</td>
+        <td>Sequence number</td>
+      </tr>
+      <tr>
+        <td>Replayability</td>
+        <td>Configurable retention (default 7 days)</td>
+        <td>24h default, up to 365 days</td>
+      </tr>
+      <tr>
+        <td>Consumer state tracking</td>
+        <td><code>__consumer_offsets</code> topic</td>
+        <td>DynamoDB table (via KCL)</td>
+      </tr>
+      <tr>
+        <td>Multiple consumers, same data</td>
+        <td>Consumer groups</td>
+        <td>KCL apps + Enhanced Fan-Out</td>
+      </tr>
+      <tr>
+        <td>At-least-once delivery</td>
+        <td>✅</td>
+        <td>✅</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <strong style="color:#FF9900">One-liner:</strong> "Kinesis Data Streams = managed Kafka brokers + topics with <em>shards</em> instead of <em>partitions</em>, and tighter throughput caps."
+  </div>
+
+  <div class="slide-number">02 / 04</div>
+</div>
+
+<!-- Slide 3 -->
+<div class="slide">
+  <div class="eyebrow">Kinesis vs Kafka — AWS Streaming Services</div>
+  <h1>The Full Ecosystem Mapping</h1>
+  <div class="divider"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Kafka / OSS</th>
+        <th>AWS Equivalent</th>
+        <th>What It Does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Kafka brokers + topics</td>
+        <td>Kinesis Data Streams</td>
+        <td>The durable log</td>
+      </tr>
+      <tr>
+        <td>Self-managed Kafka</td>
+        <td>Amazon MSK</td>
+        <td>Managed Kafka with real Kafka API</td>
+      </tr>
+      <tr>
+        <td>Kafka Connect (sink connectors)</td>
+        <td>Kinesis Data Firehose</td>
+        <td>Pull from stream, batched delivery to sink</td>
+      </tr>
+      <tr>
+        <td>Kafka Connect (DB source connectors)</td>
+        <td>AWS DMS</td>
+        <td>CDC from operational databases</td>
+      </tr>
+      <tr>
+        <td>Kafka Streams / ksqlDB / Flink</td>
+        <td>Managed Service for Apache Flink</td>
+        <td>Stateful stream processing</td>
+      </tr>
+      <tr>
+        <td>Confluent Schema Registry</td>
+        <td>AWS Glue Schema Registry</td>
+        <td>Schema versioning + compatibility enforcement</td>
+      </tr>
+      <tr>
+        <td>Kafka consumer group + commit</td>
+        <td>KCL + DynamoDB checkpoint</td>
+        <td>Distributed consumers with checkpointing</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <strong style="color:#FF9900">Pattern:</strong> AWS slices Kafka's monolith into separately managed services. Each handles less but is fully managed — no JVMs, no ZooKeeper / KRaft, no disk capacity planning.
+  </div>
+
+  <div class="slide-number">03 / 04</div>
+</div>
+
+<!-- Slide 4 -->
+<div class="slide">
+  <div class="eyebrow">Kinesis vs Kafka — AWS Streaming Services</div>
+  <h1>Where the Analogies Leak — and When to Pick Each</h1>
+  <div class="divider"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Aspect</th>
+        <th>Kafka</th>
+        <th>Kinesis Data Streams</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Throughput per partition/shard</td>
+        <td>Hardware-limited (10+ MB/s common)</td>
+        <td>Hard caps: 1 MB/s write, 2 MB/s read per shard</td>
+      </tr>
+      <tr>
+        <td>Exactly-once semantics</td>
+        <td>Supported via transactional producers</td>
+        <td>At-least-once only — build idempotency yourself</td>
+      </tr>
+      <tr>
+        <td>Compression</td>
+        <td>Per-topic config (gzip / snappy / zstd / lz4)</td>
+        <td>Up to your producer code; no topic-level setting</td>
+      </tr>
+      <tr>
+        <td>Cross-region replication</td>
+        <td>MirrorMaker / Confluent Replicator</td>
+        <td>Not built-in — write a Lambda fan-out</td>
+      </tr>
+      <tr>
+        <td>Operations cost</td>
+        <td>You run brokers (or pay for MSK / Confluent)</td>
+        <td>Zero ops, but locked to AWS region / account</td>
+      </tr>
+      <tr>
+        <td>Client ecosystem</td>
+        <td>Massive open-source library</td>
+        <td>AWS SDKs only; no Kafka-protocol compatibility</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 style="font-size:17px; margin-top:24px; margin-bottom:12px; color:#FF9900;">When to Pick</h2>
+  <ul>
+    <li><strong>Kinesis Data Streams:</strong> zero broker ops, team deep in AWS, per-shard caps work for your volume</li>
+    <li><strong>Amazon MSK:</strong> existing Kafka code, need exactly-once, or Confluent ecosystem (speaks real Kafka protocol)</li>
+    <li><strong>Kinesis Data Firehose:</strong> building an S3 sink in Kafka Connect — without operating one</li>
+  </ul>
+
+  <div class="slide-number">04 / 04</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lake Formation Grant Models — Named vs Tag-Based</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f1117;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #f1f5f9;
+    padding: 40px 0;
+    min-height: 100vh;
+  }
+
+  .slide {
+    width: 1280px;
+    min-height: 720px;
+    margin: 40px auto;
+    padding: 56px 72px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0f1020 0%, #121525 100%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255,153,0,0.12);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #FF9900;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 38px;
+    font-weight: 800;
+    color: #f1f5f9;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+  }
+
+  .divider {
+    height: 2px;
+    background: linear-gradient(90deg, #FF9900 0%, transparent 100%);
+    margin-bottom: 32px;
+    width: 80px;
+  }
+
+  p {
+    color: #94a3b8;
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 14px;
+  }
+
+  thead tr {
+    background: #1e293b;
+  }
+
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    color: #f1f5f9;
+    font-weight: 700;
+    border: 1px solid #2d3748;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+  }
+
+  tbody tr {
+    border: 1px solid #1e293b;
+  }
+
+  tbody tr:nth-child(even) {
+    background: rgba(255,255,255,0.025);
+  }
+
+  tbody tr:hover {
+    background: rgba(255,153,0,0.05);
+  }
+
+  tbody td {
+    padding: 11px 16px;
+    color: #94a3b8;
+    border: 1px solid #1e2d3d;
+    vertical-align: top;
+    line-height: 1.5;
+    font-size: 13.5px;
+  }
+
+  tbody td:first-child {
+    border-left: 3px solid #FF9900;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+
+  /* Code */
+  pre {
+    background: #0d1117;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    padding: 18px 22px;
+    border-radius: 8px;
+    border: 1px solid #21262d;
+    margin: 16px 0;
+    overflow-x: auto;
+  }
+
+  code {
+    background: #0d1117;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #21262d;
+  }
+
+  pre code {
+    background: transparent;
+    padding: 0;
+    border: none;
+    font-size: inherit;
+  }
+
+  ul {
+    margin: 10px 0 10px 20px;
+    color: #94a3b8;
+  }
+
+  li {
+    margin-bottom: 7px;
+    line-height: 1.6;
+    font-size: 14.5px;
+  }
+
+  li strong { color: #e2e8f0; }
+
+  .slide-number {
+    position: absolute;
+    bottom: 28px;
+    right: 36px;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .info-box {
+    background: rgba(255,153,0,0.07);
+    border: 1px solid rgba(255,153,0,0.25);
+    border-left: 4px solid #FF9900;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    color: #e2e8f0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 12px;
+  }
+
+  .model-panel {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,153,0,0.18);
+    border-radius: 10px;
+    padding: 24px 26px;
+    position: relative;
+  }
+
+  .model-panel.named {
+    border-top: 3px solid #7c6bc8;
+  }
+
+  .model-panel.tagged {
+    border-top: 3px solid #FF9900;
+  }
+
+  .model-panel h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .model-panel.named h3 { color: #a78bfa; }
+  .model-panel.tagged h3 { color: #FF9900; }
+
+  .icon-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 14px 0;
+    padding: 12px 14px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+
+  .icon-row .icon { font-size: 20px; }
+
+  .sql-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-top: 16px;
+    margin-bottom: 4px;
+  }
+
+  .tag-pill {
+    display: inline-block;
+    background: rgba(255,153,0,0.12);
+    border: 1px solid rgba(255,153,0,0.3);
+    color: #FF9900;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin: 2px 4px 2px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Slide 1 -->
+<div class="slide">
+  <div class="eyebrow">Lake Formation — Named vs Tag-Based Grant Models</div>
+  <h1>Two Ways to Grant in Lake Formation</h1>
+  <div class="divider"></div>
+
+  <p>When you click <strong style="color:#e2e8f0">Grant</strong> in the LF console, you choose a model. Same button — two fundamentally different mental models.</p>
+
+  <div class="two-col" style="margin-top:20px;">
+    <div class="model-panel named">
+      <h3>Named Data Catalog Resources</h3>
+      <div class="icon-row">
+        <span class="icon">👆</span>
+        <span>Point at <strong style="color:#e2e8f0">specific</strong> databases / tables / columns by exact name</span>
+      </div>
+      <p style="font-size:14px; margin-top:10px;">You select exactly what you want to share. If a table doesn't exist yet, it isn't covered — every new resource needs a new grant.</p>
+      <div class="sql-label">SQL analogue</div>
+      <pre><code>GRANT SELECT ON quicklabs.curated_oil
+  TO student7;</code></pre>
+    </div>
+
+    <div class="model-panel tagged">
+      <h3>Resources Matched by LF-Tags</h3>
+      <div class="icon-row">
+        <span class="icon">🧲</span>
+        <span>Define a <strong style="color:#e2e8f0">tag expression</strong> — LF matches all matching resources at query time</span>
+      </div>
+      <p style="font-size:14px; margin-top:10px;">You write a predicate, not a resource list. New tables tagged correctly are automatically covered — zero new grants required.</p>
+      <div class="sql-label">SQL analogue</div>
+      <pre><code>GRANT SELECT ON ANY TABLE
+  WHERE classification = 'public'
+  TO student7;</code></pre>
+    </div>
+  </div>
+
+  <div class="slide-number">01 / 04</div>
+</div>
+
+<!-- Slide 2 -->
+<div class="slide">
+  <div class="eyebrow">Lake Formation — Named vs Tag-Based Grant Models</div>
+  <h1>Named Data Catalog Resources</h1>
+  <div class="divider"></div>
+
+  <p>You pick specific things by name, optionally down to individual columns:</p>
+  <ul style="margin-bottom:18px;">
+    <li>Pick <code>database = quicklabs_student8_lake</code></li>
+    <li>Pick <code>table = curated_oil</code></li>
+    <li>Optionally pick specific columns — e.g. all except <code>volume</code></li>
+  </ul>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Property</th>
+        <th>Behavior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Scope</td>
+        <td>Static — exactly the resources you ticked at grant time</td>
+      </tr>
+      <tr>
+        <td>New tables created tomorrow</td>
+        <td>Not covered — requires a new grant per resource</td>
+      </tr>
+      <tr>
+        <td>Audit / listing</td>
+        <td>Easy: Data Permissions page shows db → table directly</td>
+      </tr>
+      <tr>
+        <td>Best for</td>
+        <td>Small data lakes, one-off grants, ad-hoc sharing</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="sql-label" style="font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#64748b; margin-top:8px;">SQL analogue</div>
+  <pre><code>GRANT SELECT ON quicklabs_student8_lake.curated_oil TO student7;</code></pre>
+
+  <div class="info-box">
+    Named grants work well for small lakes with stable schemas. They couple your security model to your data catalog — every new table is a support ticket to security.
+  </div>
+
+  <div class="slide-number">02 / 04</div>
+</div>
+
+<!-- Slide 3 -->
+<div class="slide">
+  <div class="eyebrow">Lake Formation — Named vs Tag-Based Grant Models</div>
+  <h1>Resources Matched by LF-Tags</h1>
+  <div class="divider"></div>
+
+  <p>You write a tag expression; LF resolves it at runtime against the current tag state of every resource:</p>
+
+  <div style="margin: 14px 0 22px;">
+    <span style="font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Tag expression example</span>
+    <div style="margin-top:8px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <span class="tag-pill">sensitivity = public</span>
+      <span style="color:#64748b; font-weight:700;">AND</span>
+      <span class="tag-pill">department = finance</span>
+    </div>
+    <p style="margin-top:10px; font-size:14px; color:#94a3b8;">Applies to every resource carrying these tags — today <strong style="color:#e2e8f0">and in the future</strong>.</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Property</th>
+        <th>Behavior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Scope</td>
+        <td>Dynamic — defined by predicate, not a resource name</td>
+      </tr>
+      <tr>
+        <td>New tables tagged accordingly tomorrow</td>
+        <td>Automatically covered — zero new grants required</td>
+      </tr>
+      <tr>
+        <td>Audit / listing</td>
+        <td>Harder — must join tag expression with current tag attachments across resources</td>
+      </tr>
+      <tr>
+        <td>Best for</td>
+        <td>Large orgs, many tables, consistent classification policy</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="sql-label" style="font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#64748b; margin-top:8px;">SQL analogue</div>
+  <pre><code>GRANT SELECT ON ANY TABLE WHERE classification = 'public' TO student7;</code></pre>
+
+  <div class="slide-number">03 / 04</div>
+</div>
+
+<!-- Slide 4 -->
+<div class="slide">
+  <div class="eyebrow">Lake Formation — Named vs Tag-Based Grant Models</div>
+  <h1>When the Difference Matters</h1>
+  <div class="divider"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Scenario</th>
+        <th>Named Grants</th>
+        <th>LF-Tag Grants</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1 table, 1 consumer</td>
+        <td>1 grant</td>
+        <td>1 grant + 1 tag attachment</td>
+      </tr>
+      <tr>
+        <td>50 tables, 1 consumer, same access</td>
+        <td>50 grants</td>
+        <td>1 grant + 50 tag attachments</td>
+      </tr>
+      <tr>
+        <td>Add a 51st table next week</td>
+        <td>+1 more grant — manual action required</td>
+        <td>Just tag the new table — grant auto-applies</td>
+      </tr>
+      <tr>
+        <td>Audit "what can student7 read?"</td>
+        <td>Look at Data Permissions list — direct</td>
+        <td>Cross-reference tag expression + every table's current tags</td>
+      </tr>
+      <tr>
+        <td>Coordination cost</td>
+        <td>Every new table = ticket to security team</td>
+        <td>Data eng tags; security wrote the rule once</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box" style="margin-top:24px;">
+    <strong style="color:#FF9900">The punchline:</strong> Named grants couple access control to resource creation — security acts every time data engineering ships a new table. Tag-based grants decouple them. In a real organization, this is the difference between <strong>"security is a bottleneck"</strong> and <strong>"security scales."</strong>
+  </div>
+
+  <div class="slide-number">04 / 04</div>
+</div>
+
+</body>
+</html>

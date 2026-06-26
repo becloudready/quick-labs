@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Day 3 Kickoff — Day 1 & Day 2 Recap | AWS Data Platform Training</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ── Slide shell ─────────────────────────────────────── */
+    .slide {
+      width: 1280px;
+      min-height: 720px;
+      margin: 40px auto;
+      padding: 44px 64px 52px;
+      border-radius: 14px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0,0,0,.10);
+    }
+
+    /* ── Top bar ─────────────────────────────────────────── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .day-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .day-pill {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+    }
+
+    .program-tag {
+      font-size: 12px;
+      color: #475569;
+      letter-spacing: .06em;
+    }
+
+    .slide-num {
+      font-size: 13px;
+      color: #334155;
+      letter-spacing: .06em;
+    }
+
+    /* ── Heading ─────────────────────────────────────────── */
+    .slide-heading {
+      margin-bottom: 32px;
+    }
+
+    .slide-heading h1 {
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1.15;
+      color: #0f172a;
+    }
+
+    .slide-heading .sub {
+      font-size: 15px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    /* ── Module grid ─────────────────────────────────────── */
+    .module-grid {
+      display: grid;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+    .module-card {
+      border-radius: 10px;
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .module-card .m-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .m-icon {
+      font-size: 24px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .m-title-block .m-num {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .m-title-block .m-title {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .m-title-block .m-duration {
+      font-size: 11px;
+      color: #475569;
+      margin-top: 2px;
+    }
+
+    .m-bullets {
+      list-style: none;
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: #374151;
+      padding-left: 2px;
+      flex: 1;
+    }
+
+    .m-bullets li::before {
+      content: "▸ ";
+      font-size: 10px;
+    }
+
+    .m-key-concept {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 5px;
+      margin-top: auto;
+      letter-spacing: .02em;
+    }
+
+    /* ── Data flow bar (bottom of slides) ───────────────── */
+    .flow-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-top: 22px;
+      padding: 12px 20px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      font-size: 12px;
+      color: #475569;
+      flex-wrap: wrap;
+    }
+
+    .flow-bar .flow-label {
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-right: 14px;
+      white-space: nowrap;
+    }
+
+    .flow-chip {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .flow-arrow {
+      padding: 0 6px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    /* ─────────────────────────────────────────────────────
+       SLIDE 1 COLOURS (Blue / Day 1)
+    ───────────────────────────────────────────────────── */
+    .slide-1 {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    .slide-1 .day-pill {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border: 1px solid #93c5fd;
+    }
+
+    /* Module 1 — AWS Intro */
+    .card-m1 {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+    }
+    .card-m1 .m-num  { color: #2563eb; }
+    .card-m1 .m-title { color: #1e3a8a; }
+    .card-m1 .m-bullets li::before { color: #2563eb; }
+    .card-m1 .m-key-concept { background: #dbeafe; color: #1e40af; }
+
+    /* Module 2 — S3 / Data Lake */
+    .card-m2 {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+    .card-m2 .m-num  { color: #16a34a; }
+    .card-m2 .m-title { color: #14532d; }
+    .card-m2 .m-bullets li::before { color: #16a34a; }
+    .card-m2 .m-key-concept { background: #dcfce7; color: #15803d; }
+
+    /* Module 3 — IAM */
+    .card-m3 {
+      background: #fefce8;
+      border: 1px solid #fde68a;
+    }
+    .card-m3 .m-num  { color: #d97706; }
+    .card-m3 .m-title { color: #78350f; }
+    .card-m3 .m-bullets li::before { color: #d97706; }
+    .card-m3 .m-key-concept { background: #fef9c3; color: #854d0e; }
+
+    /* Module 4 — Data Ingestion */
+    .card-m4 {
+      background: #faf5ff;
+      border: 1px solid #e9d5ff;
+    }
+    .card-m4 .m-num  { color: #7c3aed; }
+    .card-m4 .m-title { color: #4c1d95; }
+    .card-m4 .m-bullets li::before { color: #7c3aed; }
+    .card-m4 .m-key-concept { background: #ede9fe; color: #5b21b6; }
+
+    /* Day 1 flow bar chips */
+    .chip-s3    { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .chip-iam   { background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; }
+    .chip-sqs   { background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+    .chip-lmb   { background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+
+    /* ─────────────────────────────────────────────────────
+       SLIDE 2 COLOURS (Teal / Day 2)
+    ───────────────────────────────────────────────────── */
+    .slide-2 {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    .slide-2 .day-pill {
+      background: #cffafe;
+      color: #0e7490;
+      border: 1px solid #67e8f9;
+    }
+
+    /* Module 5 — Lake Formation */
+    .card-m5 {
+      background: #ecfeff;
+      border: 1px solid #a5f3fc;
+    }
+    .card-m5 .m-num  { color: #0e7490; }
+    .card-m5 .m-title { color: #164e63; }
+    .card-m5 .m-bullets li::before { color: #0e7490; }
+    .card-m5 .m-key-concept { background: #cffafe; color: #0e7490; }
+
+    /* Module 6 — Athena */
+    .card-m6 {
+      background: #f5f3ff;
+      border: 1px solid #c4b5fd;
+    }
+    .card-m6 .m-num  { color: #4f46e5; }
+    .card-m6 .m-title { color: #3730a3; }
+    .card-m6 .m-bullets li::before { color: #4f46e5; }
+    .card-m6 .m-key-concept { background: #ede9fe; color: #3730a3; }
+
+    /* Module 7 — CDC */
+    .card-m7 {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+    }
+    .card-m7 .m-num  { color: #e11d48; }
+    .card-m7 .m-title { color: #881337; }
+    .card-m7 .m-bullets li::before { color: #e11d48; }
+    .card-m7 .m-key-concept { background: #ffe4e6; color: #be123c; }
+
+    /* Day 2 flow bar chips */
+    .chip-lf    { background: #cffafe; color: #0e7490; border: 1px solid #67e8f9; }
+    .chip-ath   { background: #ede9fe; color: #3730a3; border: 1px solid #a5b4fc; }
+    .chip-dms   { background: #ffe4e6; color: #be123c; border: 1px solid #fecdd3; }
+
+    /* ── Permission layer visual (inside M5) ─────────────── */
+    .perm-layers {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .perm-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: 700;
+    }
+
+    .pt-db  { background: #cffafe; color: #0e7490; }
+    .pt-tbl { background: #a5f3fc; color: #0c4a6e; }
+    .pt-col { background: #bbf7d0; color: #065f46; }
+    .pt-row { background: #fecdd3; color: #9f1239; }
+
+    /* ── Divider between slides ───────────────────────────── */
+    .slide-divider {
+      width: 1280px;
+      margin: 0 auto;
+      border: none;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    /* ══ DAY 2 EXPANDED SLIDES ══════════════════════════════ */
+
+    /* Overview grid */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      flex: 1;
+    }
+    .overview-block {
+      border-radius: 12px;
+      padding: 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ov-icon { font-size: 30px; }
+    .ov-mod-label { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    .ov-title { font-size: 16px; font-weight: 800; line-height: 1.25; }
+    .ov-bullets { list-style: none; font-size: 12.5px; line-height: 1.65; flex: 1; padding-left: 2px; }
+    .ov-bullets li::before { content: "▸ "; font-size: 10px; }
+    .ov-takeaway { font-size: 11.5px; font-weight: 700; padding: 5px 10px; border-radius: 5px; margin-top: auto; }
+
+    .ov-lf { background: #ecfeff; border: 1px solid #a5f3fc; }
+    .ov-lf .ov-mod-label, .ov-lf .ov-bullets li::before { color: #0e7490; }
+    .ov-lf .ov-title { color: #164e63; }
+    .ov-lf .ov-bullets { color: #1e4a5f; }
+    .ov-lf .ov-takeaway { background: #cffafe; color: #0e7490; }
+
+    .ov-ath { background: #f5f3ff; border: 1px solid #c4b5fd; }
+    .ov-ath .ov-mod-label, .ov-ath .ov-bullets li::before { color: #4f46e5; }
+    .ov-ath .ov-title { color: #3730a3; }
+    .ov-ath .ov-bullets { color: #312e81; }
+    .ov-ath .ov-takeaway { background: #ede9fe; color: #3730a3; }
+
+    .ov-cdc { background: #fff1f2; border: 1px solid #fecdd3; }
+    .ov-cdc .ov-mod-label, .ov-cdc .ov-bullets li::before { color: #e11d48; }
+    .ov-cdc .ov-title { color: #881337; }
+    .ov-cdc .ov-bullets { color: #9f1239; }
+    .ov-cdc .ov-takeaway { background: #ffe4e6; color: #be123c; }
+
+    /* Two-column detail layout */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; flex: 1; }
+    .detail-panel { border-radius: 10px; padding: 18px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .panel-title { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 2px; }
+    .detail-list { list-style: none; font-size: 13px; line-height: 1.7; flex: 1; color: #374151; padding-left: 2px; }
+    .detail-list li::before { content: "▸ "; font-size: 10px; }
+
+    .dp-teal   { background: #ecfeff; border: 1px solid #a5f3fc; }
+    .dp-teal   .panel-title { color: #0e7490; }
+    .dp-teal   .detail-list li::before { color: #0e7490; }
+    .dp-blue   { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .dp-blue   .panel-title { color: #1d4ed8; }
+    .dp-blue   .detail-list li::before { color: #1d4ed8; }
+    .dp-indigo { background: #f5f3ff; border: 1px solid #c4b5fd; }
+    .dp-indigo .panel-title { color: #4f46e5; }
+    .dp-indigo .detail-list li::before { color: #4f46e5; }
+    .dp-rose   { background: #fff1f2; border: 1px solid #fecdd3; }
+    .dp-rose   .panel-title { color: #e11d48; }
+    .dp-rose   .detail-list li::before { color: #e11d48; }
+    .dp-amber  { background: #fefce8; border: 1px solid #fde68a; }
+    .dp-amber  .panel-title { color: #d97706; }
+    .dp-amber  .detail-list li::before { color: #d97706; }
+    .dp-slate  { background: #f8fafc; border: 1px solid #e2e8f0; }
+    .dp-slate  .panel-title { color: #334155; }
+    .dp-slate  .detail-list li::before { color: #64748b; }
+
+    /* Callout boxes */
+    .callout-box { padding: 9px 13px; border-radius: 7px; font-size: 12.5px; line-height: 1.5; }
+    .cb-teal  { background: #ecfeff; border: 1px solid #a5f3fc; color: #0e7490; }
+    .cb-blue  { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; }
+    .cb-amber { background: #fefce8; border: 1px solid #fde68a; color: #78350f; }
+
+    /* Permission hierarchy */
+    .perm-hierarchy { display: flex; flex-direction: column; gap: 5px; }
+    .ph-row { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 600; }
+    .ph-icon { font-size: 14px; min-width: 20px; }
+    .ph-label { flex: 1; }
+    .ph-desc { font-size: 11px; font-weight: 400; opacity: .75; }
+    .ph-db   { background: #ecfeff; color: #0e7490; border: 1px solid #a5f3fc; }
+    .ph-tbl  { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .ph-col  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .ph-rfl  { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .ph-cell { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+    /* LF-Tags grid */
+    .lftag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .lftag-item { padding: 8px 10px; border-radius: 6px; background: #f8fafc; border: 1px solid #e2e8f0; }
+    .lftag-key { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #4f46e5; margin-bottom: 2px; }
+    .lftag-val { font-size: 11.5px; color: #374151; }
+
+    /* Athena query flow */
+    .query-flow { display: flex; align-items: center; padding: 12px 14px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; gap: 4px; }
+    .qf-step { text-align: center; flex: 1; }
+    .qf-icon { font-size: 20px; }
+    .qf-label { font-size: 10.5px; font-weight: 700; color: #374151; margin-top: 2px; }
+    .qf-sub   { font-size: 9.5px; color: #94a3b8; }
+    .qf-arrow { color: #94a3b8; font-size: 14px; padding: 0 1px; }
+
+    /* CDC pipeline */
+    .cdc-pipeline { display: flex; align-items: stretch; }
+    .cdc-stage { flex: 1; padding: 12px 14px; border-radius: 8px; text-align: center; }
+    .cdc-arrow { display: flex; align-items: center; padding: 0 8px; color: #94a3b8; font-size: 18px; }
+    .cs-badge  { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 3px; }
+    .cs-name   { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .cs-detail { font-size: 10.5px; opacity: .8; }
+    .cs-src  { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; }
+    .cs-dms  { background: #fefce8; border: 1px solid #fde68a; color: #78350f; }
+    .cs-tgt  { background: #ecfeff; border: 1px solid #a5f3fc; color: #164e63; }
+
+    /* Athena vs Redshift compare table */
+    .compare-table { display: flex; flex-direction: column; gap: 4px; }
+    .ct-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 4px; }
+    .ct-cell { padding: 6px 9px; border-radius: 5px; font-size: 11.5px; color: #374151; background: #f8fafc; border: 1px solid #e2e8f0; }
+    .ct-cell.hdr { font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #64748b; background: #f1f5f9; }
+    .ct-cell.c-ath { background: #f5f3ff; border-color: #c4b5fd; color: #3730a3; }
+    .ct-cell.c-red { background: #ecfeff; border-color: #a5f3fc; color: #164e63; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 1 — Day 1 Recap
+═══════════════════════════════════════════════════════ -->
+<div class="slide slide-1">
+
+  <div class="top-bar">
+    <div class="day-badge">
+      <div class="day-pill">Day 3 Kickoff</div>
+      <span class="program-tag">AWS Data Platform Training &nbsp;·&nbsp; 2026</span>
+    </div>
+    <div class="slide-num">Recap 1 of 6</div>
+  </div>
+
+  <div class="slide-heading">
+    <h1>Day 1 Review — AWS Foundations &amp; Data Storage</h1>
+    <div class="sub">&nbsp;&nbsp; Core building blocks everything else depends on</div>
+  </div>
+
+  <div class="module-grid grid-4">
+
+    <!-- Module 1 -->
+    <div class="module-card card-m1">
+      <div class="m-header">
+        <div class="m-icon">☁️</div>
+        <div class="m-title-block">
+          <div class="m-num">Module 1</div>
+          <div class="m-title">AWS Intro &amp; Shared Responsibility</div>
+          <div class="m-duration"></div>
+        </div>
+      </div>
+      <ul class="m-bullets">
+        <li>Cloud fundamentals &amp; AWS value prop</li>
+        <li>Regions, AZs, Edge Locations</li>
+        <li>Shared Responsibility Model</li>
+        <li>AWS GovCloud for compliance</li>
+        <li>Hybrid multi-environment strategy</li>
+      </ul>
+      <div class="m-key-concept">Key idea: AWS secures the cloud; you secure what's in it</div>
+    </div>
+
+    <!-- Module 2 -->
+    <div class="module-card card-m2">
+      <div class="m-header">
+        <div class="m-icon">🪣</div>
+        <div class="m-title-block">
+          <div class="m-num">Module 2</div>
+          <div class="m-title">Amazon S3 &amp; Data Lake Foundations</div>
+        </div>
+      </div>
+      <ul class="m-bullets">
+        <li>Buckets, objects, prefixes, storage classes</li>
+        <li>Data lake pattern: Raw → Enriched → Consolidated</li>
+        <li>Bucket policies, encryption at rest &amp; in transit</li>
+        <li>Versioning for data protection</li>
+        <li>Lifecycle policies &amp; intelligent tiering</li>
+        <li>Cross-region replication for DR</li>
+      </ul>
+      <div class="m-key-concept">Key idea: S3 is the foundation of the enterprise data lake</div>
+    </div>
+
+    <!-- Module 3 -->
+    <div class="module-card card-m3">
+      <div class="m-header">
+        <div class="m-icon">🔑</div>
+        <div class="m-title-block">
+          <div class="m-num">Module 3</div>
+          <div class="m-title">IAM Fundamentals for Data Platforms</div>
+        </div>
+      </div>
+      <ul class="m-bullets">
+        <li>Principals: users, groups, roles, policies</li>
+        <li>Policy structure: Effect · Action · Resource · Condition</li>
+        <li>RBAC best practices</li>
+        <li>Cross-account access patterns</li>
+        <li>Service roles &amp; instance profiles</li>
+        <li>Principle of least privilege</li>
+      </ul>
+      <div class="m-key-concept">Key idea: IAM is the identity control plane for all services</div>
+    </div>
+
+    <!-- Module 4 -->
+    <div class="module-card card-m4">
+      <div class="m-header">
+        <div class="m-icon">⚡</div>
+        <div class="m-title-block">
+          <div class="m-num">Module 4</div>
+          <div class="m-title">Data Ingestion Use Cases</div>
+        </div>
+      </div>
+      <ul class="m-bullets">
+        <li>Event-driven: S3 → SQS → Lambda</li>
+        <li>UC1: field imagery capture (ITAR context)</li>
+        <li>UC2: batch file-drop pipeline</li>
+        <li>SQS vs. Kinesis — batch vs. streaming fit</li>
+        <li>Dead-letter queues &amp; error handling</li>
+      </ul>
+      <div class="m-key-concept">Key idea: S3 is the landing zone; events drive processing</div>
+    </div>
+
+  </div>
+
+  <!-- Data flow recap bar -->
+  <div class="flow-bar">
+    <span class="flow-label">Day 1 Architecture Thread</span>
+    <span class="flow-chip chip-s3">S3 Raw</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-iam">IAM Role</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-sqs">SQS</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-lmb">Lambda</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-s3">S3 Enriched</span>
+    <span style="margin-left:auto;font-size:12px;color:#64748b;">Security: bucket policies · encryption · versioning · least privilege</span>
+  </div>
+
+</div>
+
+<hr class="slide-divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 2 — Day 2 Overview
+═══════════════════════════════════════════════════════ -->
+<div class="slide slide-2">
+
+  <div class="top-bar">
+    <div class="day-badge">
+      <div class="day-pill">Day 3 Kickoff</div>
+      <span class="program-tag">AWS Data Platform Training &nbsp;·&nbsp; 2026</span>
+    </div>
+    <div class="slide-num">Recap 2 of 6</div>
+  </div>
+
+  <div class="slide-heading">
+    <h1>Day 2 Overview — Governance, Analytics &amp; Data Sync</h1>
+    <div class="sub">&nbsp;&nbsp; Three capabilities that turn a raw data lake into a governed, queryable, always-current platform</div>
+  </div>
+
+  <div class="overview-grid">
+
+    <div class="overview-block ov-lf">
+      <div class="ov-icon">🏛️</div>
+      <div class="ov-mod-label">Module 5</div>
+      <div class="ov-title">Lake Formation — Governance &amp; Permissions</div>
+      <ul class="ov-bullets">
+        <li>Data Catalog as central metadata store</li>
+        <li>Fine-grained: column · row · cell-level access</li>
+        <li>LF-Tags for attribute-based access control (ABAC)</li>
+        <li>IAM + Lake Formation dual-layer model</li>
+        <li>Cross-account data sharing</li>
+        <li>CloudTrail audit logging</li>
+      </ul>
+      <div class="ov-takeaway">Who sees what — enforced at the catalog layer</div>
+    </div>
+
+    <div class="overview-block ov-ath">
+      <div class="ov-icon">🔍</div>
+      <div class="ov-mod-label">Module 6</div>
+      <div class="ov-title">Athena — Serverless SQL on S3</div>
+      <ul class="ov-bullets">
+        <li>No infrastructure — pay per TB scanned</li>
+        <li>Workgroups: isolation &amp; cost controls</li>
+        <li>Partitioning &amp; columnar formats (Parquet / ORC)</li>
+        <li>Federated queries across multiple sources</li>
+        <li>Respects Lake Formation governed tables</li>
+        <li>Athena vs. Redshift — workload fit decision</li>
+      </ul>
+      <div class="ov-takeaway">Query S3 directly — no data movement, no clusters</div>
+    </div>
+
+    <div class="overview-block ov-cdc">
+      <div class="ov-icon">🔄</div>
+      <div class="ov-mod-label">Module 7</div>
+      <div class="ov-title">CDC — Change Data Capture with DMS</div>
+      <ul class="ov-bullets">
+        <li>CDC vs. batch ETL: latency &amp; consistency tradeoffs</li>
+        <li>AWS DMS: full-load + ongoing replication modes</li>
+        <li>Pattern: PostgreSQL → DMS → Redshift</li>
+        <li>Handling schema changes &amp; replication lag</li>
+        <li>Error handling, monitoring &amp; alerting</li>
+        <li>Keeping the warehouse in sync with ops DBs</li>
+      </ul>
+      <div class="ov-takeaway">Keep the warehouse current without full reloads</div>
+    </div>
+
+  </div>
+
+  <div class="flow-bar">
+    <span class="flow-label">Day 2 Architecture Thread</span>
+    <span class="flow-chip chip-s3">S3 Data Lake</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-lf">Lake Formation</span>
+    <span class="flow-arrow">controls</span>
+    <span class="flow-chip chip-ath">Athena</span>
+    <span class="flow-arrow">+</span>
+    <span class="flow-chip chip-dms">DMS CDC</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-lf">Data Catalog</span>
+    <span style="margin-left:auto;font-size:12px;color:#64748b;">Security: column/row filters · LF-Tags · ABAC · CloudTrail audit</span>
+  </div>
+
+</div>
+
+<hr class="slide-divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 3 — Module 5: Lake Formation Foundations
+═══════════════════════════════════════════════════════ -->
+<div class="slide slide-2">
+
+  <div class="top-bar">
+    <div class="day-badge">
+      <div class="day-pill">Day 3 Kickoff</div>
+      <span class="program-tag">AWS Data Platform Training &nbsp;·&nbsp; 2026</span>
+    </div>
+    <div class="slide-num">Recap 3 of 6</div>
+  </div>
+
+  <div class="slide-heading">
+    <h1>Module 5 — Lake Formation: Governance Foundations</h1>
+    <div class="sub">&nbsp;&nbsp; Central access control layer that sits on top of S3 and IAM</div>
+  </div>
+
+  <div class="two-col">
+
+    <div class="detail-panel dp-teal">
+      <div class="panel-title">What Lake Formation Is (and Isn't)</div>
+      <ul class="detail-list">
+        <li><strong>Data Catalog</strong> — central metadata store for all S3 datasets</li>
+        <li><strong>NOT a Glue ETL replacement</strong> — governs access, not transformation</li>
+        <li>Works on top of S3 — LF registers S3 paths, then takes over from raw IAM</li>
+        <li>Principals (users/roles) query via Athena, Redshift Spectrum, or EMR</li>
+        <li>LF acts as the enforcement point — Athena asks LF if you can see the table</li>
+        <li>Glue crawler still populates catalog schema; LF controls who sees it</li>
+        <li>Service-linked role: <code>AWSServiceRoleForLakeFormationDataAccess</code> is created automatically</li>
+      </ul>
+      <div class="callout-box cb-teal" style="margin-top:6px;">
+        <strong>Key mental model:</strong> S3 holds the bytes. Glue catalogs the schema. Lake Formation decides who can read it.
+      </div>
+    </div>
+
+    <div class="detail-panel dp-blue">
+      <div class="panel-title">Setup Flow &amp; Dual-Layer Model</div>
+      <ul class="detail-list">
+        <li><strong>Step 1:</strong> Designate a Data Lake Administrator in the LF console</li>
+        <li><strong>Step 2:</strong> Register S3 locations — LF now manages access to those paths</li>
+        <li><strong>Step 3:</strong> Create databases &amp; tables in the Data Catalog (Glue crawler or manual DDL)</li>
+        <li><strong>Step 4:</strong> Grant LF permissions to IAM principals (users, roles, groups)</li>
+        <li><strong>Step 5:</strong> Grant Athena workgroup or Redshift namespace access to query</li>
+        <li>Revoke the default <em>"IAMAllowedPrincipals"</em> super-grant — otherwise IAM alone can bypass LF</li>
+      </ul>
+      <div class="callout-box cb-blue" style="margin-top:8px;">
+        <strong>IAM + Lake Formation dual-layer — both must Allow:</strong><br>
+        IAM = can the principal call the Athena / Glue API?<br>
+        LF = can the principal see this database / table / column?<br>
+        A single Deny in either layer blocks the query.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="flow-bar">
+    <span class="flow-label">Access Path</span>
+    <span class="flow-chip chip-ath">Athena query</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-lf">Lake Formation check</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-iam">IAM check</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-s3">S3 data read</span>
+    <span style="margin-left:auto;font-size:12px;color:#64748b;">Both Lake Formation AND IAM must allow — a single deny blocks the query</span>
+  </div>
+
+</div>
+
+<hr class="slide-divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 4 — Module 5: Fine-Grained Permissions & LF-Tags
+═══════════════════════════════════════════════════════ -->
+<div class="slide slide-2">
+
+  <div class="top-bar">
+    <div class="day-badge">
+      <div class="day-pill">Day 3 Kickoff</div>
+      <span class="program-tag">AWS Data Platform Training &nbsp;·&nbsp; 2026</span>
+    </div>
+    <div class="slide-num">Recap 4 of 6</div>
+  </div>
+
+  <div class="slide-heading">
+    <h1>Module 5 — Fine-Grained Access Control &amp; LF-Tags (ABAC)</h1>
+    <div class="sub">&nbsp;&nbsp; Column · row · cell-level filters + attribute-based access that scales without per-table grants</div>
+  </div>
+
+  <div class="two-col">
+
+    <div class="detail-panel dp-teal">
+      <div class="panel-title">Permission Hierarchy</div>
+      <div class="perm-hierarchy">
+        <div class="ph-row ph-db">
+          <span class="ph-icon">🗄️</span>
+          <span class="ph-label">Database-level</span>
+          <span class="ph-desc">Access to all tables in a database</span>
+        </div>
+        <div class="ph-row ph-tbl">
+          <span class="ph-icon">📋</span>
+          <span class="ph-label">Table-level</span>
+          <span class="ph-desc">Access to one specific table</span>
+        </div>
+        <div class="ph-row ph-col">
+          <span class="ph-icon">📊</span>
+          <span class="ph-label">Column-level</span>
+          <span class="ph-desc">Include or exclude specific columns per role</span>
+        </div>
+        <div class="ph-row ph-rfl">
+          <span class="ph-icon">🔎</span>
+          <span class="ph-label">Row-level filter</span>
+          <span class="ph-desc">WHERE-clause condition attached to the principal</span>
+        </div>
+        <div class="ph-row ph-cell">
+          <span class="ph-icon">🔐</span>
+          <span class="ph-label">Cell-level security</span>
+          <span class="ph-desc">Column exclusion + row filter combined</span>
+        </div>
+      </div>
+      <div class="callout-box cb-teal" style="margin-top:10px;">
+        Example: analyst role sees <em>all rows</em> but <em>no SSN column</em>. Contractor role sees only <em>their region's rows</em> and <em>no salary columns</em>.
+      </div>
+    </div>
+
+    <div class="detail-panel dp-indigo">
+      <div class="panel-title">LF-Tags for ABAC (Attribute-Based Access Control)</div>
+      <ul class="detail-list">
+        <li>Assign tags to <strong>resources</strong> (databases, tables, columns)</li>
+        <li>Assign matching tags to <strong>principals</strong> (IAM users / roles)</li>
+        <li>Access = tag match — no explicit per-table grants needed</li>
+        <li>New tables tagged correctly are automatically accessible to matching principals</li>
+        <li>Eliminates the O(tables × roles) grant explosion of traditional RBAC</li>
+      </ul>
+      <div class="lftag-grid" style="margin: 8px 0;">
+        <div class="lftag-item">
+          <div class="lftag-key">Resource tag</div>
+          <div class="lftag-val">classification = <strong>sensitive</strong></div>
+        </div>
+        <div class="lftag-item">
+          <div class="lftag-key">Principal tag</div>
+          <div class="lftag-val">clearance = <strong>level-2</strong></div>
+        </div>
+        <div class="lftag-item">
+          <div class="lftag-key">Resource tag</div>
+          <div class="lftag-val">env = <strong>prod</strong></div>
+        </div>
+        <div class="lftag-item">
+          <div class="lftag-key">Principal tag</div>
+          <div class="lftag-val">team = <strong>analytics</strong></div>
+        </div>
+      </div>
+      <ul class="detail-list">
+        <li><strong>Cross-account sharing:</strong> share via Resource Links in the target account; analysts query without copying data</li>
+        <li>CloudTrail logs every LF access decision — full audit trail for compliance</li>
+      </ul>
+      <div class="callout-box cb-blue" style="margin-top:6px;">
+        ITAR scenario: tag tables <code>classification=itar</code>, grant only cleared roles the matching tag — one grant covers every future ITAR table automatically.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="flow-bar">
+    <span class="flow-label">LF-Tag Flow</span>
+    <span class="flow-chip chip-iam">Principal (role)</span>
+    <span class="flow-arrow">has tag →</span>
+    <span class="flow-chip chip-lf">LF evaluates tag match</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-ath">Query on filtered view (column + row)</span>
+    <span style="margin-left:auto;font-size:12px;color:#64748b;">Audit: every access decision recorded in CloudTrail · ITAR / compliance ready</span>
+  </div>
+
+</div>
+
+<hr class="slide-divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 5 — Module 6: Athena Deep Dive
+═══════════════════════════════════════════════════════ -->
+<div class="slide slide-2">
+
+  <div class="top-bar">
+    <div class="day-badge">
+      <div class="day-pill">Day 3 Kickoff</div>
+      <span class="program-tag">AWS Data Platform Training &nbsp;·&nbsp; 2026</span>
+    </div>
+    <div class="slide-num">Recap 5 of 6</div>
+  </div>
+
+  <div class="slide-heading">
+    <h1>Module 6 — Athena: Serverless SQL on the Data Lake</h1>
+    <div class="sub">&nbsp;&nbsp; Query S3 with standard SQL — no infrastructure, no loading, governed by Lake Formation</div>
+  </div>
+
+  <div class="two-col">
+
+    <div class="detail-panel dp-indigo">
+      <div class="panel-title">Architecture &amp; How Queries Run</div>
+      <div class="query-flow" style="margin-bottom:10px;">
+        <div class="qf-step"><div class="qf-icon">👤</div><div class="qf-label">User / App</div><div class="qf-sub">SQL query</div></div>
+        <span class="qf-arrow">→</span>
+        <div class="qf-step"><div class="qf-icon">📂</div><div class="qf-label">Workgroup</div><div class="qf-sub">isolation + limits</div></div>
+        <span class="qf-arrow">→</span>
+        <div class="qf-step"><div class="qf-icon">🏛️</div><div class="qf-label">LF Check</div><div class="qf-sub">column / row filter</div></div>
+        <span class="qf-arrow">→</span>
+        <div class="qf-step"><div class="qf-icon">🔍</div><div class="qf-label">Athena Engine</div><div class="qf-sub">Presto / Trino</div></div>
+        <span class="qf-arrow">→</span>
+        <div class="qf-step"><div class="qf-icon">🪣</div><div class="qf-label">S3 Scan</div><div class="qf-sub">Parquet / ORC / CSV</div></div>
+      </div>
+      <ul class="detail-list">
+        <li><strong>Workgroups:</strong> isolate teams, set per-query scan limits, separate S3 result locations</li>
+        <li><strong>Cost control:</strong> cancel queries exceeding X GB scanned — prevents runaway costs</li>
+        <li><strong>Partitioning:</strong> prunes irrelevant partitions before scanning — the biggest cost lever</li>
+        <li><strong>Formats:</strong> Parquet / ORC compress 5–10× vs CSV and enable column pruning</li>
+        <li><strong>MSCK REPAIR TABLE</strong> — sync new S3 partitions into the catalog after data lands</li>
+        <li><strong>Federated queries:</strong> query RDS, DynamoDB, Elasticsearch via Lambda connectors</li>
+        <li><strong>Schema evolution:</strong> Data Catalog tracks versions; older partitions stay queryable</li>
+      </ul>
+    </div>
+
+    <div class="detail-panel dp-slate">
+      <div class="panel-title">Athena vs Redshift — Workload Fit</div>
+      <div class="compare-table">
+        <div class="ct-row">
+          <div class="ct-cell hdr">Dimension</div>
+          <div class="ct-cell hdr">Athena</div>
+          <div class="ct-cell hdr">Redshift</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Pricing model</div>
+          <div class="ct-cell c-ath">$/TB scanned</div>
+          <div class="ct-cell c-red">$/node-hour (or serverless)</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Best for</div>
+          <div class="ct-cell c-ath">Ad-hoc, infrequent queries</div>
+          <div class="ct-cell c-red">High-concurrency BI / DW</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Data location</div>
+          <div class="ct-cell c-ath">Stays in S3</div>
+          <div class="ct-cell c-red">Loaded into Redshift</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Infrastructure</div>
+          <div class="ct-cell c-ath">Zero — fully serverless</div>
+          <div class="ct-cell c-red">Provisioned or serverless</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">LF governance</div>
+          <div class="ct-cell c-ath">Full (column / row filters)</div>
+          <div class="ct-cell c-red">Via Spectrum + LF</div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Data freshness</div>
+          <div class="ct-cell c-ath">Live (queries S3 directly)</div>
+          <div class="ct-cell c-red">As fresh as last COPY / CDC</div>
+        </div>
+      </div>
+      <div class="callout-box cb-blue" style="margin-top:10px;">
+        Rule of thumb: choose Athena for exploration and low-frequency queries; choose Redshift when analysts run the same reports many times per day.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="flow-bar">
+    <span class="flow-label">Cost levers</span>
+    <span class="flow-chip chip-lf">Partition pruning</span>
+    <span class="flow-arrow">+</span>
+    <span class="flow-chip chip-ath">Parquet / ORC format</span>
+    <span class="flow-arrow">+</span>
+    <span class="flow-chip chip-iam">Workgroup scan limits</span>
+    <span style="margin-left:auto;font-size:12px;color:#64748b;">All three together can cut Athena costs by 90%+ vs unpartitioned CSV</span>
+  </div>
+
+</div>
+
+<hr class="slide-divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 6 — Module 7: CDC with AWS DMS
+═══════════════════════════════════════════════════════ -->
+<div class="slide slide-2">
+
+  <div class="top-bar">
+    <div class="day-badge">
+      <div class="day-pill">Day 3 Kickoff</div>
+      <span class="program-tag">AWS Data Platform Training &nbsp;·&nbsp; 2026</span>
+    </div>
+    <div class="slide-num">Recap 6 of 6</div>
+  </div>
+
+  <div class="slide-heading">
+    <h1>Module 7 — Change Data Capture with AWS DMS</h1>
+    <div class="sub">&nbsp;&nbsp; Stream row-level changes from operational databases into the warehouse — no nightly full reloads</div>
+  </div>
+
+  <div class="two-col">
+
+    <div class="detail-panel dp-rose">
+      <div class="panel-title">DMS Pipeline &amp; Task Modes</div>
+      <div class="cdc-pipeline" style="margin-bottom:12px;">
+        <div class="cdc-stage cs-src">
+          <div class="cs-badge">Source</div>
+          <div class="cs-name">🐘 PostgreSQL / RDS</div>
+          <div class="cs-detail">Logical replication slot enabled</div>
+        </div>
+        <div class="cdc-arrow">→</div>
+        <div class="cdc-stage cs-dms">
+          <div class="cs-badge">DMS Replication</div>
+          <div class="cs-name">⚙️ Replication Instance</div>
+          <div class="cs-detail">Reads WAL / redo logs</div>
+        </div>
+        <div class="cdc-arrow">→</div>
+        <div class="cdc-stage cs-tgt">
+          <div class="cs-badge">Target</div>
+          <div class="cs-name">🔴 Redshift / S3</div>
+          <div class="cs-detail">Rows applied in near real-time</div>
+        </div>
+      </div>
+      <ul class="detail-list">
+        <li><strong>full-load:</strong> initial snapshot of all existing rows</li>
+        <li><strong>cdc:</strong> capture ongoing inserts / updates / deletes only</li>
+        <li><strong>full-load-and-cdc:</strong> snapshot first, seamlessly switch to live capture</li>
+        <li>Source prerequisite: logical replication ON + replication slot created</li>
+        <li>Replication Instance size drives throughput — scale up for large tables</li>
+        <li>LOB columns (BLOB / CLOB): use Limited LOB Mode for best performance</li>
+        <li><strong>Batch apply mode:</strong> buffer changes, write in batches to Redshift — better throughput than row-by-row</li>
+      </ul>
+    </div>
+
+    <div class="detail-panel dp-amber">
+      <div class="panel-title">Production Considerations</div>
+      <ul class="detail-list">
+        <li><strong>Schema changes:</strong> DMS does NOT auto-alter the target — apply DDL manually or use a schema-change event handler</li>
+        <li><strong>Replication lag:</strong> monitor <code>CDCLatencySource</code> &amp; <code>CDCLatencyTarget</code> in CloudWatch</li>
+        <li><strong>Error handling:</strong> configure task-level error policies (stop / continue / log) per table; set CloudWatch alarms</li>
+        <li><strong>Data Catalog consistency:</strong> new source columns won't appear in Glue until manually updated</li>
+        <li><strong>Primary key requirement:</strong> tables without PKs can use full-load; CDC requires a PK or unique index for correct row tracking</li>
+        <li><strong>CDC vs Batch ETL:</strong> CDC wins on latency (&lt;1 min lag) and source load; batch wins on simplicity — for a live DW feeding dashboards, CDC is the right choice</li>
+        <li><strong>Enterprise use case:</strong> keep Redshift DW synchronized with PostgreSQL operational DB without nightly full ETL jobs</li>
+      </ul>
+      <div class="callout-box cb-amber" style="margin-top:8px;">
+        Teardown check: after the training, delete the DMS Replication Instance — it bills by the hour even when the task is stopped.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="flow-bar">
+    <span class="flow-label">Day 2 Full Thread</span>
+    <span class="flow-chip chip-s3">S3 Data Lake</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-lf">Lake Formation (governed)</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-ath">Athena (ad-hoc SQL)</span>
+    <span class="flow-arrow">|</span>
+    <span class="flow-chip chip-dms">DMS CDC</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-chip chip-ath">Redshift (DW)</span>
+    <span style="margin-left:auto;font-size:12px;color:#64748b;">Monitor: CDCLatencySource · CDCLatencyTarget · CloudWatch alarms</span>
+  </div>
+
+</div>
+
+</body>
+</html>

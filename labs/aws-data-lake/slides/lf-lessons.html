@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lake Formation — Key Lessons from the Demo</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f1117;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #f1f5f9;
+    padding: 40px 0;
+    min-height: 100vh;
+  }
+
+  .slide {
+    width: 1280px;
+    min-height: 720px;
+    margin: 40px auto;
+    padding: 56px 72px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0a0f1e 0%, #0d1428 100%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255,153,0,0.12);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #FF9900;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 38px;
+    font-weight: 800;
+    color: #f1f5f9;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+  }
+
+  .divider {
+    height: 2px;
+    background: linear-gradient(90deg, #FF9900 0%, transparent 100%);
+    margin-bottom: 32px;
+    width: 80px;
+  }
+
+  p {
+    color: #94a3b8;
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13.5px;
+  }
+
+  thead tr {
+    background: #1e293b;
+  }
+
+  thead th {
+    padding: 11px 14px;
+    text-align: left;
+    color: #f1f5f9;
+    font-weight: 700;
+    border: 1px solid #2d3748;
+    font-size: 12.5px;
+    letter-spacing: 0.4px;
+  }
+
+  tbody tr {
+    border: 1px solid #1e293b;
+  }
+
+  tbody tr:nth-child(even) {
+    background: rgba(255,255,255,0.025);
+  }
+
+  tbody tr:hover {
+    background: rgba(255,153,0,0.05);
+  }
+
+  tbody td {
+    padding: 10px 14px;
+    color: #94a3b8;
+    border: 1px solid #1e2d3d;
+    vertical-align: top;
+    line-height: 1.5;
+    font-size: 13px;
+  }
+
+  tbody td:first-child {
+    border-left: 3px solid #FF9900;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+
+  /* Code */
+  pre {
+    background: #0d1117;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    padding: 18px 22px;
+    border-radius: 8px;
+    border: 1px solid #21262d;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+
+  code {
+    background: #0d1117;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #21262d;
+  }
+
+  pre code {
+    background: transparent;
+    padding: 0;
+    border: none;
+    font-size: inherit;
+  }
+
+  ul, ol {
+    margin: 10px 0 10px 20px;
+    color: #94a3b8;
+  }
+
+  li {
+    margin-bottom: 7px;
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  li strong { color: #e2e8f0; }
+
+  .slide-number {
+    position: absolute;
+    bottom: 28px;
+    right: 36px;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .info-box {
+    background: rgba(255,153,0,0.07);
+    border: 1px solid rgba(255,153,0,0.25);
+    border-left: 4px solid #FF9900;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    color: #e2e8f0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-top: 10px;
+  }
+
+  .step-list {
+    counter-reset: step;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .step-list li {
+    counter-increment: step;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 11px;
+    font-size: 14px;
+    color: #94a3b8;
+  }
+
+  .step-list li::before {
+    content: counter(step);
+    background: #FF9900;
+    color: #0f1117;
+    font-weight: 800;
+    font-size: 11px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-list li strong { color: #e2e8f0; }
+
+  .highlight-row {
+    background: rgba(255,153,0,0.08) !important;
+  }
+
+  .highlight-row td { color: #e2e8f0 !important; }
+</style>
+</head>
+<body>
+
+<!-- Slide 1 -->
+<div class="slide">
+  <div class="eyebrow">Lake Formation — Key Lessons from the Demo</div>
+  <h1>The Problem LF Was Built to Solve</h1>
+  <div class="divider"></div>
+
+  <p>Before LF, access to a data lake was pure IAM. IAM is blunt — it controls whether you can touch a service, not what you see when you do.</p>
+
+  <ul style="margin-bottom:18px;">
+    <li>Every analyst needs <strong>S3 read on the raw bucket</strong> → they see PII columns just by <code>SELECT *</code></li>
+    <li>Every analyst needs <strong>Glue catalog read</strong> → they see every table, governed or not</li>
+    <li>Column-level masking? Build it yourself in every query, every view, every dashboard</li>
+    <li>Row-level access? Same — every consumer reimplements the filter independently</li>
+  </ul>
+
+  <table>
+    <thead>
+      <tr>
+        <th>What</th>
+        <th>IAM Controls</th>
+        <th>LF Controls</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>"Can this user use Athena at all?"</td>
+        <td>✅</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>"Can this user see column <code>volume</code>?"</td>
+        <td>—</td>
+        <td>✅</td>
+      </tr>
+      <tr>
+        <td>"Can this user see rows where <code>month = 12</code>?"</td>
+        <td>—</td>
+        <td>✅</td>
+      </tr>
+      <tr>
+        <td>"Can this user read S3 at all?"</td>
+        <td>Required, but intentionally empty</td>
+        <td>LF issues temp creds at query time</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <strong style="color:#FF9900">Punchline:</strong> IAM stays static per role. LF grants are where access changes. Three users with identical IAM policies can see <strong>three different result sets</strong> from the same query.
+  </div>
+
+  <div class="slide-number">01 / 04</div>
+</div>
+
+<!-- Slide 2 -->
+<div class="slide">
+  <div class="eyebrow">Lake Formation — Key Lessons from the Demo</div>
+  <h1>How LF Actually Intercepts a Query</h1>
+  <div class="divider"></div>
+
+  <p>LF doesn't proxy your data. It issues <strong style="color:#e2e8f0">temporary, scoped S3 credentials</strong> at query time — Athena reads S3 with those creds, never the user's own IAM.</p>
+
+  <ol class="step-list">
+    <li>Athena receives <code>SELECT * FROM oil</code></li>
+    <li>Athena → Glue Catalog: <strong>"where is this table's data?"</strong></li>
+    <li>Glue Catalog → Lake Formation: <strong>"does this principal have SELECT on this table?"</strong></li>
+    <li>LF evaluates all grants — named grants, LF-Tag expressions, data cell filters, all combined</li>
+    <li>LF returns <code>GetDataAccess</code> response — a short-lived IAM credential scoped to: just the allowed columns, just the allowed rows (predicate-pushed), just the registered S3 prefix</li>
+    <li>Athena uses those temp creds to read S3 — <strong>never the user's own IAM</strong></li>
+    <li>Athena returns rows — already filtered; the user never touches the masked data</li>
+  </ol>
+
+  <div class="info-box">
+    The user does <strong>NOT</strong> need direct S3 read on the data lake bucket &nbsp;·&nbsp; The user <strong>CANNOT</strong> bypass LF via S3 directly — they have no creds &nbsp;·&nbsp; The audit trail is single-source: every read is a <code>GetDataAccess</code> in CloudTrail
+  </div>
+
+  <div class="slide-number">02 / 04</div>
+</div>
+
+<!-- Slide 3 -->
+<div class="slide">
+  <div class="eyebrow">Lake Formation — Key Lessons from the Demo</div>
+  <h1>Same Query, Three Views: The Demo Punchline</h1>
+  <div class="divider"></div>
+
+  <pre><code>SELECT * FROM quicklabs_student8_lake.curated_oil LIMIT 5;</code></pre>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Persona</th>
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Data Lake Admin</td>
+        <td>All 11 columns, all 6,367 rows</td>
+      </tr>
+      <tr>
+        <td>Manager (table SELECT grant)</td>
+        <td>All 11 columns, all 6,367 rows</td>
+      </tr>
+      <tr>
+        <td>Analyst (column grant — no <code>volume</code>)</td>
+        <td>10 columns (<code>volume</code> gone), all 6,367 rows</td>
+      </tr>
+      <tr class="highlight-row">
+        <td>Analyst with data filter (<code>month = 12</code>)</td>
+        <td>10 columns (<code>volume</code> gone), ~530 rows</td>
+      </tr>
+      <tr>
+        <td>Tagged analyst (<code>sensitivity = public</code>)</td>
+        <td>10 columns (<code>volume</code> tagged <code>restricted</code>), all rows</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box" style="margin-top:20px;">
+    Five different grant models, five different result sets — all from the same query string.<br><br>
+    <strong style="color:#FF9900">Governance is declarative</strong> (grant a rule) instead of imperative (rewrite the query, build a view, manage S3 prefixes manually).
+  </div>
+
+  <div class="slide-number">03 / 04</div>
+</div>
+
+<!-- Slide 4 -->
+<div class="slide">
+  <div class="eyebrow">Lake Formation — Key Lessons from the Demo</div>
+  <h1>Audit: Every Read Produces a GetDataAccess Event</h1>
+  <div class="divider"></div>
+
+  <div class="two-col">
+    <div>
+      <h2 style="font-size:17px; color:#FF9900; margin-bottom:12px;">Event Payload Contains</h2>
+      <ul>
+        <li>The IAM principal — <strong>who</strong></li>
+        <li>The table being read — <strong>what</strong></li>
+        <li>The exact column list LF authorized (after grants + filters + tag rules combined)</li>
+        <li>The Athena query ID — correlate to the SQL itself</li>
+        <li>Timestamp + source IP</li>
+      </ul>
+    </div>
+    <div>
+      <h2 style="font-size:17px; color:#FF9900; margin-bottom:12px;">What You Can Prove</h2>
+      <ul>
+        <li>"Show me every query analyst X ran on <code>pii_users</code> in March." → CloudTrail filter on principal + table</li>
+        <li>"Did anyone read column <code>ssn</code> ever?" → filter <code>GetDataAccess</code> where authorized column list contains <code>ssn</code></li>
+        <li>"Reconstruct what data analyst X could see at any point in time." → cross-reference <code>GetDataAccess</code> + <code>GrantPermissions</code> / <code>RevokePermissions</code> events</li>
+      </ul>
+    </div>
+  </div>
+
+  <table style="margin-top:22px;">
+    <thead>
+      <tr>
+        <th>Audit capability</th>
+        <th>Traditional IAM + S3 access logs</th>
+        <th>Lake Formation + CloudTrail</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Who read a file?</td>
+        <td>Alice read <code>s3://bucket/x.parquet</code></td>
+        <td>Alice ran query QID-123 on table <code>curated_oil</code></td>
+      </tr>
+      <tr>
+        <td>Which columns were materialized?</td>
+        <td>Unknown — you see the object, not the query</td>
+        <td>Column list in every <code>GetDataAccess</code> event</td>
+      </tr>
+      <tr>
+        <td>Was PII column read?</td>
+        <td>Requires Macie or manual inference</td>
+        <td>Direct: filter events by column name</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="slide-number">04 / 04</div>
+</div>
+
+</body>
+</html>
