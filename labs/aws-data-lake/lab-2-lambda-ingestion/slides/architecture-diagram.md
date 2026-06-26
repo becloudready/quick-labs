@@ -1,6 +1,6 @@
 # Event-driven ingestion architecture — S3 as the landing zone
 
-One overview diagram covering all three use cases from `student-lambda-lab.md`. Use this on the opening slide of Module 4 / Lab 2 so students can return to it as you walk each pattern.
+One overview diagram covering all three use cases from `student-lab-2-lambda-ingestion.md`. Use this on the opening slide of Module 4 / Lab 2 so students can return to it as you walk each pattern.
 
 ---
 ---

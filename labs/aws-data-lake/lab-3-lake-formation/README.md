@@ -39,7 +39,7 @@ Lab Terraform: [`../terraform-lab/lab-3-lake-formation/`](../terraform-lab/lab-3
 
 | File | What it covers |
 |---|---|
-| [`student/student-lab.md`](student/student-lab.md) | Hands-on student lab: each student creates their own RDS Postgres, sets up a Glue JDBC connection, catalogs the table, runs 5 LF practice exercises with a partner |
+| [`student/student-lab-3-lake-formation.md`](student/student-lab-3-lake-formation.md) | Hands-on student lab: each student creates their own RDS Postgres, sets up a Glue JDBC connection, catalogs the table, runs 5 LF practice exercises with a partner |
 | [`student/lab-3-assignments.md`](student/lab-3-assignments.md) | 3 take-home / in-class assignments wired to the terraform-managed lab |
 | [`student/lab-3-quiz.md`](student/lab-3-quiz.md) | 10-question MCQ with answer key |
 | [`student/day1-recap-quiz.docx`](student/day1-recap-quiz.docx) | 20-question Day 1 recap (MS Forms upload format) |

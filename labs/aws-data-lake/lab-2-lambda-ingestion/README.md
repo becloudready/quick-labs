@@ -22,7 +22,7 @@ Curriculum anchor: **Day 1 — Module 4: Data Ingestion Use Cases.** Builds on t
 
 | File | What it covers |
 |---|---|
-| [`student/student-lambda-lab.md`](student/student-lambda-lab.md) | Main student lab — three use cases (S3→SQS→Lambda image metadata, S3→Lambda batch direct, Lambda-as-ETL for Redshift + S3 lakehouse) with smoke tests, DLQ wiring, design considerations, knowledge check |
+| [`student/student-lab-2-lambda-ingestion.md`](student/student-lab-2-lambda-ingestion.md) | Main student lab — three use cases (S3→SQS→Lambda image metadata, S3→Lambda batch direct, Lambda-as-ETL for Redshift + S3 lakehouse) with smoke tests, DLQ wiring, design considerations, knowledge check |
 | [`student/student-lambda-redshift-lab.md`](student/student-lambda-redshift-lab.md) | Variant — Lambda-as-ETL deep dive ending in a Redshift COPY |
 | [`student/lambda-code/`](student/lambda-code/) | Reference Lambda handler code students paste into the console |
 
