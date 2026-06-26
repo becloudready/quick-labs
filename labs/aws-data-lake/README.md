@@ -22,13 +22,13 @@ Every resource you create must be prefixed `quicklabs-<USER>-` (or `quicklabs_<U
 
 ## Labs
 
-| Lab | Topic | Student guide |
+| Lab | Topic | Lab guide |
 |---|---|---|
-| Lab 1 | S3 · Glue Crawler · Glue ETL (PySpark) · Athena | [student-lab-1-glue-athena.md](lab-1-data-lake/student-lab-1-glue-athena.md) |
-| Lab 2 | Event-driven ingestion — S3 → SQS → Lambda | [student-lab-2-lambda-ingestion.md](lab-2-lambda-ingestion/student/student-lab-2-lambda-ingestion.md) |
-| Lab 3 | Lake Formation — row/column/tag-based access control | [README.md](lab-3-lake-formation/README.md) |
-| Lab 4 | Redshift Serverless · federated query from RDS | [student-lab-4-federated-query.md](lab-4-redshift-serverless/student-lab-4-federated-query.md) |
-| Lab 5 | CDC — Postgres → DMS → S3 or Postgres target | [student-lab-5-cdc.md](lab-5-cdc/student-lab-5-cdc.md) |
+| Lab 1 | S3 · Glue Crawler · Glue ETL (PySpark) · Athena | [console-lab-glue-athena.md](lab-1-data-lake/console-lab-glue-athena.md) · [cli version](lab-1-data-lake/cli-lab-glue-athena.md) |
+| Lab 2 | Event-driven ingestion — S3 → SQS → Lambda | [console-lab-lambda-ingestion.md](lab-2-lambda-ingestion/console-lab-lambda-ingestion.md) |
+| Lab 3 | Lake Formation — row/column/tag-based access control | [lakeformation-console-demo.md](lab-3-lake-formation/lakeformation-console-demo.md) |
+| Lab 4 | Redshift Serverless · federated query from RDS | [console-lab-redshift-federated-query.md](lab-4-redshift-serverless/console-lab-redshift-federated-query.md) |
+| Lab 5 | CDC — Postgres → DMS → S3 or Postgres target | [console-lab-cdc-dms-postgres.md](lab-5-cdc/console-lab-cdc-dms-postgres.md) |
 | Lab 6 | OpenSearch — ingestion, search, and dashboards | [student-lab-6-opensearch.md](lab-6-opensearch/student-lab-6-opensearch.md) |
 
 Labs 1–3 build on each other. Labs 4–6 are standalone and can be done in any order after Lab 1.
