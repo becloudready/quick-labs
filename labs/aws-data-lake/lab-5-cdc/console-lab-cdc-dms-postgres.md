@@ -77,9 +77,9 @@ By the end you'll have:
 
 Open the new group → search `rds.logical_replication` → **Edit parameters** → set value to `1` → **Save**.
 
-![Create parameter group](images/01-01-parameter-group.png)
+![Create parameter group](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/01-01-parameter-group.png)
 
-![Set rds.logical_replication = 1](images/01-02-parameter-group.png)
+![Set rds.logical_replication = 1](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/01-02-parameter-group.png)
 
 ### 1.2 Create the RDS instance
 
@@ -107,9 +107,9 @@ Click **Create database**. Provisioning takes ~6 minutes.
 
 > **If you forgot to set the parameter group during creation:** go to **RDS → Databases → your instance → Modify**, scroll to **Additional configuration → DB parameter group**, select your group, and choose **Apply immediately**.
 >
-> ![Attach parameter group via Modify](images/02-02-rds-parameter-group-modify.png)
+> ![Attach parameter group via Modify](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/02-02-rds-parameter-group-modify.png)
 >
-> ![Apply immediately confirmation](images/02-03-rds-parameter-group-apply.png)
+> ![Apply immediately confirmation](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/02-03-rds-parameter-group-apply.png)
 
 ### 1.3 Edit the security group inbound rules
 
@@ -140,7 +140,7 @@ Then re-check status. Don't proceed until `in-sync`.
 
 Once available, your RDS instance detail page should look like this — note the connection strings at the bottom:
 
-![RDS instance available with connection strings](images/02-01-rds-created.png)
+![RDS instance available with connection strings](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/02-01-rds-created.png)
 
 ---
 
@@ -273,9 +273,9 @@ instead of clicking "Create new IAM role."
 | Multi-AZ | dev or non-prod (single AZ) |
 | Publicly accessible | **No** |
 
-![DMS replication instance — Settings](images/03-01-dms-setup.png)
+![DMS replication instance — Settings](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/03-01-dms-setup.png)
 
-![DMS replication instance — VPC and connectivity](images/03-02-dms-setup.png)
+![DMS replication instance — VPC and connectivity](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/03-02-dms-setup.png)
 
 Provisioning takes ~5 minutes. Move on to the endpoints while it provisions.
 
@@ -299,11 +299,11 @@ Provisioning takes ~5 minutes. Move on to the endpoints while it provisions.
 | Password | your password |
 | **SSL mode** | **`require`** — NOT `none` (RDS rejects unencrypted) |
 
-![Source endpoint configuration](images/03-03-dms-endpoint-setup.png)
+![Source endpoint configuration](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/03-03-dms-endpoint-setup.png)
 
 **Test connection** (pick `oil-cdc-rep-<U>` as the rig). Must say "Successfully connected" before continuing.
 
-![Source endpoint test — Successful](images/03-04-dms-endpoint-setup.png)
+![Source endpoint test — Successful](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/03-04-dms-endpoint-setup.png)
 
 **Common error here:** `no pg_hba.conf entry for host ... no encryption` means SSL mode is still `none`. Modify the endpoint, change to `require`, retest.
 
@@ -335,11 +335,11 @@ CREATE DATABASE oil_target;
 | Password | your password |
 | **SSL mode** | **`require`** |
 
-![Target endpoint configuration — PostgreSQL](images/03-05-dms-target-endpoint-setup.png)
+![Target endpoint configuration — PostgreSQL](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/03-05-dms-target-endpoint-setup.png)
 
 **Test connection** against `oil-cdc-rep-<U>`. Must say "Successfully connected".
 
-![Target endpoint test — Successful](images/03-06-dms-target-endpoint-setup.png)
+![Target endpoint test — Successful](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/03-06-dms-target-endpoint-setup.png)
 
 ---
 
@@ -383,11 +383,11 @@ CREATE DATABASE oil_target;
 | Start task on create | **Yes** | **Yes** |
 | Table mappings (Wizard) | Schema `public`, table `crude_oil_daily`, **Include** | Schema `public`, table `crude_oil_daily`, **Include** |
 
-![Create migration task — configuration](images/04-01-dms-cdc-task-creation.png)
+![Create migration task — configuration](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/04-01-dms-cdc-task-creation.png)
 
-![Create migration task — table mappings](images/04-02-dms-cdc-task-creation.png)
+![Create migration task — table mappings](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/04-02-dms-cdc-task-creation.png)
 
-![Table mapping selection rule detail](images/04-03-dms-cdc-task-creation.png)
+![Table mapping selection rule detail](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/04-03-dms-cdc-task-creation.png)
 
 Click **Create task**. Wait ~30-60 seconds. Status should move from `Creating` → `Starting` → `Replication ongoing`.
 
@@ -444,7 +444,7 @@ WHERE trade_ts >= '2026-06-01'
 ORDER BY trade_ts;
 ```
 
-![Migration complete — 6367 rows replicated to oil_target](images/05-01-dms-migration-complete.png)
+![Migration complete — 6367 rows replicated to oil_target](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/cdc-dms/05-01-dms-migration-complete.png)
 
 > **What you see:** `awsdms_apply_exceptions` is a DMS bookkeeping table automatically created on the target. `crude_oil_daily` should have 6,367 rows from the initial full load, plus any CDC rows you inserted.
 

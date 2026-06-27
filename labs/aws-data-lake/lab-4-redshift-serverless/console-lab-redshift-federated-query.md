@@ -40,7 +40,7 @@ your tables will clash. The instructor uses NN = 00 for the demo.
 3. A connection dialog appears. Select **Federated user** — no password needed.
    Make sure **Database** shows `dev`, then click **Create connection**.
 
-   ![Connect to workgroup dialog](images/01-01-rs-connect-workgroup.png)
+   ![Connect to workgroup dialog](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/redshift-serverless/01-01-rs-connect-workgroup.png)
 
 4. Confirm the database at the top is `dev`.
 
@@ -49,13 +49,13 @@ You will see two types of entries in the left catalog tree:
 - **Native databases** — schemas you create live here, under `dev`
 - **External databases** — the shared AWS Glue Data Catalog
 
-![Workgroup catalog — collapsed view](images/01-02-rs-catalog-layout.png)
+![Workgroup catalog — collapsed view](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/redshift-serverless/01-02-rs-catalog-layout.png)
 
 You will see databases that OTHER students created (like `spectrum_db_student02`).
 This is normal — the Glue catalog is account-wide. Use YOUR own names and ignore
 the rest.
 
-![Workgroup catalog — fully expanded](images/01-03-rs-native-external-db.png)
+![Workgroup catalog — fully expanded](https://pub-5c24f672454946bb951bf35f09c3964e.r2.dev/learn/aws-data-engineer/redshift-serverless/01-03-rs-native-external-db.png)
 
 ---
 
