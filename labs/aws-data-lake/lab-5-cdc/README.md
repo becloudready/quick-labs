@@ -18,9 +18,6 @@ Scripts to load sample data into the PostgreSQL source database.
 | [`rds-source/load_oil.sh`](rds-source/load_oil.sh) | Loads the crude oil CSV into the RDS Postgres source |
 | [`rds-source/prep_oil_for_postgres.py`](rds-source/prep_oil_for_postgres.py) | Cleans the raw CSV into Postgres-compatible format before loading |
 
-## Screenshots
-
-Step-by-step screenshots are in [`images/`](images/) and embedded in the lab guide.
 
 ## What you'll learn
 
