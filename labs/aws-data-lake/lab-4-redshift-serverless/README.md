@@ -8,9 +8,7 @@ Query live data from Aurora PostgreSQL and your S3 data lake directly inside Red
 |---|---|
 | [console-lab-redshift-federated-query.md](console-lab-redshift-federated-query.md) | Console walkthrough — connect to a Redshift workgroup, set up federated query to Aurora, and query S3 via Spectrum |
 
-## Screenshots
 
-Step-by-step screenshots are in [`images/`](images/) and embedded in the lab guide.
 
 ## What you'll learn
 
