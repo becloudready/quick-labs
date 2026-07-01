@@ -1,0 +1,65 @@
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  StateMachine9a5b0887:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Definition:
+        Comment: >-
+          An example demonstrates how to ingest a large data set in Amazon S3
+          and partition it through aws Glue Crawlers, then execute Amazon Athena
+          queries against that partition.
+        StartAt: Start Crawler
+        QueryLanguage: JSONata
+        States:
+          Start Crawler:
+            Type: Task
+            Next: Get Crawler status
+            Arguments:
+              Name: quicklabs-demo-raw
+            Resource: arn:aws:states:::aws-sdk:glue:startCrawler
+          Get Crawler status:
+            Type: Task
+            Arguments:
+              Name: quicklabs-demo-raw
+            Resource: arn:aws:states:::aws-sdk:glue:getCrawler
+            Next: Check Crawler status
+          Check Crawler status:
+            Type: Choice
+            Choices:
+              - Next: Wait
+                Condition: '{% $states.input.Crawler.State = ''RUNNING'' %}'
+            Default: Start an Athena query
+          Wait:
+            Type: Wait
+            Seconds: 30
+            Next: Get Crawler status
+          Start an Athena query:
+            Resource: arn:aws:states:::athena:startQueryExecution.sync
+            Arguments:
+              QueryString: SELECT * FROM AwsDataCatalog.quicklabs_demo_lake.oil limit 10;
+              WorkGroup: ${athenastartQueryExecution_WorkGroup_5af76775}
+            Type: Task
+            Next: Get query results
+          Get query results:
+            Resource: arn:aws:states:::athena:getQueryResults
+            Arguments:
+              QueryExecutionId: '{% $states.input.QueryExecution.QueryExecutionId %}'
+            Type: Task
+            Next: Send query results
+          Send query results:
+            Resource: arn:aws:states:::sns:publish
+            Arguments:
+              TopicArn: ${snspublish_TopicArn_f800658b}
+              Message:
+                Input: '{% $states.input.ResultSet.Rows %}'
+            Type: Task
+            End: true
+      DefinitionSubstitutions:
+        athenastartQueryExecution_WorkGroup_5af76775: quicklabs-bob-patel-wg
+        snspublish_TopicArn_f800658b: !Sub "arn:aws:sns:us-west-2:${AWS::AccountId}:QuicklabDataPipelineDemo"
+      Name: StateMachine9a5b0887
+      Type: STANDARD
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/QuickLabs-DataPipeline-StepFunctionsRole"
+      Logging:
+        Level: 'OFF'
+        IncludeExecutionData: false
