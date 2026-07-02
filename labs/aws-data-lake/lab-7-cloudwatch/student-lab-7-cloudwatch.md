@@ -27,7 +27,7 @@ contents with:
 ```python
 import urllib.parse
 
-def handler(event, context):
+def lambda_handler(event, context):
     records = event["Records"]          # KeyError if event has no Records
     for record in records:
         bucket = record["s3"]["bucket"]["name"]
