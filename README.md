@@ -1,12 +1,12 @@
-# Quick Labs
+# QuickLabs
 
-Hands-on cloud labs built by [BeCloudReady](https://becloudready.com) for corporate training, partner enablement, and sales engineering. Each lab is a self-contained student environment — scoped IAM permissions, step-by-step console walkthroughs, and sample data included.
+Hands-on workshop labs built by [BeCloudReady](https://becloudready.com) for engineering teams. Each lab is self-contained — pre-scoped IAM permissions, step-by-step walkthroughs, and sample data included. Drop into a workshop or run independently.
 
 ---
 
-## Labs
+## Workshops
 
-| Lab | What you build | Stack |
+| Workshop | What you build | Stack |
 |---|---|---|
 | [`labs/aws-data-lake/`](labs/aws-data-lake/) | End-to-end data lake — raw ingestion → ETL → governance → CDC → analytics | S3, Glue, Athena, Lake Formation, Redshift, DMS, OpenSearch |
 | [`labs/aws-iam-policy-lab/`](labs/aws-iam-policy-lab/) | Read, predict, and write IAM policies using a real sandbox policy as the textbook | IAM, CloudShell |
@@ -28,32 +28,26 @@ Labs 1–3 build on each other. Labs 4–6 are standalone.
 
 ---
 
-## Who builds these
+## About
 
-BeCloudReady is a Databricks Registered Partner specializing in custom cloud lab environments across three lanes:
+[BeCloudReady](https://becloudready.com) is a Databricks Registered Partner that builds and delivers cloud workshops for engineering teams. We run community workshops at [TorontoAI](https://torontoai.io).
 
-| Lane | What it solves |
+| | |
 |---|---|
-| **Cloud Training Labs** | Per-student AWS / Azure / GCP / Databricks sandboxes — region-locked, namespace-scoped, teardown-clean |
-| **AI & GPU Labs** | H100 / A100 cohorts on neo-cloud (Lambda Labs, Shadeform, RunPod) — 30–70% cheaper than hyperscaler equivalents |
+| **Cloud Workshops** | Per-student AWS / Azure / GCP / Databricks sandboxes — region-locked, namespace-scoped, teardown-clean |
+| **AI & GPU Labs** | H100 / A100 cohorts on neo-cloud (Lambda Labs, Shadeform, RunPod) — 30–70% cheaper than hyperscaler on-demand |
 | **Sales Demo Environments** | Reproducible demo stacks for SE teams and partner programs |
 
-Community talks and workshops: [TorontoAI](https://torontoai.io)
-
-**Need a custom lab for your team?**
-→ [becloudready.com/labs](https://becloudready.com/labs) · [Book a 30-min call](https://calendly.com/kchandank/30-mins-meeting)
+**Need a workshop for your team?**
+→ [becloudready.com/labs](https://becloudready.com/labs) · [Book a call](https://calendly.com/kchandank/30-mins-meeting)
 
 ---
 
 ## Contributing
 
-Found a bug or policy gap in a published lab? Issues and PRs are welcome.
-Have a lab that fits one of the lanes above? Reach out before opening a PR.
+Found a bug or a gap in a published lab? Issues and PRs are welcome.
+Have a lab that fits one of the tracks above? Reach out before opening a PR.
 
 ## License
 
 Apache License 2.0 — see [`LICENSE`](LICENSE).
-
----
-
-*Maintained by [BeCloudReady](https://becloudready.com) — Databricks Registered Partner. Community talks at [TorontoAI](https://torontoai.io).*
