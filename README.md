@@ -9,7 +9,7 @@ Hands-on workshop labs built by [BeCloudReady](https://becloudready.com) for eng
 | Workshop | What you build | Stack |
 |---|---|---|
 | [`labs/aws-data-lake/`](labs/aws-data-lake/) | End-to-end data lake — raw ingestion → ETL → governance → CDC → analytics | S3, Glue, Athena, Lake Formation, Redshift, DMS, OpenSearch |
-| [`labs/aws-iam-policy-lab/`](labs/aws-iam-policy-lab/) | Read, predict, and write IAM policies using a real sandbox policy as the textbook | IAM, CloudShell |
+| [`labs/aws-iam-policy/`](labs/aws-iam-policy/) | Read, predict, and write IAM policies using a real sandbox policy as the textbook | IAM, CloudShell |
 | [`labs/fullstack-aws/`](labs/fullstack-aws/) | Full-stack app sandbox with GitHub Copilot seats and namespace-scoped AWS access | EC2, Lambda, S3, DynamoDB, CloudFront, API Gateway |
 | [`labs/databricks-db-agent-lakebase/`](labs/databricks-db-agent-lakebase/) | Text-to-SQL agent backed by Lakebase (Postgres), Databricks Unity Catalog, and a self-hosted vLLM endpoint | Databricks, Delta Lake, vLLM |
 
