@@ -1,4 +1,4 @@
-# Engineering Workshops
+# Cloud Workshops
 
 Hands-on workshop labs built by [BeCloudReady](https://becloudready.com) for engineering teams. Each lab is self-contained — pre-scoped IAM permissions, step-by-step walkthroughs, and sample data included. Drop into a workshop or run independently.
 
