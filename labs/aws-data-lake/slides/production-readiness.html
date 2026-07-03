@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 15 — Production Readiness &amp; AWS Reference Architectures</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .slide {
+      width: 1280px;
+      min-height: 720px;
+      margin: 40px auto;
+      padding: 44px 64px 48px;
+      border-radius: 14px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0,0,0,.10);
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+
+    hr.divider {
+      width: 1280px;
+      margin: 0 auto;
+      border: none;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 26px;
+    }
+
+    .module-pill {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #93c5fd;
+    }
+
+    .slide-num {
+      font-size: 12px;
+      color: #94a3b8;
+      letter-spacing: .06em;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+
+    .sub {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .red    { color: #dc2626; }
+    .orange { color: #ea580c; }
+    .yellow { color: #d97706; }
+    .green  { color: #16a34a; }
+    .blue   { color: #2563eb; }
+    .purple { color: #7c3aed; }
+    .cyan   { color: #0e7490; }
+    .slate  { color: #475569; }
+
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #0369a1;
+    }
+
+    .key-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-top: 20px;
+      padding: 11px 18px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      font-size: 12.5px;
+    }
+
+    .kb-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #1d4ed8;
+      margin-right: 14px;
+      white-space: nowrap;
+    }
+
+    .kb-text { color: #374151; line-height: 1.5; }
+    .kb-text strong { color: #0f172a; }
+
+    /* ── Shared list card ── */
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .card h3 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .card ul {
+      list-style: none;
+      font-size: 13px;
+      color: #374151;
+      line-height: 1.75;
+    }
+
+    .card ul li::before { content: "→ "; font-weight: 700; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 1 — Module Overview
+    ═══════════════════════════════════════════════════════ */
+    .card h3 { color: #1d4ed8; }
+    .card ul li::before { color: #1d4ed8; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 2 — Modern Data Architecture
+    ═══════════════════════════════════════════════════════ */
+    .arch-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .arch-layer {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      align-items: start;
+      gap: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+
+    .al-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .al-icon { font-size: 20px; }
+    .al-name { font-size: 13px; font-weight: 800; }
+    .al-zone { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-top: 2px; }
+
+    .al-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      padding-top: 2px;
+    }
+
+    .al-chip {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 4px;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+
+    .l-ingest  { background: #f0fdf4; border-color: #22c55e; }
+    .l-ingest .al-name { color: #166534; }
+    .l-ingest .al-zone { color: #22c55e; }
+    .l-ingest .al-chip { background: #dcfce7; border-color: #86efac; color: #166534; }
+
+    .l-store   { background: #fff7ed; border-color: #f97316; }
+    .l-store .al-name { color: #9a3412; }
+    .l-store .al-zone { color: #f97316; }
+    .l-store .al-chip { background: #ffedd5; border-color: #fdba74; color: #9a3412; }
+
+    .l-catalog { background: #faf5ff; border-color: #a78bfa; }
+    .l-catalog .al-name { color: #4c1d95; }
+    .l-catalog .al-zone { color: #a78bfa; }
+    .l-catalog .al-chip { background: #ede9fe; border-color: #c4b5fd; color: #4c1d95; }
+
+    .l-process { background: #fefce8; border-color: #eab308; }
+    .l-process .al-name { color: #854d0e; }
+    .l-process .al-zone { color: #eab308; }
+    .l-process .al-chip { background: #fef9c3; border-color: #fde047; color: #854d0e; }
+
+    .l-consume { background: #eff6ff; border-color: #3b82f6; }
+    .l-consume .al-name { color: #1e3a8a; }
+    .l-consume .al-zone { color: #3b82f6; }
+    .l-consume .al-chip { background: #dbeafe; border-color: #93c5fd; color: #1e3a8a; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 3 — Three-Zone S3
+    ═══════════════════════════════════════════════════════ */
+    .zones-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      flex: 1;
+    }
+
+    .zone-card {
+      border-radius: 10px;
+      padding: 18px 18px;
+      border: 1px solid;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .zone-card .z-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    .zone-card h3 {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .zone-card ul {
+      list-style: none;
+      font-size: 12.5px;
+      color: #374151;
+      line-height: 1.7;
+      flex: 1;
+    }
+
+    .zone-card ul li::before { content: "▸ "; }
+
+    .zone-card .z-access {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 5px;
+      margin-top: auto;
+    }
+
+    .z-raw { background: #fff7ed; border-color: #fdba74; }
+    .z-raw .z-badge { background: #fed7aa; color: #9a3412; }
+    .z-raw h3 { color: #9a3412; }
+    .z-raw ul li::before { color: #f97316; }
+    .z-raw .z-access { background: #ffedd5; color: #9a3412; }
+
+    .z-cur { background: #f0fdf4; border-color: #86efac; }
+    .z-cur .z-badge { background: #dcfce7; color: #166534; }
+    .z-cur h3 { color: #166534; }
+    .z-cur ul li::before { color: #22c55e; }
+    .z-cur .z-access { background: #dcfce7; color: #166534; }
+
+    .z-srv { background: #eff6ff; border-color: #93c5fd; }
+    .z-srv .z-badge { background: #dbeafe; color: #1e3a8a; }
+    .z-srv h3 { color: #1e3a8a; }
+    .z-srv ul li::before { color: #3b82f6; }
+    .z-srv .z-access { background: #dbeafe; color: #1e3a8a; }
+
+    .extras-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .extra-chip {
+      font-size: 12px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .extra-chip span { display: block; font-size: 10px; font-weight: 400; color: #94a3b8; margin-top: 2px; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 4 — Encryption
+    ═══════════════════════════════════════════════════════ */
+    .enc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .enc-col h3 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .enc-svc {
+      border-radius: 7px;
+      padding: 13px 15px;
+      margin-bottom: 9px;
+      border-left: 4px solid;
+    }
+
+    .enc-svc .sn { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+    .enc-svc ul { list-style: none; font-size: 12px; color: #374151; line-height: 1.65; }
+    .enc-svc ul li::before { content: "▸ "; }
+
+    .at-rest { background: #fefce8; border-color: #eab308; }
+    .at-rest .sn { color: #854d0e; }
+    .at-rest ul li::before { color: #eab308; }
+
+    .in-transit { background: #ecfeff; border-color: #06b6d4; }
+    .in-transit .sn { color: #0e7490; }
+    .in-transit ul li::before { color: #22d3ee; }
+
+    .kms-rules {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 13px 15px;
+      margin-top: 6px;
+    }
+
+    .kms-rules h4 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #92400e;
+      margin-bottom: 8px;
+    }
+
+    .kms-rules ul {
+      list-style: none;
+      font-size: 12px;
+      color: #374151;
+      line-height: 1.65;
+    }
+
+    .kms-rules ul li::before { content: "▸ "; color: #eab308; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 5 — VPC IAM SCPs
+    ═══════════════════════════════════════════════════════ */
+    .sec-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      flex: 1;
+    }
+
+    .sec-col h3 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .sec-item {
+      border-radius: 7px;
+      padding: 11px 13px;
+      margin-bottom: 8px;
+      border: 1px solid;
+    }
+
+    .sec-item .si-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .sec-item .si-body {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .vpc-item { background: #f0fdf4; border-color: #86efac; }
+    .vpc-item .si-title { color: #166534; }
+    .iam-item { background: #eff6ff; border-color: #93c5fd; }
+    .iam-item .si-title { color: #1e3a8a; }
+    .scp-item { background: #faf5ff; border-color: #c4b5fd; }
+    .scp-item .si-title { color: #4c1d95; }
+
+    .ou-bar {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .ou-box {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .ou-prod { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+    .ou-dev  { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+
+    .ou-box strong { display: block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 3px; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 6 — IaC
+    ═══════════════════════════════════════════════════════ */
+    .iac-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    .iac-col h3 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .cfn-col h3 { color: #ea580c; }
+    .cdk-col h3 { color: #7c3aed; }
+
+    .iac-block {
+      border-radius: 7px;
+      padding: 13px 15px;
+      margin-bottom: 9px;
+      border-left: 4px solid;
+    }
+
+    .cfn-block { background: #fff7ed; border-color: #f97316; }
+    .cfn-block .ib-title { color: #9a3412; font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+
+    .cdk-block { background: #faf5ff; border-color: #a78bfa; }
+    .cdk-block .ib-title { color: #4c1d95; font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+
+    .iac-block ul { list-style: none; font-size: 12px; color: #374151; line-height: 1.65; }
+    .cfn-block ul li::before { content: "▸ "; color: #f97316; }
+    .cdk-block ul li::before { content: "▸ "; color: #a78bfa; }
+
+    .what-goes-in {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .what-goes-in h4 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 10px;
+    }
+
+    .what-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .wg-chip {
+      font-size: 11.5px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    .acid-test {
+      margin-top: 14px;
+      padding: 11px 16px;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-left: 4px solid #ef4444;
+      border-radius: 6px;
+      font-size: 12.5px;
+      color: #991b1b;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 7 — Change Management
+    ═══════════════════════════════════════════════════════ */
+    .chg-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      flex: 1;
+    }
+
+    .cicd-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .cicd-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+    }
+
+    .cs-num {
+      font-size: 14px;
+      font-weight: 900;
+      color: #1d4ed8;
+      min-width: 20px;
+    }
+
+    .cs-body .cs-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+
+    .cs-body .cs-desc {
+      font-size: 11.5px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .cs-warn { background: #fef2f2; border-color: #fca5a5; }
+    .cs-warn .cs-num { color: #dc2626; }
+
+    .schema-rules {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .schema-rules h3 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .sr-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .sr-safe   { background: #f0fdf4; border: 1px solid #86efac; }
+    .sr-unsafe { background: #fef2f2; border: 1px solid #fca5a5; }
+
+    .sr-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .sr-safe .sr-badge { background: #dcfce7; color: #166534; }
+    .sr-unsafe .sr-badge { background: #fee2e2; color: #991b1b; }
+    .sr-safe .sr-text { color: #166534; }
+    .sr-unsafe .sr-text { color: #991b1b; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 8 — Data Quality Gates
+    ═══════════════════════════════════════════════════════ */
+    .gates-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      flex: 1;
+    }
+
+    .gate-card {
+      border-radius: 9px;
+      padding: 16px 18px;
+      border: 1px solid;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .gate-card .g-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .g-num {
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .g-title { font-size: 14px; font-weight: 800; }
+
+    .gate-card ul {
+      list-style: none;
+      font-size: 12.5px;
+      color: #374151;
+      line-height: 1.65;
+    }
+
+    .gate-card ul li::before { content: "▸ "; }
+
+    .gate-card .g-fail {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 5px;
+      margin-top: auto;
+    }
+
+    .g1 { background: #fff7ed; border-color: #fdba74; }
+    .g1 .g-num, .g1 .g-title { color: #9a3412; }
+    .g1 ul li::before { color: #f97316; }
+    .g1 .g-fail { background: #ffedd5; color: #9a3412; }
+
+    .g2 { background: #faf5ff; border-color: #c4b5fd; }
+    .g2 .g-num, .g2 .g-title { color: #4c1d95; }
+    .g2 ul li::before { color: #a78bfa; }
+    .g2 .g-fail { background: #ede9fe; color: #4c1d95; }
+
+    .g3 { background: #eff6ff; border-color: #93c5fd; }
+    .g3 .g-num, .g3 .g-title { color: #1e3a8a; }
+    .g3 ul li::before { color: #3b82f6; }
+    .g3 .g-fail { background: #dbeafe; color: #1e3a8a; }
+
+    .g4 { background: #f0fdf4; border-color: #86efac; }
+    .g4 .g-num, .g4 .g-title { color: #166534; }
+    .g4 ul li::before { color: #22c55e; }
+    .g4 .g-fail { background: #dcfce7; color: #166534; }
+
+    .quarantine-flow {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 11px 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      font-size: 12px;
+    }
+
+    .qf-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-right: 10px;
+      white-space: nowrap;
+    }
+
+    .qf-chip {
+      padding: 4px 11px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .qf-raw   { background: #fff7ed; color: #9a3412; border: 1px solid #fdba74; }
+    .qf-gate  { background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; }
+    .qf-pass  { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+    .qf-fail  { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+    .qf-arr   { color: #94a3b8; font-size: 14px; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 9 — Lambda Quality Gate
+    ═══════════════════════════════════════════════════════ */
+    .impl-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
+      flex: 1;
+    }
+
+    .check-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .check-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+
+    .check-step .ck-num {
+      font-size: 20px;
+      font-weight: 900;
+      min-width: 22px;
+      line-height: 1;
+    }
+
+    .check-step .ck-body .ck-title {
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .check-step .ck-body ul {
+      list-style: none;
+      font-size: 12px;
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    .check-step .ck-body ul li::before { content: "▸ "; }
+
+    .ck1 { background: #fff7ed; border-color: #f97316; }
+    .ck1 .ck-num { color: #ea580c; }
+    .ck1 .ck-title { color: #9a3412; }
+    .ck1 ul li::before { color: #f97316; }
+
+    .ck2 { background: #faf5ff; border-color: #a78bfa; }
+    .ck2 .ck-num { color: #7c3aed; }
+    .ck2 .ck-title { color: #4c1d95; }
+    .ck2 ul li::before { color: #a78bfa; }
+
+    .ck3 { background: #eff6ff; border-color: #3b82f6; }
+    .ck3 .ck-num { color: #2563eb; }
+    .ck3 .ck-title { color: #1e3a8a; }
+    .ck3 ul li::before { color: #3b82f6; }
+
+    .metrics-right {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .metrics-right h3 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+
+    .metric-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+    }
+
+    .mr-name { font-size: 12.5px; font-weight: 700; color: #0369a1; font-family: 'Courier New', monospace; }
+    .mr-type { font-size: 11px; color: #94a3b8; }
+
+    .alarm-rows { display: flex; flex-direction: column; gap: 6px; }
+
+    .alarm-rows h3 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .alarm-row {
+      padding: 7px 12px;
+      border-radius: 5px;
+      font-size: 11.5px;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+    }
+
+    .alarm-row strong { color: #dc2626; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 10 — Engine Comparison
+    ═══════════════════════════════════════════════════════ */
+    .eng-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .eng-card {
+      border-radius: 10px;
+      padding: 18px;
+      border: 1px solid;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .eng-card h3 { font-size: 17px; font-weight: 800; }
+    .eng-card .e-price { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; width: fit-content; }
+
+    .eng-card ul {
+      list-style: none;
+      font-size: 12px;
+      color: #374151;
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    .eng-card ul li::before { content: "▸ "; }
+
+    .eng-card .e-best, .eng-card .e-worst {
+      font-size: 11.5px;
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-weight: 600;
+    }
+
+    .e-athena { background: #f0fdf4; border-color: #86efac; }
+    .e-athena h3 { color: #166534; }
+    .e-athena .e-price { background: #dcfce7; color: #166534; }
+    .e-athena ul li::before { color: #22c55e; }
+    .e-athena .e-best { background: #dcfce7; color: #166534; }
+    .e-athena .e-worst { background: #fef2f2; color: #991b1b; }
+
+    .e-spectrum { background: #faf5ff; border-color: #c4b5fd; }
+    .e-spectrum h3 { color: #4c1d95; }
+    .e-spectrum .e-price { background: #ede9fe; color: #4c1d95; }
+    .e-spectrum ul li::before { color: #a78bfa; }
+    .e-spectrum .e-best { background: #ede9fe; color: #4c1d95; }
+    .e-spectrum .e-worst { background: #fef2f2; color: #991b1b; }
+
+    .e-redshift { background: #eff6ff; border-color: #93c5fd; }
+    .e-redshift h3 { color: #1e3a8a; }
+    .e-redshift .e-price { background: #dbeafe; color: #1e3a8a; }
+    .e-redshift ul li::before { color: #3b82f6; }
+    .e-redshift .e-best { background: #dbeafe; color: #1e3a8a; }
+    .e-redshift .e-worst { background: #fef2f2; color: #991b1b; }
+
+    .decision-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+    }
+
+    .d-chip {
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #374151;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .d-chip strong { display: block; color: #0f172a; font-size: 12px; margin-bottom: 2px; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 11 — Cost Per Query
+    ═══════════════════════════════════════════════════════ */
+    .cost-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      flex: 1;
+    }
+
+    .concurrency-col h3, .cost-col h3 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .concurrency-col h3 { color: #1d4ed8; }
+    .cost-col h3 { color: #d97706; }
+
+    .conc-block {
+      border-radius: 7px;
+      padding: 12px 14px;
+      margin-bottom: 9px;
+      border-left: 4px solid;
+    }
+
+    .conc-athena  { background: #f0fdf4; border-color: #22c55e; }
+    .conc-athena  h4 { color: #166534; }
+    .conc-redshift { background: #eff6ff; border-color: #3b82f6; }
+    .conc-redshift h4 { color: #1e3a8a; }
+
+    .conc-block h4 { font-size: 12.5px; font-weight: 700; margin-bottom: 6px; }
+    .conc-block ul { list-style: none; font-size: 12px; color: #374151; line-height: 1.6; }
+    .conc-athena ul li::before  { content: "▸ "; color: #22c55e; }
+    .conc-redshift ul li::before { content: "▸ "; color: #3b82f6; }
+
+    .cost-scenario {
+      background: #fefce8;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+    }
+
+    .cost-scenario .sc-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #854d0e;
+      margin-bottom: 8px;
+    }
+
+    .cost-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 5px 0;
+      border-bottom: 1px solid #fde68a;
+      font-size: 12px;
+    }
+
+    .cost-row:last-child { border-bottom: none; }
+    .cr-label { color: #92400e; font-weight: 700; }
+    .cr-val   { color: #1d4ed8; font-family: 'Courier New', monospace; font-size: 12.5px; font-weight: 700; }
+
+    .crossover {
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+      border-left: 4px solid #3b82f6;
+      border-radius: 7px;
+      padding: 12px 15px;
+      font-size: 12.5px;
+      color: #1e3a8a;
+      line-height: 1.6;
+    }
+
+    .crossover strong { color: #1d4ed8; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 12 — Runbooks
+    ═══════════════════════════════════════════════════════ */
+    .runbook-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      flex: 1;
+    }
+
+    .rb-section {
+      border-radius: 8px;
+      padding: 14px 15px;
+      border: 1px solid;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .rb-section .rb-num {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 3px;
+      width: fit-content;
+    }
+
+    .rb-section h3 {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .rb-section p, .rb-section ul {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.55;
+    }
+
+    .rb-section ul { list-style: none; }
+    .rb-section ul li::before { content: "▸ "; }
+    .rb-section .rb-example {
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      background: rgba(0,0,0,0.04);
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: #0369a1;
+      margin-top: 2px;
+    }
+
+    .rb1 { background: #fff7ed; border-color: #fdba74; }
+    .rb1 .rb-num { background: #fed7aa; color: #9a3412; }
+    .rb1 h3 { color: #9a3412; }
+    .rb1 ul li::before { color: #f97316; }
+
+    .rb2 { background: #fef2f2; border-color: #fca5a5; }
+    .rb2 .rb-num { background: #fee2e2; color: #991b1b; }
+    .rb2 h3 { color: #991b1b; }
+    .rb2 ul li::before { color: #ef4444; }
+
+    .rb3 { background: #fefce8; border-color: #fde68a; }
+    .rb3 .rb-num { background: #fef9c3; color: #854d0e; }
+    .rb3 h3 { color: #854d0e; }
+    .rb3 ul li::before { color: #eab308; }
+
+    .rb4 { background: #f0fdf4; border-color: #86efac; }
+    .rb4 .rb-num { background: #dcfce7; color: #166534; }
+    .rb4 h3 { color: #166534; }
+    .rb4 ul li::before { color: #22c55e; }
+
+    .rb5 { background: #eff6ff; border-color: #93c5fd; }
+    .rb5 .rb-num { background: #dbeafe; color: #1e3a8a; }
+    .rb5 h3 { color: #1e3a8a; }
+    .rb5 ul li::before { color: #3b82f6; }
+
+    .rb6 { background: #faf5ff; border-color: #c4b5fd; }
+    .rb6 .rb-num { background: #ede9fe; color: #4c1d95; }
+    .rb6 h3 { color: #4c1d95; }
+    .rb6 ul li::before { color: #a78bfa; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 13 — Incident Response
+    ═══════════════════════════════════════════════════════ */
+    .ir-phases {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .ir-phase {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      align-items: start;
+      gap: 14px;
+      padding: 11px 14px;
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+
+    .ir-phase .ph-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .ph-num {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .ph-name {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .ph-time {
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .ir-phase .ph-body {
+      font-size: 12px;
+      color: #374151;
+      line-height: 1.55;
+    }
+
+    .ir-phase .ph-body ul {
+      list-style: none;
+    }
+
+    .ir-phase .ph-body ul li::before { content: "▸ "; }
+
+    .ph1 { background: #fef2f2; border-color: #ef4444; }
+    .ph1 .ph-num, .ph1 .ph-name { color: #dc2626; }
+    .ph1 .ph-body ul li::before { color: #ef4444; }
+
+    .ph2 { background: #fff7ed; border-color: #f97316; }
+    .ph2 .ph-num, .ph2 .ph-name { color: #ea580c; }
+    .ph2 .ph-body ul li::before { color: #f97316; }
+
+    .ph3 { background: #fefce8; border-color: #eab308; }
+    .ph3 .ph-num, .ph3 .ph-name { color: #d97706; }
+    .ph3 .ph-body ul li::before { color: #eab308; }
+
+    .ph4 { background: #f0fdf4; border-color: #22c55e; }
+    .ph4 .ph-num, .ph4 .ph-name { color: #16a34a; }
+    .ph4 .ph-body ul li::before { color: #22c55e; }
+
+    .ph5 { background: #eff6ff; border-color: #3b82f6; }
+    .ph5 .ph-num, .ph5 .ph-name { color: #2563eb; }
+    .ph5 .ph-body ul li::before { color: #3b82f6; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 14 — Checklist
+    ═══════════════════════════════════════════════════════ */
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      flex: 1;
+    }
+
+    .cl-section {
+      border-radius: 9px;
+      padding: 15px 16px;
+      border: 1px solid;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cl-section h3 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .cl-section ul {
+      list-style: none;
+      font-size: 11.5px;
+      color: #374151;
+      line-height: 1.7;
+    }
+
+    .cl-section ul li::before {
+      content: "☐ ";
+      font-size: 13px;
+    }
+
+    .cl-infra { background: #f8fafc; border-color: #cbd5e1; }
+    .cl-infra h3 { color: #475569; }
+
+    .cl-data { background: #fff7ed; border-color: #fdba74; }
+    .cl-data h3 { color: #9a3412; }
+
+    .cl-pipeline { background: #faf5ff; border-color: #c4b5fd; }
+    .cl-pipeline h3 { color: #4c1d95; }
+
+    .cl-obs { background: #ecfeff; border-color: #67e8f9; }
+    .cl-obs h3 { color: #0e7490; }
+
+    .cl-cost { background: #f0fdf4; border-color: #86efac; }
+    .cl-cost h3 { color: #166534; }
+
+    .cl-runbook { background: #fef2f2; border-color: #fca5a5; }
+    .cl-runbook h3 { color: #991b1b; }
+
+    /* ════════════════════════════════════════════════════════
+       SLIDE 15 — Knowledge Check
+    ═══════════════════════════════════════════════════════ */
+    .kc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .kc-q {
+      border-radius: 9px;
+      padding: 15px 17px;
+      border: 1px solid;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .kc-q .q-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 3px;
+      width: fit-content;
+    }
+
+    .kc-q .q-text { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.45; }
+
+    .kc-q .q-options {
+      list-style: none;
+      font-size: 12px;
+      color: #374151;
+      line-height: 1.7;
+    }
+
+    .kc-q .q-options li::before { content: "○ "; color: #94a3b8; }
+
+    .kc-q .q-answer {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 11px;
+      border-radius: 5px;
+      margin-top: auto;
+    }
+
+    .kc1 { background: #f0fdf4; border-color: #86efac; }
+    .kc1 .q-label { background: #dcfce7; color: #166534; }
+    .kc1 .q-answer { background: #dcfce7; color: #166534; }
+
+    .kc2 { background: #fefce8; border-color: #fde68a; }
+    .kc2 .q-label { background: #fef9c3; color: #854d0e; }
+    .kc2 .q-answer { background: #fef9c3; color: #854d0e; }
+
+    .kc3 { background: #faf5ff; border-color: #c4b5fd; }
+    .kc3 .q-label { background: #ede9fe; color: #4c1d95; }
+    .kc3 .q-answer { background: #ede9fe; color: #4c1d95; }
+
+    .kc4 { background: #fef2f2; border-color: #fca5a5; }
+    .kc4 .q-label { background: #fee2e2; color: #991b1b; }
+    .kc4 .q-answer { background: #fee2e2; color: #991b1b; }
+
+    .kc5 { background: #eff6ff; border-color: #93c5fd; }
+    .kc5 .q-label { background: #dbeafe; color: #1e3a8a; }
+    .kc5 .q-answer { background: #dbeafe; color: #1e3a8a; }
+
+    .kc-wide { grid-column: 1 / -1; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 1 — Module Overview
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">1 / 15</div>
+  </div>
+
+  <h1>Production Readiness &amp; AWS Reference Architectures</h1>
+  <p class="sub">From a working platform to a production-grade enterprise data platform — 2 hours</p>
+
+  <div class="card" style="flex:1;">
+    <h3>What We Cover</h3>
+    <ul>
+      <li>AWS Modern Data Architecture — five-layer reference blueprint</li>
+      <li>Three-zone S3 architecture (Raw / Curated / Serving)</li>
+      <li>Security hardening: encryption, VPC, IAM, SCPs</li>
+      <li>Infrastructure as Code: CloudFormation vs CDK — what goes where</li>
+      <li>Change management and safe deployment patterns</li>
+      <li>Data quality gates: schema, null checks, row count reconciliation</li>
+      <li>Lambda quality gate implementation with custom CloudWatch metrics</li>
+      <li>Performance benchmarking: Athena vs Spectrum vs Redshift Direct</li>
+      <li>Concurrency testing and cost-per-query crossover analysis</li>
+      <li>Operational runbook structure and incident response (5-phase)</li>
+      <li>Production readiness checklist — rate your platform today</li>
+    </ul>
+  </div>
+
+  <div class="key-bar">
+    <span class="kb-label">Module Framing</span>
+    <span class="kb-text">Days 1–3 built the platform. <strong>A platform that works in a demo is not a production platform.</strong> Production-ready means: secure, observable, deployable from code, recoverable, and cost-controlled. Every checklist item today has a "done means" definition.</span>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 2 — Modern Data Architecture
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">2 / 15</div>
+  </div>
+
+  <h2>AWS Modern Data Architecture — The Five-Layer Blueprint</h2>
+  <p class="sub">Every architectural decision today maps to one of these layers — production readiness means hardening all five</p>
+
+  <div class="arch-layers">
+    <div class="arch-layer l-ingest">
+      <div class="al-label">
+        <span class="al-icon">📥</span>
+        <div>
+          <div class="al-name">Ingest Layer</div>
+          <div class="al-zone">How data enters the platform</div>
+        </div>
+      </div>
+      <div class="al-items">
+        <span class="al-chip">AWS Glue (batch)</span>
+        <span class="al-chip">DMS (CDC)</span>
+        <span class="al-chip">Kinesis Data Streams</span>
+        <span class="al-chip">Kinesis Firehose</span>
+        <span class="al-chip">MSK / Kafka</span>
+        <span class="al-chip">Snow family</span>
+      </div>
+    </div>
+
+    <div class="arch-layer l-store">
+      <div class="al-label">
+        <span class="al-icon">🪣</span>
+        <div>
+          <div class="al-name">Store Layer</div>
+          <div class="al-zone">Where data lives (Raw → Curated → Serving)</div>
+        </div>
+      </div>
+      <div class="al-items">
+        <span class="al-chip">S3 Raw (Bronze)</span>
+        <span class="al-chip">S3 Curated (Silver)</span>
+        <span class="al-chip">Redshift (Gold)</span>
+        <span class="al-chip">OpenSearch</span>
+        <span class="al-chip">DynamoDB</span>
+      </div>
+    </div>
+
+    <div class="arch-layer l-catalog">
+      <div class="al-label">
+        <span class="al-icon">🏛️</span>
+        <div>
+          <div class="al-name">Catalog &amp; Governance</div>
+          <div class="al-zone">Schema, access control, data quality</div>
+        </div>
+      </div>
+      <div class="al-items">
+        <span class="al-chip">Glue Data Catalog</span>
+        <span class="al-chip">Lake Formation</span>
+        <span class="al-chip">Glue Data Quality</span>
+        <span class="al-chip">CloudTrail</span>
+        <span class="al-chip">GuardDuty</span>
+      </div>
+    </div>
+
+    <div class="arch-layer l-process">
+      <div class="al-label">
+        <span class="al-icon">⚙️</span>
+        <div>
+          <div class="al-name">Process &amp; Transform</div>
+          <div class="al-zone">ETL, orchestration, quality gates</div>
+        </div>
+      </div>
+      <div class="al-items">
+        <span class="al-chip">AWS Glue ETL (Spark)</span>
+        <span class="al-chip">Step Functions</span>
+        <span class="al-chip">Lambda (transforms + gates)</span>
+        <span class="al-chip">MWAA (Airflow)</span>
+      </div>
+    </div>
+
+    <div class="arch-layer l-consume">
+      <div class="al-label">
+        <span class="al-icon">📊</span>
+        <div>
+          <div class="al-name">Consume Layer</div>
+          <div class="al-zone">Who queries the data and how</div>
+        </div>
+      </div>
+      <div class="al-items">
+        <span class="al-chip">Athena (ad-hoc SQL)</span>
+        <span class="al-chip">Redshift Spectrum (S3 joins)</span>
+        <span class="al-chip">Redshift Direct (high concurrency)</span>
+        <span class="al-chip">QuickSight</span>
+        <span class="al-chip">SageMaker</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-bar">
+    <span class="kb-label">Key Point</span>
+    <span class="kb-text">AWS does not publish a single "Modern Data Architecture" doc page — this is an <strong>editorial synthesis</strong> from the AWS Architecture Center. Tell students they are synthesizing, not citing, so they do not hunt for a page that does not exist.</span>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 3 — Three-Zone S3 Architecture
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">3 / 15</div>
+  </div>
+
+  <h2>Three-Zone S3 Data Lake — Enterprise Standard</h2>
+  <p class="sub">Separation of concerns between raw, curated, and serving data — plus three enterprise additions</p>
+
+  <div class="zones-grid">
+    <div class="zone-card z-raw">
+      <div class="z-badge">Zone 1 — Bronze</div>
+      <h3>RAW</h3>
+      <ul>
+        <li>Exact copy of source data as received</li>
+        <li>Immutable — never overwrite, never transform in place</li>
+        <li>Format: CSV, JSON, binary — as-landed</li>
+        <li>Retention: matches source SLA (7 years regulated)</li>
+        <li>Partitioned by ingest date only</li>
+      </ul>
+      <div class="z-access">Access: pipeline service roles only — no analysts</div>
+    </div>
+
+    <div class="zone-card z-cur">
+      <div class="z-badge">Zone 2 — Silver</div>
+      <h3>CURATED</h3>
+      <ul>
+        <li>Validated, deduplicated, schema-conformed</li>
+        <li>Format: Parquet, snappy-compressed, partitioned</li>
+        <li>Partitioned by: year / month / business key</li>
+        <li>Schema enforced here — no raw inconsistencies pass</li>
+        <li>Registered in Glue Catalog, Lake Formation governed</li>
+      </ul>
+      <div class="z-access">Access: data engineers + approved pipeline roles</div>
+    </div>
+
+    <div class="zone-card z-srv">
+      <div class="z-badge">Zone 3 — Gold</div>
+      <h3>SERVING</h3>
+      <ul>
+        <li>Aggregated, business-ready, domain-specific</li>
+        <li>Loaded into Redshift for heavy analytics</li>
+        <li>Available via Athena for ad-hoc, Spectrum for joins</li>
+        <li>Lake Formation row/column filters applied</li>
+        <li>BI-tool and analyst-facing</li>
+      </ul>
+      <div class="z-access">Access: analysts, BI tools, data scientists</div>
+    </div>
+  </div>
+
+  <div class="extras-row">
+    <div class="extra-chip">🚧 Quarantine Bucket<span>Failed quality gate records — visible, tracked, actionable</span></div>
+    <div class="extra-chip">🧊 Archive Bucket<span>S3 Glacier — raw data beyond active retention window</span></div>
+    <div class="extra-chip">📋 Audit Bucket<span>CloudTrail + Lake Formation logs — WORM-protected, no delete</span></div>
+  </div>
+
+  <div class="key-bar" style="margin-top:12px;">
+    <span class="kb-label">Key Insight</span>
+    <span class="kb-text">The quarantine bucket is what separates mature platforms. <strong>Bad data landing in curated silently poisons every downstream consumer.</strong> Data landing in quarantine is visible, tracked, and actionable. No quarantine bucket = no production platform.</span>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 4 — Encryption
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">4 / 15</div>
+  </div>
+
+  <h2>Security Hardening — Encryption at Every Layer</h2>
+  <p class="sub">Data must be encrypted at rest and in transit everywhere. No exceptions. No "it slows down Glue."</p>
+
+  <div class="enc-grid">
+    <div class="enc-col">
+      <h3 style="color:#d97706;">Encryption at Rest (KMS)</h3>
+
+      <div class="enc-svc at-rest">
+        <div class="sn">Amazon S3</div>
+        <ul>
+          <li>SSE-S3 (free) for non-regulated data</li>
+          <li>SSE-KMS: CMK + every decrypt audited in CloudTrail</li>
+          <li>DSSE-KMS: dual-layer — required by some government/financial frameworks</li>
+          <li>Bucket policy: <code>Deny s3:PutObject</code> where encryption header not set</li>
+        </ul>
+      </div>
+
+      <div class="enc-svc at-rest">
+        <div class="sn">Amazon Redshift</div>
+        <ul>
+          <li>Cluster-level KMS encryption — enable at creation</li>
+          <li>Cannot add retroactively — requires snapshot + restore</li>
+          <li>Redshift Serverless: encrypted by default</li>
+        </ul>
+      </div>
+
+      <div class="enc-svc at-rest">
+        <div class="sn">AWS Glue + CloudWatch Logs</div>
+        <ul>
+          <li>Glue Catalog metadata encryption with KMS</li>
+          <li>Job bookmark encryption (also KMS)</li>
+          <li>CloudWatch log group encryption: KMS key on the group</li>
+        </ul>
+      </div>
+
+      <div class="kms-rules">
+        <h4>KMS Key Management Rules</h4>
+        <ul>
+          <li>One CMK per classification tier — not one key for everything</li>
+          <li>Automatic annual rotation on all CMKs</li>
+          <li>Key policy: restrict <code>kms:Decrypt</code> to specific roles — not <code>*</code></li>
+          <li>Cross-account: grant to specific principal, not all external</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="enc-col">
+      <h3 style="color:#0e7490;">Encryption in Transit (TLS)</h3>
+
+      <div class="enc-svc in-transit">
+        <div class="sn">S3 — Force HTTPS</div>
+        <ul>
+          <li>Bucket policy with <code>Deny</code> on <code>aws:SecureTransport: false</code></li>
+          <li>Blocks any HTTP (unencrypted) request to the bucket</li>
+          <li>Apply to raw, curated, serving, quarantine, and audit buckets</li>
+        </ul>
+      </div>
+
+      <div class="enc-svc in-transit">
+        <div class="sn">Amazon Redshift</div>
+        <ul>
+          <li>Parameter group: <code>require_ssl = true</code></li>
+          <li>TLS 1.2 minimum for all client connections</li>
+          <li>JDBC/ODBC drivers enforce certificate validation</li>
+        </ul>
+      </div>
+
+      <div class="enc-svc in-transit">
+        <div class="sn">All AWS APIs (Athena, Glue, Step Functions)</div>
+        <ul>
+          <li>HTTPS enforced by AWS on all service endpoints</li>
+          <li>Athena results land in S3 — inherit bucket encryption</li>
+          <li>Secrets Manager: all credentials stored encrypted, never in code</li>
+        </ul>
+      </div>
+
+      <div class="enc-svc" style="background:#f8fafc;border-color:#64748b;border-left-color:#475569;">
+        <div class="sn" style="color:#1e293b;">Instructor Note — "Encryption slows Glue"</div>
+        <ul>
+          <li>SSE-S3 has near-zero performance impact</li>
+          <li>SSE-KMS adds latency only on the key call — which is cached</li>
+          <li>The performance argument for skipping encryption is not valid in 2026</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 5 — VPC IAM SCPs
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">5 / 15</div>
+  </div>
+
+  <h2>Security Hardening — VPC, IAM &amp; Service Control Policies</h2>
+  <p class="sub">Network isolation · least privilege · org-level preventive controls</p>
+
+  <div class="sec-grid">
+    <div>
+      <h3 style="color:#166534;">VPC Isolation</h3>
+      <div class="sec-item vpc-item"><div class="si-title">Glue jobs in VPC</div><div class="si-body">Without VPC assignment, Glue jobs can reach the public internet. Always assign a VPC + subnet.</div></div>
+      <div class="sec-item vpc-item"><div class="si-title">S3 VPC Gateway Endpoint</div><div class="si-body">Glue / Lambda → S3 traffic stays on the AWS backbone. No NAT Gateway. No public path. Free.</div></div>
+      <div class="sec-item vpc-item"><div class="si-title">Redshift in private subnet</div><div class="si-body">No public IP. Accessed via VPC only. Security group: inbound port 5439 from BI subnet only. No 0.0.0.0/0.</div></div>
+      <div class="sec-item vpc-item"><div class="si-title">Interface endpoints</div><div class="si-body">Glue, Athena, STS, KMS, Secrets Manager — all via VPC endpoints. Eliminates NAT Gateway cost and public traffic.</div></div>
+    </div>
+
+    <div>
+      <h3 style="color:#1e3a8a;">IAM Least Privilege</h3>
+      <div class="sec-item iam-item"><div class="si-title">Glue job role</div><div class="si-body"><code>s3:GetObject</code> on raw prefix only + <code>s3:PutObject</code> on curated prefix only. Not <code>s3:*</code>.</div></div>
+      <div class="sec-item iam-item"><div class="si-title">Lambda quality gate role</div><div class="si-body"><code>cloudwatch:PutMetricData</code> + <code>s3:GetObject</code> on specific prefix. Nothing else.</div></div>
+      <div class="sec-item iam-item"><div class="si-title">Redshift role</div><div class="si-body"><code>s3:GetObject</code> for COPY + <code>glue:GetTable</code> for Spectrum. No write permissions to data.</div></div>
+      <div class="sec-item iam-item"><div class="si-title">No access keys, ever</div><div class="si-body">All services use IAM roles. No long-lived access keys. No inline policies. Managed policies in version control.</div></div>
+    </div>
+
+    <div>
+      <h3 style="color:#4c1d95;">Service Control Policies</h3>
+      <div class="sec-item scp-item"><div class="si-title">Region lockdown</div><div class="si-body">Deny all actions where <code>aws:RequestedRegion</code> not in approved list (us-west-2, us-east-1).</div></div>
+      <div class="sec-item scp-item"><div class="si-title">Encryption mandate</div><div class="si-body">Deny <code>s3:PutObject</code> where <code>s3:x-amz-server-side-encryption</code> not set.</div></div>
+      <div class="sec-item scp-item"><div class="si-title">Audit trail protection</div><div class="si-body">Deny <code>cloudtrail:StopLogging</code> and <code>cloudtrail:DeleteTrail</code> — no principal can silence the audit trail.</div></div>
+      <div class="sec-item scp-item"><div class="si-title">No public S3</div><div class="si-body">Deny <code>s3:PutBucketPublicAccessBlock</code> with BlockPublicAcls=false. Public buckets cannot be created.</div></div>
+    </div>
+  </div>
+
+  <div class="ou-bar">
+    <div class="ou-box ou-prod"><strong>Production OU — Strictest SCPs</strong>Encryption mandatory · region locked · no direct console data access · no IAM admin roles without boundaries</div>
+    <div class="ou-box ou-dev"><strong>Non-Production OU — Relaxed</strong>Engineers can experiment · no public S3 still enforced · CloudTrail still required · encryption still required</div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 6 — IaC
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">6 / 15</div>
+  </div>
+
+  <h2>Infrastructure as Code — CloudFormation vs CDK</h2>
+  <p class="sub">If it is not in code, it does not exist. A click-created platform cannot be reproduced, reviewed, or trusted.</p>
+
+  <div class="iac-grid">
+    <div class="iac-col cfn-col">
+      <h3>CloudFormation</h3>
+
+      <div class="iac-block cfn-block">
+        <div class="ib-title">What it is</div>
+        <ul>
+          <li>AWS-native IaC — declarative JSON or YAML</li>
+          <li>Direct 1:1 mapping to AWS resource properties</li>
+          <li>Supports all services, day-one for new AWS features</li>
+          <li>Drift detection: live state vs template → flags manual changes</li>
+          <li>Stack sets: deploy across multiple accounts and regions simultaneously</li>
+        </ul>
+      </div>
+
+      <div class="iac-block cfn-block">
+        <div class="ib-title">Best for</div>
+        <ul>
+          <li>IAM roles and policies</li>
+          <li>S3 bucket policies and lifecycle rules</li>
+          <li>KMS keys and key policies</li>
+          <li>CloudWatch alarms, dashboards, SNS topics</li>
+          <li>Stable, low-change platform infrastructure</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="iac-col cdk-col">
+      <h3>CDK (Cloud Development Kit)</h3>
+
+      <div class="iac-block cdk-block">
+        <div class="ib-title">What it is</div>
+        <ul>
+          <li>Write infrastructure in Python, TypeScript, Java, Go</li>
+          <li><strong>Compiles to CloudFormation</strong> — same deployment engine underneath</li>
+          <li>L2 constructs: <code>new s3.Bucket(this, 'Raw', { encryption: BucketEncryption.KMS })</code></li>
+          <li>L3 constructs (patterns): entire pipeline as one reusable construct</li>
+          <li>Better for teams already writing Python/TypeScript</li>
+        </ul>
+      </div>
+
+      <div class="iac-block cdk-block">
+        <div class="ib-title">CDK vs CloudFormation — the truth</div>
+        <ul>
+          <li>CDK does NOT replace CloudFormation — it synthesizes CF templates</li>
+          <li>All drift detection, rollback, stack management = CloudFormation</li>
+          <li>CDK and CloudFormation are complementary, not competing</li>
+          <li>Pick by team language preference, not by feature capability</li>
+        </ul>
+      </div>
+
+      <div class="acid-test">
+        <strong>Acid Test:</strong> Delete your entire AWS environment. Re-create it from code in under 2 hours. If you cannot — your IaC is incomplete. This is not hypothetical: it is your disaster recovery test.
+      </div>
+    </div>
+  </div>
+
+  <div class="what-goes-in">
+    <h4>What Goes in IaC for a Data Platform</h4>
+    <div class="what-grid">
+      <div class="wg-chip">S3 buckets + policies + lifecycle</div>
+      <div class="wg-chip">All IAM roles + managed policies</div>
+      <div class="wg-chip">Glue databases + crawlers + job defs</div>
+      <div class="wg-chip">KMS keys + key policies</div>
+      <div class="wg-chip">CloudWatch alarms + dashboards</div>
+      <div class="wg-chip">SNS topics + subscriptions</div>
+      <div class="wg-chip">Step Functions state machines</div>
+      <div class="wg-chip">Lake Formation permissions</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 7 — Change Management
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">7 / 15</div>
+  </div>
+
+  <h2>Change Management — Deploying Data Services Safely</h2>
+  <p class="sub">Data services are harder to deploy than web services — schema changes break consumers, and you cannot roll back written data</p>
+
+  <div class="chg-grid">
+    <div>
+      <h3 style="font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#1d4ed8;margin-bottom:12px;">CI/CD Pipeline — The Five Stages</h3>
+      <div class="cicd-steps">
+        <div class="cicd-step">
+          <span class="cs-num">1</span>
+          <div class="cs-body"><div class="cs-title">Lint + Unit Test</div><div class="cs-desc">Lambda/Glue script passes syntax checks and unit tests against mock data</div></div>
+        </div>
+        <div class="cicd-step">
+          <span class="cs-num">2</span>
+          <div class="cs-body"><div class="cs-title">Deploy to Staging</div><div class="cs-desc">CloudFormation/CDK deploys to staging environment. Same SCPs, same VPC config, no real PII</div></div>
+        </div>
+        <div class="cicd-step">
+          <span class="cs-num">3</span>
+          <div class="cs-body"><div class="cs-title">Integration Test</div><div class="cs-desc">Invoke pipeline end-to-end. Validate output row count and schema match expected</div></div>
+        </div>
+        <div class="cicd-step cs-warn">
+          <span class="cs-num">4</span>
+          <div class="cs-body"><div class="cs-title">Manual Approval Gate</div><div class="cs-desc">Required for regulated industries. Automated prod deploys without human sign-off fail SOC2 CC8.1</div></div>
+        </div>
+        <div class="cicd-step">
+          <span class="cs-num">5</span>
+          <div class="cs-body"><div class="cs-title">Deploy + Monitor</div><div class="cs-desc">Deploy to production. Watch CloudWatch dashboard 15 minutes. Auto-rollback if error alarm fires within 30 min</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="schema-rules">
+        <h3>Schema Evolution Safety Rules</h3>
+
+        <div class="sr-row sr-safe"><span class="sr-badge">SAFE</span><span class="sr-text">Add a nullable column — existing queries unaffected</span></div>
+        <div class="sr-row sr-safe"><span class="sr-badge">SAFE</span><span class="sr-text">Add a new partition key going forward — old partitions still readable</span></div>
+        <div class="sr-row sr-unsafe"><span class="sr-badge">UNSAFE</span><span class="sr-text">Rename a column — breaks all existing queries immediately</span></div>
+        <div class="sr-row sr-unsafe"><span class="sr-badge">UNSAFE</span><span class="sr-text">Change a column type — silent breakage (widening) or loud (narrowing)</span></div>
+        <div class="sr-row sr-unsafe"><span class="sr-badge">UNSAFE</span><span class="sr-text">Remove a column — immediate breakage for all consumers</span></div>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <h3 style="color:#d97706;">Blue/Green for Glue Jobs</h3>
+        <ul>
+          <li>Blue = current production job version</li>
+          <li>Green = new version deployed alongside blue</li>
+          <li>Run green against staging dataset, validate output</li>
+          <li>Switch Glue trigger to green after validation</li>
+          <li>Keep blue running for 24 hours as rollback</li>
+          <li>Breaking schema change? New table version (v2) + migration window</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 8 — Four Quality Gates
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">8 / 15</div>
+  </div>
+
+  <h2>Data Quality — The Four Gate Types</h2>
+  <p class="sub">Quality is enforced before data moves downstream — not discovered after analysts complain</p>
+
+  <div class="gates-grid">
+    <div class="gate-card g1">
+      <div class="g-header"><span class="g-num">1</span><span class="g-title">Schema Validation</span></div>
+      <ul>
+        <li>Do all expected columns exist with correct names?</li>
+        <li>Are column types correct? (string where date expected)</li>
+        <li>Are required columns present at all?</li>
+        <li>Implemented: at Lambda ingestion entry point</li>
+      </ul>
+      <div class="g-fail">On fail: route to quarantine, emit SchemaMismatch=1, alarm fires</div>
+    </div>
+
+    <div class="gate-card g2">
+      <div class="g-header"><span class="g-num">2</span><span class="g-title">Null &amp; Type Checks</span></div>
+      <ul>
+        <li>Required fields: customer_id, trade_date, price — must not be null</li>
+        <li>Type check: numeric fields contain no "N/A" strings</li>
+        <li>Range check: price &gt; 0 AND &lt; 1,000,000</li>
+        <li>Referential: region in [NA, EMEA, APAC, LATAM]</li>
+      </ul>
+      <div class="g-fail">On fail: quarantine + NullViolationCount + RangeViolationCount metrics</div>
+    </div>
+
+    <div class="gate-card g3">
+      <div class="g-header"><span class="g-num">3</span><span class="g-title">Row Count Reconciliation</span></div>
+      <ul>
+        <li>Source row count (from object metadata tag) vs loaded rows</li>
+        <li>Delta threshold: abs(source − loaded) / source &gt; 0.1%</li>
+        <li>Pipeline ran, SUCCEEDED, wrote 0 rows — this gate catches it</li>
+        <li>Lab 3: RowCountDelta metric → CloudWatch alarm</li>
+      </ul>
+      <div class="g-fail">On fail: quarantine + RowCountDelta metric → ALARM (missing=breaching)</div>
+    </div>
+
+    <div class="gate-card g4">
+      <div class="g-header"><span class="g-num">4</span><span class="g-title">Pipeline Heartbeat</span></div>
+      <ul>
+        <li>Lambda Invocations &lt; 1 for 2 expected run intervals → ALARM</li>
+        <li>Lambda Duration &gt; SLA threshold → ALARM</li>
+        <li>S3 object not created in expected prefix within 5 min → ALARM</li>
+        <li>Catches: pipeline did not run (not just wrong output)</li>
+      </ul>
+      <div class="g-fail">On fail: alert immediately — no data = worse than wrong data</div>
+    </div>
+  </div>
+
+  <div class="quarantine-flow">
+    <span class="qf-label">Quarantine Pattern</span>
+    <span class="qf-chip qf-raw">Raw</span>
+    <span class="qf-arr">→</span>
+    <span class="qf-chip qf-gate">Quality Gate Lambda</span>
+    <span class="qf-arr">→ PASS →</span>
+    <span class="qf-chip qf-pass">Curated (clean)</span>
+    <span class="qf-arr">&nbsp;&nbsp;&nbsp;→ FAIL →</span>
+    <span class="qf-chip qf-fail">Quarantine (tagged with failure reason)</span>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 9 — Lambda Quality Gate Implementation
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">9 / 15</div>
+  </div>
+
+  <h2>Lambda Quality Gate — Three Checks &amp; Custom Metrics</h2>
+  <p class="sub">Architecture: S3 PutObject event → Lambda → CloudWatch custom metric → Alarm → SNS</p>
+
+  <div class="impl-grid">
+    <div class="check-steps">
+      <div class="check-step ck1">
+        <span class="ck-num">1</span>
+        <div class="ck-body">
+          <div class="ck-title">Schema Check</div>
+          <ul>
+            <li>Read Parquet header, extract column names and types</li>
+            <li>Compare against schema in SSM Parameter Store</li>
+            <li>On mismatch: tag object <code>ingest-status=quarantined</code>, move to quarantine prefix, publish <code>SchemaMismatch=1</code>, return</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="check-step ck2">
+        <span class="ck-num">2</span>
+        <div class="ck-body">
+          <div class="ck-title">Null &amp; Range Check</div>
+          <ul>
+            <li>Load first 1,000 rows — not entire file for large datasets</li>
+            <li>For each required column: assert null count = 0</li>
+            <li>For each numeric column: assert min &gt; lower AND max &lt; upper</li>
+            <li>Publish <code>NullViolationCount</code> and <code>RangeViolationCount</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="check-step ck3">
+        <span class="ck-num">3</span>
+        <div class="ck-body">
+          <div class="ck-title">Row Count Reconciliation</div>
+          <ul>
+            <li>Read expected count from S3 object metadata tag (set by producer at write time)</li>
+            <li>Compare against actual rows in file</li>
+            <li>Compute delta as a percentage</li>
+            <li>If delta &gt; threshold: quarantine + alarm</li>
+            <li>Publish <code>RowCountDelta</code> metric</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="metrics-right">
+      <h3>CloudWatch Custom Metrics</h3>
+      <div style="font-size:10px;color:#94a3b8;margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase;">Namespace: DataPlatform/QualityGate</div>
+
+      <div class="metric-row"><span class="mr-name">SchemaMismatch</span><span class="mr-type">Count (0=pass, 1=fail)</span></div>
+      <div class="metric-row"><span class="mr-name">NullViolationCount</span><span class="mr-type">Count per file</span></div>
+      <div class="metric-row"><span class="mr-name">RangeViolationCount</span><span class="mr-type">Count per file</span></div>
+      <div class="metric-row"><span class="mr-name">RowCountDelta</span><span class="mr-type">Percent</span></div>
+      <div class="metric-row"><span class="mr-name">QualityGatePassRate</span><span class="mr-type">Percent (5-min window)</span></div>
+
+      <div class="alarm-rows">
+        <h3 style="margin-top:6px;">Alarms</h3>
+        <div class="alarm-row"><strong>SchemaMismatch &gt; 0</strong> → ALARM immediately (1/1 period)</div>
+        <div class="alarm-row"><strong>RowCountDelta &gt; 0.1%</strong> → ALARM, missing=breaching</div>
+        <div class="alarm-row"><strong>QualityGatePassRate &lt; 99%</strong> → ALARM if sustained 2 periods</div>
+      </div>
+
+      <div class="card" style="margin-top:8px;border-color:#bbf7d0;">
+        <h3 style="color:#166534;">Key Pattern</h3>
+        <ul style="font-size:12px;">
+          <li>Producer writes expected row count as S3 object tag at write time</li>
+          <li>Gate reads tag at validation time — decouples from re-querying source</li>
+          <li>No source system connection required in the quality Lambda</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 10 — Engine Comparison
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">10 / 15</div>
+  </div>
+
+  <h2>Performance Benchmarking — Athena vs Spectrum vs Redshift Direct</h2>
+  <p class="sub">For a given workload: which engine gives the right performance at the right cost? Run the math — don't guess.</p>
+
+  <div class="eng-grid">
+    <div class="eng-card e-athena">
+      <h3>Amazon Athena</h3>
+      <div class="e-price">$5 / TB scanned</div>
+      <ul>
+        <li>Serverless SQL on S3 — no cluster, no provisioning</li>
+        <li>Parquet + partitions = less scan = lower cost</li>
+        <li>20 concurrent DML queries per account (soft limit)</li>
+        <li>Results delivered to S3 — fetch after completion</li>
+      </ul>
+      <div class="e-best">Best: ad-hoc, infrequent large scans, unpredictable workloads</div>
+      <div class="e-worst">Worst: high-concurrency dashboards, sub-second SLAs</div>
+    </div>
+
+    <div class="eng-card e-spectrum">
+      <h3>Redshift Spectrum</h3>
+      <div class="e-price">$5/TB S3 scan + node hours</div>
+      <ul>
+        <li>Redshift SQL engine reads S3 via external tables</li>
+        <li>JOIN S3 data with Redshift internal tables in one query</li>
+        <li>No separate ETL required for cross-source joins</li>
+        <li>Requires an active Redshift cluster to use</li>
+      </ul>
+      <div class="e-best">Best: S3 data + Redshift dimension table JOINs</div>
+      <div class="e-worst">Worst: teams without Redshift (paying nodes + scan)</div>
+    </div>
+
+    <div class="eng-card e-redshift">
+      <h3>Redshift Direct</h3>
+      <div class="e-price">Node hours only — no scan charge</div>
+      <ul>
+        <li>Data physically loaded via COPY into columnar storage</li>
+        <li>Pre-sorted, compressed, distributed — fastest for repeated queries</li>
+        <li>High-concurrency with WLM queue management</li>
+        <li>Concurrency Scaling: auto spin-up on demand</li>
+      </ul>
+      <div class="e-best">Best: dashboards, sub-second SLAs, repeated aggregations</div>
+      <div class="e-worst">Worst: cold historical data queried quarterly</div>
+    </div>
+  </div>
+
+  <div class="decision-grid">
+    <div class="d-chip"><strong>Infrequent queries</strong>Once or rarely → Athena</div>
+    <div class="d-chip"><strong>Daily / hourly</strong>Repeated patterns → Redshift Direct</div>
+    <div class="d-chip"><strong>S3 + Redshift JOIN</strong>Cross-source in one SQL → Spectrum</div>
+    <div class="d-chip"><strong>Sub-2s SLA</strong>High concurrency → Redshift Direct</div>
+    <div class="d-chip"><strong>Pay per query</strong>Unpredictable volume → Athena</div>
+    <div class="d-chip"><strong>Pay for capacity</strong>Predictable, high-freq → Redshift</div>
+    <div class="d-chip"><strong>Hot + cold data</strong>90-day in RS, historical S3 → Hybrid Lakehouse</div>
+    <div class="d-chip"><strong>Join needed + S3</strong>Avoid extra ETL → Spectrum</div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 11 — Cost Per Query Analysis
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">11 / 15</div>
+  </div>
+
+  <h2>Concurrency Testing &amp; Cost-Per-Query Crossover</h2>
+  <p class="sub">The engine that works for 1 user may fail for 50 — always benchmark concurrency before committing to an architecture</p>
+
+  <div class="cost-grid">
+    <div class="concurrency-col">
+      <h3>Concurrency Testing Protocol</h3>
+
+      <div class="conc-block conc-athena">
+        <h4>Athena Concurrency Test</h4>
+        <ul>
+          <li>Submit 20 queries simultaneously via boto3</li>
+          <li>Measure: <code>StartQueryExecution</code> → <code>SUCCEEDED</code> per query</li>
+          <li>Watch for: queries queuing at the 20-query account limit</li>
+          <li>Mitigation: request limit increase, or shard across workgroups</li>
+          <li>Cost signal: Athena Workgroup per-query scan limit prevents runaway scans</li>
+        </ul>
+      </div>
+
+      <div class="conc-block conc-redshift">
+        <h4>Redshift Concurrency Test</h4>
+        <ul>
+          <li>Submit from 50 simultaneous sessions (pgbench or JMeter)</li>
+          <li>CloudWatch: <code>WLMQueueLength &gt; 0</code> during test = saturation</li>
+          <li>Watch: <code>WLMQueueWaitTime</code> — time waiting, not executing</li>
+          <li>Tune: increase WLM concurrency slot count for analyst queue</li>
+          <li>Nuclear option: Concurrency Scaling — spins additional clusters</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cost-col">
+      <h3>Cost-Per-Query Example — Work This Out Live</h3>
+
+      <div class="cost-scenario">
+        <div class="sc-title">Scenario: Daily sales aggregation · 500 GB scan · 8 runs/day</div>
+
+        <div class="cost-row">
+          <span class="cr-label">Athena cost per run</span>
+          <span class="cr-val">500 GB × $5/TB = $2.50</span>
+        </div>
+        <div class="cost-row">
+          <span class="cr-label">Athena cost per day</span>
+          <span class="cr-val">$2.50 × 8 = $20</span>
+        </div>
+        <div class="cost-row">
+          <span class="cr-label">Athena cost per month</span>
+          <span class="cr-val">$20 × 30 = $600</span>
+        </div>
+        <div class="cost-row">
+          <span class="cr-label">Redshift RA3.xlplus 2-node cluster</span>
+          <span class="cr-val">$0.482 × 2 × 730 = $704/mo</span>
+        </div>
+        <div class="cost-row">
+          <span class="cr-label">Redshift cost per run (this query only)</span>
+          <span class="cr-val">$704 ÷ 240 runs = $2.93</span>
+        </div>
+        <div class="cost-row">
+          <span class="cr-label">If 20 queries share cluster</span>
+          <span class="cr-val">$704 ÷ 4,800 = $0.15/run</span>
+        </div>
+      </div>
+
+      <div class="crossover">
+        <strong>Crossover logic:</strong> This query alone → Athena cheaper ($600 vs $704). Twenty queries share the cluster → Redshift wins by 16×. The crossover point: <strong>when total monthly Athena spend &gt; Redshift cluster cost, load into Redshift.</strong>
+        <br/><br/>
+        Common wrong answer: "put everything in Redshift." 7 years of historical data queried 4×/year → Athena at $20/year vs Redshift storage at $2,760/year. Run the math out loud every time.
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 12 — Runbook Structure
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">12 / 15</div>
+  </div>
+
+  <h2>Operational Runbooks — Structure That Works at 3 AM</h2>
+  <p class="sub">Written for the engineer who just got paged and has never touched this pipeline — not for the engineer who built it</p>
+
+  <div class="runbook-grid">
+    <div class="rb-section rb1">
+      <div class="rb-num">Section 1</div>
+      <h3>Alarm &amp; Trigger</h3>
+      <p>Alarm name, metric, threshold, and evaluation period. No interpretation required.</p>
+      <div class="rb-example">quicklabs-RowCountDelta-too-high<br/>RowCountDelta &gt; 0.1% · 1/1 period · 5 min</div>
+    </div>
+
+    <div class="rb-section rb2">
+      <div class="rb-num">Section 2</div>
+      <h3>Impact Statement</h3>
+      <p>What breaks. Who is affected. SLA implications.</p>
+      <div class="rb-example">Curated sales data is stale.<br/>Reporting dashboards show yesterday's figures.<br/>End-of-day reporting pipeline at risk.</div>
+    </div>
+
+    <div class="rb-section rb3">
+      <div class="rb-num">Section 3</div>
+      <h3>Immediate Triage (&lt;5 min)</h3>
+      <ul>
+        <li>CloudWatch → Alarm History → when did it first fire?</li>
+        <li>S3 → quarantine bucket → files today?</li>
+        <li>Lambda → Monitor → error count last hour?</li>
+      </ul>
+      <p style="margin-top:6px;font-size:11px;color:#92400e;font-weight:700;">Assess before acting. Do NOT fix anything yet.</p>
+    </div>
+
+    <div class="rb-section rb4">
+      <div class="rb-num">Section 4</div>
+      <h3>Diagnosis (5–15 min)</h3>
+      <ul>
+        <li>Exact SQL or CLI command — no improvisation</li>
+        <li>Exact CW log group + filter pattern</li>
+        <li>Exact console navigation path (no "go look in the console")</li>
+      </ul>
+    </div>
+
+    <div class="rb-section rb5">
+      <div class="rb-num">Section 5</div>
+      <h3>Remediation Steps</h3>
+      <ul>
+        <li>Numbered — no ambiguity about order</li>
+        <li>Exact action at each step</li>
+        <li>Fallback if Step N fails</li>
+        <li>Escalation: page [name] if not resolved in 30 min</li>
+      </ul>
+    </div>
+
+    <div class="rb-section rb6">
+      <div class="rb-num">Sections 6–7</div>
+      <h3>Verify + Post-Incident</h3>
+      <ul>
+        <li>Specific check proving fix worked</li>
+        <li>Metric returned to OK (don't silence — verify)</li>
+        <li>Jira ticket: timeline, root cause, action items</li>
+        <li>Update runbook if steps were wrong</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="key-bar">
+    <span class="kb-label">Runbook Quality Test</span>
+    <span class="kb-text">Have a junior engineer execute the runbook against a staged failure — without help. If they cannot complete it in the target time, the runbook is incomplete. <strong>Runbooks rot — version-control them alongside the IaC they describe.</strong></span>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 13 — Incident Response
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">13 / 15</div>
+  </div>
+
+  <h2>Incident Response — Five-Phase Pattern</h2>
+  <p class="sub">The most common failure: jumping to Phase 4 (fix) without Phase 2 (triage). Fixing the wrong thing costs 30+ minutes.</p>
+
+  <div class="ir-phases">
+    <div class="ir-phase ph1">
+      <div class="ph-label">
+        <div class="ph-num">Phase 1</div>
+        <div class="ph-name">Detect</div>
+        <div class="ph-time">0–2 min</div>
+      </div>
+      <div class="ph-body">
+        <ul>
+          <li>CloudWatch Alarm → SNS → PagerDuty / email → on-call acknowledges</li>
+          <li>Open war room: Slack channel + Zoom. Declare severity: P1 (down), P2 (degraded), P3 (data quality)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ir-phase ph2">
+      <div class="ph-label">
+        <div class="ph-num">Phase 2</div>
+        <div class="ph-name">Triage</div>
+        <div class="ph-time">2–10 min</div>
+      </div>
+      <div class="ph-body">
+        <ul>
+          <li>Infrastructure or data? — Lambda not running / Glue failed / Redshift unhealthy vs output wrong or late</li>
+          <li>Isolated or systemic? — one file = schema issue; all files = IAM permission or upstream source change</li>
+          <li>Check Slack for analyst complaints before assuming you found it first</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ir-phase ph3">
+      <div class="ph-label">
+        <div class="ph-num">Phase 3</div>
+        <div class="ph-name">Mitigate</div>
+        <div class="ph-time">10–30 min</div>
+      </div>
+      <div class="ph-body">
+        <ul>
+          <li>Goal: stop the bleeding, NOT fix the root cause</li>
+          <li>Glue infinite retry → disable trigger, let job exhaust. Bad data reached curated → revoke Lake Formation access.</li>
+          <li>Redshift overloaded → kill runaway query (<code>pg_cancel_backend</code>), raise WLM concurrency</li>
+          <li>Communicate status every 10 minutes — even with no new information</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ir-phase ph4">
+      <div class="ph-label">
+        <div class="ph-num">Phase 4</div>
+        <div class="ph-name">Resolve</div>
+        <div class="ph-time">30 min–4 hrs</div>
+      </div>
+      <div class="ph-body">
+        <ul>
+          <li>Fix root cause. Re-run failed pipeline with corrected code or corrected input.</li>
+          <li>Verify with row count reconciliation. Restore Lake Formation access. Mark alarm as OK (verify, don't silence).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ir-phase ph5">
+      <div class="ph-label">
+        <div class="ph-num">Phase 5</div>
+        <div class="ph-name">Review</div>
+        <div class="ph-time">Within 24 hrs</div>
+      </div>
+      <div class="ph-body">
+        <ul>
+          <li>Blameless post-mortem: timeline, root cause, contributing factors</li>
+          <li>Five Whys until you hit a systemic gap — not "be more careful"</li>
+          <li>Action items with owners and due dates. Update runbook, alarm, test suite.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 14 — Production Readiness Checklist
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">14 / 15</div>
+  </div>
+
+  <h2>Production Readiness Checklist</h2>
+  <p class="sub">Rate each item: DONE · IN PROGRESS · NOT STARTED · N/A — "Done" means linked evidence exists (IaC file, test result, runbook doc)</p>
+
+  <div class="checklist-grid">
+    <div class="cl-section cl-infra">
+      <h3>Infrastructure</h3>
+      <ul>
+        <li>All resources in CloudFormation or CDK</li>
+        <li>Multi-region CloudTrail + log integrity validation</li>
+        <li>S3: versioning on, MFA delete, public access blocked</li>
+        <li>All sensitive buckets encrypted SSE-KMS</li>
+        <li>KMS: rotation on, least-privilege policy, one key per tier</li>
+        <li>SCPs: region lock, encryption mandate, no CloudTrail disable</li>
+        <li>Glue in VPC with S3 endpoint. No long-lived access keys.</li>
+      </ul>
+    </div>
+
+    <div class="cl-section cl-data">
+      <h3>Data Layer</h3>
+      <ul>
+        <li>Raw / Curated / Serving zone separation</li>
+        <li>Quarantine bucket configured</li>
+        <li>Schema validation gate on ingestion</li>
+        <li>Null / range / type checks on required fields</li>
+        <li>Row count reconciliation for all batch loads</li>
+        <li>Lake Formation column security on PII columns</li>
+        <li>S3 lifecycle: Glacier transition + expiry on all buckets</li>
+      </ul>
+    </div>
+
+    <div class="cl-section cl-pipeline">
+      <h3>Pipeline</h3>
+      <ul>
+        <li>All pipelines in Step Functions (or orchestrator)</li>
+        <li>Retry: exponential backoff, max 3 retries</li>
+        <li>DLQ on all SQS queues used by Lambda</li>
+        <li>Heartbeat alarm: fires if pipeline misses run window</li>
+        <li>CI/CD: test → staging → manual approval → prod</li>
+        <li>Blue/green tested for at least one critical Glue job</li>
+      </ul>
+    </div>
+
+    <div class="cl-section cl-obs">
+      <h3>Observability</h3>
+      <ul>
+        <li>Dashboard: CPU, disk, WLM, Lambda errors, Athena bytes</li>
+        <li>Alarm: Redshift disk &gt; 85%</li>
+        <li>Alarm: Lambda error rate &gt; 5% (not raw count)</li>
+        <li>Alarm: WLMQueueLength &gt; 0 sustained 2 periods</li>
+        <li>Alarm: SchemaMismatch, RowCountDelta</li>
+        <li>Log retention set on all log groups (no never-expire)</li>
+        <li>GuardDuty on in all regions, S3 Protection enabled</li>
+      </ul>
+    </div>
+
+    <div class="cl-section cl-cost">
+      <h3>Cost</h3>
+      <ul>
+        <li>Cost allocation tags activated in Billing</li>
+        <li>Budget alert at 80% and 100% of monthly target</li>
+        <li>Cost Anomaly Detection for Lambda + Redshift</li>
+        <li>Athena workgroup scan limit set</li>
+        <li>Redshift usage limit: Spectrum + Concurrency Scaling</li>
+        <li>Compute Optimizer enabled + recommendations reviewed</li>
+      </ul>
+    </div>
+
+    <div class="cl-section cl-runbook">
+      <h3>Runbooks &amp; Recovery</h3>
+      <ul>
+        <li>Runbook for every P1 and P2 alarm</li>
+        <li>Runbooks tested by junior engineer in last 90 days</li>
+        <li>Redshift snapshot restore tested successfully</li>
+        <li>S3 versioning: accidental delete recovery tested</li>
+        <li>RTO defined and tested (Recovery Time Objective)</li>
+        <li>RPO defined (max acceptable data loss)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE 15 — Knowledge Check
+═══════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="module-pill">Module 15 · Day 4</div>
+    <div class="slide-num">15 / 15</div>
+  </div>
+
+  <h2>Knowledge Check — KC-15</h2>
+  <p class="sub">Self-grade · 10 minutes · Mix of recall and judgment</p>
+
+  <div class="kc-grid">
+    <div class="kc-q kc1">
+      <div class="q-label">Q1 · Recall</div>
+      <div class="q-text">A Glue job writes 0 rows to the curated bucket but returns status SUCCEEDED. Which quality gate would have caught this?</div>
+      <ul class="q-options">
+        <li>A) Schema validation</li>
+        <li>B) Null check on required fields</li>
+        <li>C) Row count reconciliation</li>
+        <li>D) Pipeline heartbeat alarm</li>
+      </ul>
+      <div class="q-answer">Answer: C — Row count: 0 loaded vs 50,000 expected = gate fires. Schema and null checks cannot catch empty output. Heartbeat catches "did not run," not "ran and wrote nothing."</div>
+    </div>
+
+    <div class="kc-q kc2">
+      <div class="q-label">Q2 · Judgment</div>
+      <div class="q-text">200 analyst queries/day, 500 GB each, 3-second SLA. Athena costs $3,200/month. 2-node Redshift RA3 = $1,400/month. Should you migrate?</div>
+      <ul class="q-options">
+        <li>A) No — Athena is serverless and simpler</li>
+        <li>B) Yes — Redshift will be cheaper and faster</li>
+        <li>C) Benchmark 200 concurrent queries at peak load first</li>
+        <li>D) Use Redshift Spectrum instead</li>
+      </ul>
+      <div class="q-answer">Answer: C — Math suggests Redshift wins ($1,400 vs $3,200), but you must benchmark 200 concurrent queries to verify the 3-second SLA holds before committing.</div>
+    </div>
+
+    <div class="kc-q kc3">
+      <div class="q-label">Q3 · Recall</div>
+      <div class="q-text">Which SCP condition prevents S3 objects from being written without encryption?</div>
+      <ul class="q-options">
+        <li>A) Deny s3:GetObject where encryption header is missing</li>
+        <li>B) Deny s3:PutObject where s3:x-amz-server-side-encryption not set</li>
+        <li>C) Deny s3:CreateBucket where encryption not enabled</li>
+        <li>D) Deny s3:PutBucketPolicy where policy allows public access</li>
+      </ul>
+      <div class="q-answer">Answer: B — Must target the write action (PutObject) and check the encryption request condition. GetObject is a read — encryption is irrelevant at read time.</div>
+    </div>
+
+    <div class="kc-q kc4">
+      <div class="q-label">Q4 · Judgment</div>
+      <div class="q-text">On-call gets paged for a RowCountDelta alarm at 2 AM. Checks S3 quarantine — no files there. What should they do next?</div>
+      <ul class="q-options">
+        <li>A) Assume transient glitch and go back to sleep</li>
+        <li>B) Check if the Lambda quality gate itself failed to run</li>
+        <li>C) Re-run the pipeline immediately</li>
+        <li>D) Escalate to senior engineer without further investigation</li>
+      </ul>
+      <div class="q-answer">Answer: B — Empty quarantine + alarm = the gate may have crashed before writing anywhere. Check Lambda error logs. An unhandled exception writes to neither curated nor quarantine.</div>
+    </div>
+
+    <div class="kc-q kc5 kc-wide">
+      <div class="q-label">Q5 · Recall</div>
+      <div class="q-text">Which statement about CloudFormation and CDK is correct?</div>
+      <ul class="q-options">
+        <li>A) CDK replaces CloudFormation — you do not need CloudFormation if you use CDK</li>
+        <li>B) CDK compiles down to CloudFormation templates and uses the same deployment engine</li>
+        <li>C) CloudFormation supports Python; CDK supports only JSON and YAML templates</li>
+        <li>D) CDK is only suitable for serverless applications, not data platforms</li>
+      </ul>
+      <div class="q-answer">Answer: B — CDK synthesizes CloudFormation templates. Deployment, rollback, drift detection, and stack management all happen via CloudFormation under the hood. CDK and CloudFormation are complementary — not competing.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LambdaFullAccess",
+      "Effect": "Allow",
+      "Action": "lambda:*",
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudWatchFullAccess",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:*",
+        "logs:*",
+        "sns:*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "IAMPassRoleForLambda",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "lambda.amazonaws.com"
+        }
+      }
+    }
+  ]
+}
